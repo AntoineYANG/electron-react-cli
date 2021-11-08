@@ -1,0 +1,11 @@
+{
+  "name": "espoir",
+  "version": "0.0.0",
+  "description": "",
+  "author": "kanatayou",
+  "license": "MIT",
+  "scripts": {
+    "build": "node ./scripts/build.js",
+    "test:project": "npm run build & node ./build/index.js p temp"
+  }
+}
