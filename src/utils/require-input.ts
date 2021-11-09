@@ -2,12 +2,12 @@
  * @Author: Kanata You 
  * @Date: 2021-11-04 11:54:03 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-09 02:16:20
+ * @Last Modified time: 2021-11-09 20:42:06
  */
 
 import chalk from 'chalk';
 import readline from 'readline';
-import { requireBooleanInput, requireStringInput } from './qa-ui';
+import { requireBooleanInput, requireCheckBoxInput, requireOptionInput, requireStringInput } from './qa-ui';
 import styles from './styles';
 
 
@@ -22,17 +22,13 @@ export type PropertySchema = {
   /** The expected value regex needs to be satisfied by the value */
   pattern?: RegExp;
   /** Tells if the value is valid */
-  checker?: (value: string) => boolean;
+  checker?: (value: string | Record<string, boolean>) => boolean;
   /** Description for this object */
   desc?: string;
   /** Displays when input is not valid */
   tips?: (input: string) => string;
   /** The array of expected values */
-  expected?: {
-    value: any;
-    label: string;
-    desc?: string;
-  }[];
+  options?: [string, boolean, string?][] | string[];
   /** Default value */
   defaultValue?: any;
 };
@@ -46,7 +42,7 @@ type ExpectedValue<P extends Properties> = {
 };
 
 const requireInput = async <P extends Properties>(properties: P, retell = false): Promise<ExpectedValue<P>> => {
-  console.log(chalk`{${styles.pink} ${'='.repeat(16)}}`);
+  console.log(chalk`{${styles.pink} ┏═TABLE${'═'.repeat(25)}}`);
   const result: ExpectedValue<P> = {};
 
   const rl = readline.createInterface({
@@ -70,9 +66,15 @@ const requireInput = async <P extends Properties>(properties: P, retell = false)
             break;
           }
           case 'option': {
+            if ((schema.options ?? []).length) {
+              val = await requireOptionInput(name, schema.options as string[], schema);
+            }
             break;
           }
           case 'checkbox': {
+            if ((schema.options ?? []).length) {
+              val = await requireCheckBoxInput(name, schema.options as [string, boolean, string?][], schema);
+            }
             break;
           }
           default: {
@@ -82,40 +84,38 @@ const requireInput = async <P extends Properties>(properties: P, retell = false)
         result[key as keyof P] = val;
         resolve();
       });
+      await new Promise<void>(r => setTimeout(r, 120));
     }
   
-    process.stdout.write(' '.repeat(40) + '\n');
-
-    const display = JSON.stringify(result, undefined, 2).split('\n');
-    const maxLen = display.reduce((prev, cur) => Math.max(prev, cur.length), 0);
+    console.log(chalk`{${styles.pink} │ ${'╍'.repeat(28)}}`);
     
-    display.forEach(s => {
-      console.log(
-        chalk`{cyan ${s.replace(/ /g, chalk.gray('_'))}}{gray ${'_'.repeat(maxLen + 1 - s.length)}}`
+    const display = JSON.stringify(result, undefined, 2).split('\n').map(line => {
+      return chalk`{${styles.pink} │} {${styles.white} ${line}}`;
+    }).join('\n');
+    console.log(display);
+    
+    if (retell) {
+      console.log(chalk`{${styles.pink} │ ${'╌'.repeat(28)}}`);
+      
+      const ok = await requireBooleanInput(
+        ' Is this OK?',
+        true,
+        {
+          defaultValue: true
+        },
+        rl
       );
-    });
-    console.log();
 
-    const ok = await new Promise<boolean>(res => {
-      if (!retell) {
-        res(true);
-        return;
+      if (!ok) {
+        console.log(chalk`{${styles.pink} ├${'─'.repeat(30)}}`);
+        await ask();
       }
-      rl.question(
-        chalk`{cyanBright Is this OK?} {gray ({white ${chalk.underline('Y')}}/n)} `,
-        ans => {
-          res(ans.toLocaleLowerCase() !== 'n');
-          process.stdout.write('\n\n');
-        }
-      );
-    });
-
-    if (retell && !ok) {
-      await ask();
     }
   };
 
   await ask();
+  
+  console.log(chalk`{${styles.pink} ╘${'═'.repeat(31)}}`);
 
   return result;
 };

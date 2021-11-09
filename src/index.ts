@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-04 18:49:22 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-08 21:47:38
+ * @Last Modified time: 2021-11-09 19:41:25
  */
 
 import { exit } from 'process';
@@ -15,6 +15,7 @@ program.version(VERSION);
 
 program
   .command('project [dir]')
+  .description('create a new project')
   // .option('')
   .aliases(['p'])
   .action((dir, cmd) => {

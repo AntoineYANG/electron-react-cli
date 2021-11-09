@@ -20,7 +20,7 @@
     "sourceMap": true,
     "baseUrl": ".",
     "paths": {},
-    "outDir": "build"
+    "outDir": "output/bin"
   },
   "include": [
     "src/*"

@@ -2,14 +2,18 @@
  * @Author: Kanata You 
  * @Date: 2021-11-04 19:07:13 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-09 03:54:45
+ * @Last Modified time: 2021-11-09 21:22:30
  */
 
 import chalk from 'chalk';
 import { resolve } from 'path';
-import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { existsSync, readdirSync, rmdirSync, writeFileSync } from 'fs';
+import { makeTemplate, FileNode } from './extra-fs';
 import styles from './styles';
+import { DependenciesInfo, installAll } from './dependencies';
 
+import eslintIgnore from '../templates/eslintignore';
+import eslintRc from '../templates/eslintrc';
 import robotsTxt from '../templates/robots_txt';
 import gitignore from '../templates/gitignore';
 
@@ -63,13 +67,17 @@ const createPkgJSON = (path: string, config: PackageConfig) => {
     // }
   };
 
-  writeFileSync(resolve(path, 'package.json'), JSON.stringify(data, undefined, 2));
+  try { 
+    writeFileSync(resolve(path, 'package.json'), JSON.stringify(data, undefined, 2));
+  } catch (error) {
+    console.error(error);
+  }
 
-  console.info('🗸 ' + chalk.green`Created ${chalk.underline('package.json')}`);
+  console.info(chalk`{${styles.greenBright} 🗸  Created {underline package.json } }`);
 };
 
 export type TSConfig = {
-  target: `ES${3|5|6|`21${15|16|17|18|19|20|21}`|'Next'}`;
+  target: `ES${3|5|6|`20${15|16|17|18|19|20|21}`|'Next'}`;
   allowJS: boolean;
   module: 'AMD' | 'CommonJS' | 'esnext' | 'UMD' | 'ES6';
   emit: boolean;
@@ -112,80 +120,126 @@ const createTSConfig = (path: string, config: TSConfig) => {
   
   writeFileSync(resolve(path, 'tsconfig.json'), JSON.stringify(data, undefined, 2));
 
-  console.info('🗸 ' + chalk.green`Created ${chalk.underline('tsconfig.json')}`);
-};
-
-type FileNode = [string, string | Buffer] | [string, FileNode[]];
-
-const relativePath = (root: string, path: string) => {
-  return path.split(root)[1];
-};
-
-const makeTemplate = (root: string, path: string, files: FileNode[]) => {
-  if (!existsSync(path)) {
-    mkdirSync(resolve(path))
-  }
-  files.forEach(f => {
-    if (typeof f[1] === 'string' || f[1] instanceof Buffer) {
-      console.info(chalk`{${styles.green} +} {underline ${relativePath(root, resolve(path, f[0]))}}`);
-      writeFileSync(resolve(path, f[0]), f[1]);
-    } else {
-      console.info(chalk`{${styles.green} +} {underline ${relativePath(root, resolve(path, f[0]))}}`);
-      makeTemplate(root, resolve(path, f[0]), f[1]);
-    }
-  });
+  console.info(chalk`{${styles.greenBright} 🗸  Created {underline tsconfig.json } }`);
 };
 
 export type ProjectConfigs = {
   package: PackageConfig;
+  mode: 'react' | 'nodejs';
   typescript?: TSConfig;
   sass: boolean;
+  eslint: boolean;
 };
 
-const initProject = (path: string, configs: ProjectConfigs) => {
-  console.log('⏳ ' + chalk.cyan('Initialize project...'));
+const initProject = async (path: string, configs: ProjectConfigs) => {
+  if (existsSync(path)) {
+    if (readdirSync(path).length) {
+      console.info(
+        chalk`{${styles.red} ERROR: directory {underline ${path}} is not empty}\n` +
+        chalk`Remove it or use another directory instead\n`
+      );
+      const err = new Error(`ERROR: directory ${styles.red} is not empty`);
+      throw err;
+    } else {
+      rmdirSync(path);
+    }
+  }
+  console.clear();
+  console.log('⏳ ' + chalk`{${styles.cyan} Initialize project...}`);
+  const dependencies: DependenciesInfo[] = [];
+  const devDependencies: DependenciesInfo[] = [];
+  if (configs.eslint) {
+    devDependencies.push(...[
+      'eslint',
+      'eslint-config-react-app',
+      'eslint-plugin-flowtype',
+      'eslint-plugin-import',
+      'eslint-plugin-jest',
+      'eslint-plugin-jsx-a11y',
+      'eslint-plugin-react',
+      'eslint-plugin-react-hooks',
+      'eslint-plugin-testing-library',
+      'eslint-webpack-plugin'
+    ].filter(Boolean).map(name => ({
+      name
+    })));
+    makeTemplate(
+      path,
+      path,
+      [
+        ['app', []],
+        ['.gitignore', gitignore],
+        ['.eslintignore', eslintIgnore],
+        ['.eslintrc.js', eslintRc],
+        ['README.md', `# ${configs.package.name}\n\n`]
+      ]
+    );
+  } else {
+    makeTemplate(
+      path,
+      path,
+      [
+        ['app', []],
+        ['.gitignore', gitignore],
+        ['README.md', `# ${configs.package.name}\n\n`]
+      ]
+    );
+  }
   createPkgJSON(path, configs.package);
   if (configs.typescript) {
+    devDependencies.push({ name: 'typescript' });
     createTSConfig(path, configs.typescript);
   }
-  // if is React
-  makeTemplate(
-    path,
-    path,
-    [
-      ['app', [
-        ['public', [
-          // ['index.html', readFileSync(
-          //   '../templates/index.html', { encoding: 'utf-8' }
-          // ).replace("$NAME$", configs.package.name)],
-          // ['manifest.json', readFileSync('../templates/manifest.json')],
-          // ['favicon.ico', readFileSync('../templates/favicon.ico')],
-          ['robots.txt', robotsTxt],
-        ]],
-        ['src', [
-          ['components', []],
-          ...((configs.typescript ? [['typings', [
-            ['index.d.ts', '']
-          ]]] : []) as [string, FileNode[]][]),
-          ['views', []],
-          ['utils', []],
-          ['context', []],
-          ['apis', []],
-          // [`index.${
-          //   configs.typescript ? 'tsx' : 'jsx'
-          // }`, readFileSync('../templates/index.tsx')],
-          // [`index.${
-          //   configs.sass ? 'scss' : 'css'
-          // }`, readFileSync('../templates/index.scss')]
+  if (configs.sass) {
+    dependencies.push({ name: 'sass' });
+  }
+  if (configs.mode === 'react') {
+    // if is React
+    makeTemplate(
+      path,
+      path,
+      [
+        ['app', [
+          ['public', [
+            // ['index.html', readFileSync(
+            //   '../templates/index.html', { encoding: 'utf-8' }
+            // ).replace("$NAME$", configs.package.name)],
+            // ['manifest.json', readFileSync('../templates/manifest.json')],
+            // ['favicon.ico', readFileSync('../templates/favicon.ico')],
+            ['robots.txt', robotsTxt],
+          ]],
+          ['src', [
+            ['components', []],
+            ...((configs.typescript ? [['typings', [
+              ['index.d.ts', '']
+            ]]] : []) as [string, FileNode[]][]),
+            ['views', []],
+            ['utils', []],
+            ['context', []],
+            ['api', []],
+            // [`index.${
+            //   configs.typescript ? 'tsx' : 'jsx'
+            // }`, readFileSync('../templates/index.tsx')],
+            // [`index.${
+            //   configs.sass ? 'scss' : 'css'
+            // }`, readFileSync('../templates/index.scss')]
+          ]]
         ]]
-      ]],
-      ['.gitignore', gitignore],
-      // ['.eslintignore', readFileSync(resolve('../templates/.eslintignore'), { encoding: 'utf-8' })],
-      // ['.eslintrc.js', readFileSync(resolve('../templates/.eslintrc.js'), { encoding: 'utf-8' })],
-      ['README.md', `# ${configs.package.name}\n\n`]
-    ]
-  );
-  console.info('🗸 ' + chalk.green`Created project template`);
+      ]
+    );
+  }
+  console.info(chalk`{${styles.greenBright} 🗸  Created project template }`);
+
+  console.log();
+  console.log('⏳ ' + chalk`{${styles.cyan} Installing dependencies...}`);
+
+  await installAll(path, [
+    ...dependencies,
+    ...devDependencies.map(d => ({
+      ...d,
+      flag: 'dev'
+    }) as typeof d)
+  ]);
 };
 
 

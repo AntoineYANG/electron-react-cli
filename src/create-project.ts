@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-04 11:15:35 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-09 03:25:50
+ * @Last Modified time: 2021-11-09 21:22:42
  */
 
 import { resolve } from 'path';
@@ -64,32 +64,36 @@ const createProject = async (dir = '.') => {
     }
   }, true);
 
-  const tsConfig = await requireInput({
-    useTypeScript: {
-      type: 'boolean',
-      desc: 'Enable this will let your project be built on TS',
-      required: true,
-      defaultValue: true
+  const modelConfig = await requireInput({
+    mode: {
+      type: 'option',
+      desc: 'Choose one template to start',
+      options: ['React', 'NodeJS']
     },
-    compileTarget: {
-      onlyIf: ({ useTypeScript }) => useTypeScript
-    }
-  });
-
-  const { useSass = true } = await requireInput({
-    useSass: {
-      type: 'boolean',
-      desc: 'Enable this will let your project be built on sass',
-      required: true,
-      defaultValue: true
-    }
+    features: {
+      type: 'checkbox',
+      desc: 'Enable project dependencies',
+      options: [
+        ['typescript', true, 'TypeScript'],
+        ['sass', true, 'Sass'],
+        ['eslint', true, 'ESLint'],
+        ['@kanatayou/hibou', true, 'Hibou.js']
+      ]
+    },
+    // compileTarget: {
+    //   onlyIf: ({ useTypeScript }) => useTypeScript
+    // }
   });
 
   if (dir !== '.' && !existsSync(dir)) {
     mkdirSync(dir);
   }
 
-  initProject(resolve(dir), {
+  await initProject(resolve(dir), {
+    mode: ({
+      React: 'react',
+      NodeJS: 'nodejs'
+    }[modelConfig.mode as string] as ('react' | 'nodejs' | undefined)) ?? 'nodejs',
     package: {
       name: baseConfig.name,
       git: baseConfig.git,
@@ -99,13 +103,14 @@ const createProject = async (dir = '.') => {
       license: baseConfig.license,
       author: baseConfig.author
     },
-    typescript: tsConfig.useTypeScript ? {
+    typescript: modelConfig.features.typescript ? {
       target: 'ES6',
       allowJS: true,
       module: 'esnext',
       emit: false
     } : undefined,
-    sass: useSass
+    sass: modelConfig.features.sass,
+    eslint: modelConfig.features.eslint
   });
 
   return 0;

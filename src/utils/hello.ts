@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-04 16:18:24 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-09 03:27:12
+ * @Last Modified time: 2021-11-09 16:41:49
  */
 
 import chalk from 'chalk';
@@ -32,7 +32,7 @@ chalk`
 {${styles.pink} |                             }
 {${styles.pink} ╰─────────────────────────────}
 
-{${styles.blueBright} + ${title} ...}
+{${styles.cyan} + ${title} ...}
 `
   );
 };

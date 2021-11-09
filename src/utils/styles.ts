@@ -2,17 +2,20 @@
  * @Author: Kanata You 
  * @Date: 2021-11-08 22:18:40 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-09 03:18:00
+ * @Last Modified time: 2021-11-09 16:44:55
  */
 
 import chalk from 'chalk';
 
 
+const white = 'rgb(250,250,250)';
+const gray = 'rgb(188,188,188)';
 const pink = 'rgb(248,157,198)';
 const blue = 'rgb(14,58,206)';
-const blueBright = 'rgb(172,243,249)';
+const blueBright = 'rgb(76,126,225)';
+const cyan = 'rgb(172,243,249)';
 const red = 'rgb(225,46,49)';
-const green = 'rgb(179,245,181)';
+const greenBright = 'rgb(160,250,163)';
 const yellow = 'rgb(253,253,71)';
 
 const fit = (a: string, n: number) => {
@@ -166,11 +169,14 @@ const board = (str: string): string => {
 
 const styles = {
   board,
+  white,
+  gray,
   pink,
-  blueBright,
+  cyan,
   blue,
+  blueBright,
   red,
-  green,
+  greenBright,
   yellow
 };
 
