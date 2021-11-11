@@ -1,0 +1,35 @@
+{
+  "name": "espoir",
+  "version": "0.0.0-alpha-1.4.0",
+  "description": "Front-end scripts.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AntoineYANG/espoir.git",
+    "directory": "packages/espoir-cli"
+  },
+  "author": "kanatayou",
+  "license": "MIT",
+  "engines": {
+    "node": ">=15.5.1"
+  },
+  "bugs": {
+    "url": "https://github.com/AntoineYANG/espoir/issues"
+  },
+  "main": "./bin/index.js",
+  "files": ["/bin", "/lib"],
+  "bin": {
+    "espoir": "./bin/index.js"
+  },
+  "types": "./lib/index.d.ts",
+  "dependencies": {},
+  "devDependencies": {
+    "clean-webpack-plugin": "^4.0.0"
+  },
+  "optionalDependencies": {},
+  "peerDependencies": {},
+  "peerDependenciesMeta": {},
+  "browserslist": {
+    "production": [">0.2%", "not dead", "not op_mini all"],
+    "development": ["last 1 chrome version", "last 1 firefox version", "last 1 safari version"]
+  }
+}
