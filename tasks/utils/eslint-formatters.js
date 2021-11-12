@@ -2,7 +2,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-11 13:32:50
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-11 18:40:44
+ * @Last Modified time: 2021-11-13 02:21:05
  */
 
 const path = require('path');
@@ -37,7 +37,7 @@ const printResults = results => {
     ).groups;
     const fn = insidePackage.p ? (
       // inside the package [insidePackage]
-      chalk`{underline {blueBright.bold [${insidePackage.p}]} ${insidePackage.f}}`
+      chalk`{underline packages/{blueBright.bold ${insidePackage.p}}/${insidePackage.f}}`
     ) : (
       // at the parent dir
       chalk`{underline ${fp}}`

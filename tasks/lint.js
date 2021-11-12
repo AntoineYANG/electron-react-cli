@@ -2,7 +2,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-11 03:22:03
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-11 18:19:00
+ * @Last Modified time: 2021-11-13 02:01:45
  */
 
 // # ************************************
@@ -48,14 +48,17 @@ const lint = async (mode = 'workspace', fix = true) => {
       /((^hooks\/)|(^tasks\/)|(^packages\/[^/]+\/src\/)).*\.(js|ts)x?$/.test(fn)
     )));
   } else {
-    files.push('hooks/', 'tasks/', 'packages/*/src/**');
+    files.push('bin/', 'hooks/', 'tasks/', 'packages/*/src/**');
   }
   
   /** @type {import('eslint').ESLint.LintResult[]} */
-  const results = await engine.lintFiles(files);
+  let results = await engine.lintFiles(files);
 
   if (fix) {
     await eslint.ESLint.outputFixes(results);
+  
+    // recheck output
+    results = await engine.lintFiles(files);
   }
 
   const ok = printResults(results);
