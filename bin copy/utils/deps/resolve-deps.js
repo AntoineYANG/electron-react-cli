@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-12 20:00:53 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-13 02:18:27
+ * @Last Modified time: 2021-11-14 00:53:34
  */
 
 const path = require('path');
@@ -169,6 +169,7 @@ const downloadPackage = (data, root) => new Promise((resolve, reject) => {
       }
     );
   } catch (error) {
+    // remove the dir
     if (fs.existsSync(dir)) {
       fs.rmSync(
         dir,

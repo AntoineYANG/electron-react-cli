@@ -1,13 +1,16 @@
 {
+  "extends": "../tsconfig.base.json",
+  "include": ["./**/*"],
+  "exclude": [],
   "compilerOptions": {
     "baseUrl": "./",
     "module": "CommonJS",
     "moduleResolution": "Node",
     "paths": {},
-    "declaration": true,
+    "declaration": false,
     "preserveConstEnums": true,
     "removeComments": false,
-    "sourceMap": true,
+    "sourceMap": false,
     "allowJs": false,
     "resolveJsonModule": true,
     "target": "ES5",

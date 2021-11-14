@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-09-23 10:40:57 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-11 18:39:04
+ * @Last Modified time: 2021-11-14 22:31:27
  */
 
 /**
@@ -311,8 +311,8 @@ const eslintConfig = {
         allowParens: true
       }
     ],
-    // /* 禁用 console */
-    // 'no-console': 'warn',
+    /* 禁用 console */
+    'no-console': 'warn',
     /* 判断语句禁用显式 false */
     'no-constant-condition': 'error',
     /* 正则表达式禁用不可见控制字符 */
