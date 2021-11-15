@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 01:43:49 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-15 00:23:39
+ * @Last Modified time: 2021-11-15 23:18:28
  */
 
 import { ExitCode } from '..';
@@ -110,7 +110,7 @@ export default class Runnable<RC extends RunnableConfig> {
 
     const uncompletedArg = args.reduce<keyof typeof options | undefined>((name, arg) => {
       if (name === undefined) {
-        const match = /^-(?<flag>-)?(?<n>[a-zA-Z\-]+)$/.exec(arg);
+        const match = /^-(?<full>-)?(?<n>[a-zA-Z\-]+)$/.exec(arg);
 
         if (match) {
           if (name) {
@@ -118,16 +118,15 @@ export default class Runnable<RC extends RunnableConfig> {
               `Argument ${name} requires a value`
             );
           }
-          const { flag, n } = match.groups as {
-            flag?: string;
+
+          const { full, n } = match.groups as {
+            full?: string;
             n: string;
           };
 
-          const key = Object.entries(this.optionConfig.args).filter(
-            ([_name, config]) => flag ? !config.requiresValue : config.requiresValue
-          ).find(
+          const key = Object.entries(this.optionConfig.args).find(
             ([name, { shorthands }]) => (
-              name === n || shorthands?.includes(n)
+              full ? name === n : shorthands?.includes(n)
             )
           )?.[0] as (keyof typeof options & string) | undefined;
 
@@ -137,7 +136,9 @@ export default class Runnable<RC extends RunnableConfig> {
             );
           }
 
-          const isFlag = Boolean(flag);
+          const isFlag = !Boolean(
+            (this.optionConfig.args[key] as ArgConfig).requiresValue
+          );
 
           if (isFlag) {
             (options[key] as boolean) = true;

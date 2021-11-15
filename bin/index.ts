@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-12 15:19:20 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-14 23:38:38
+ * @Last Modified time: 2021-11-15 22:55:20
  */
 
 import * as chalk from 'chalk';
@@ -10,11 +10,6 @@ import * as chalk from 'chalk';
 import { RunnableConstructor } from './runnable';
 import InstallTask from './runnable/install';
 import Logger from './utils/ui/logger';
-
-// const fs = require('fs');
-
-// const env = require('./utils/env.js');
-// const install = require('./scripts/install.js');
 
 
 export enum ExitCode {
@@ -72,8 +67,19 @@ const main = async (script: string, args: string[]) => {
   return code;
 };
 
-main(
-  process.argv[2] ?? '', process.argv.slice(3)
-).then(
-  process.exit
-);
+const cli = async (...args: string[]) => {
+  const returnCode = await main(
+    args[0] ?? '', args.slice(1)
+  );
+
+  return returnCode;
+};
+
+if (require.main === module) {
+  cli(...process.argv.slice(2)).then(
+    process.exit
+  );
+}
+
+
+export default cli;

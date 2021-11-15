@@ -2,18 +2,17 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 18:13:35 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-14 23:59:14
+ * @Last Modified time: 2021-11-16 01:23:52
  */
 
+import * as fs from 'fs';
+import * as path from 'path';
+import { sync as mkdirp } from 'mkdirp';
 import * as needle from 'needle';
-import * as npm from './request-npm';
+import type { PassThrough } from 'stream';
+import type { ClientRequest, IncomingMessage } from 'http';
 
-import {
-  memoize,
-  useLocalCache,
-  useMemoized,
-  writeLocalCache
-} from './cache';
+import * as npm from './request-npm';
 
 
 export enum StatusCode {
@@ -65,22 +64,6 @@ const get = async <RT>(
     ...options
   };
 
-  if (actualOptions.memo) {
-    const memoized = useMemoized<RT>(url);
-
-    if (memoized) {
-      return Promise.resolve([null, memoized]);
-    }
-  }
-
-  if (actualOptions.cache) {
-    const cached = useLocalCache<RT>(url);
-
-    if (cached) {
-      return Promise.resolve([null, cached]);
-    }
-  }
-
   const [err, resp] = await new Promise<[RequestError, null] | [null, RT]>(resolve => {
     needle(
       'get',
@@ -92,6 +75,10 @@ const get = async <RT>(
       switch (statusCode) {
         case StatusCode.ok: {
           const { body } = resp;
+
+          if (filter) {
+            return resolve([null, filter(body as RT) as RT]);
+          }
 
           return resolve([null, body]);
         }
@@ -130,21 +117,128 @@ const get = async <RT>(
     });
   });
   
-  if (resp) {
-    if (actualOptions.memo) {
-      memoize(url, resp, filter ?? ((d: RT) => d));
-    }
-    if (actualOptions.cache) {
-      writeLocalCache(url, resp, actualOptions.expiresSpan, filter ?? ((d: RT) => d));
-    }
-  }
-  
   return [err, resp] as [RequestError, null] | [null, RT];
 };
 
+const getRedirectedLocation = async (
+  url: string, options?: Partial<RequestOptions>
+): Promise<[Error, null] | [null, string | null]> => {
+  const actualOptions = {
+    ...defaultOptions,
+    ...options
+  };
+
+  const [err, resp] = await new Promise<[RequestError, null] | [null, string | null]>(resolve => {
+    needle(
+      'get',
+      url,
+      {
+        timeout: actualOptions.timeout
+      }
+    ).then(({ statusCode, ...resp }) => {
+      switch (statusCode) {
+        case StatusCode.redirected: {
+          const redirectUrl = resp.rawHeaders[
+            resp.rawHeaders.indexOf('Location') + 1
+          ] as string;
+
+          return resolve([null, redirectUrl]);
+        }
+
+        default: {
+          return resolve([null, null]);
+        }
+      }
+    }).catch(reason => {
+      return [reason as Error, null];
+    });
+  });
+  
+  return [err, resp] as [RequestError, null] | [null, string | null];
+};
+
+/**
+ * Downloads a file using GET request.
+ *
+ * @param {string} url
+ * @param {string} output
+ * @param {Partial<RequestOptions>} [options]
+ * @param {(done: number, total: number) => void} [onProgress]
+ * @returns {(Promise<[Error, null] | [null, number]>)}
+ */
+const download = async (
+  url: string,
+  output: string,
+  options?: Partial<RequestOptions>,
+  onProgress?: (done: number, total: number | undefined) => void
+): Promise<[Error, null] | [null, number]> => {
+  const actualOptions = {
+    ...defaultOptions,
+    ...options
+  };
+
+  const dir = path.resolve(output, '..');
+
+  if (fs.existsSync(output)) {
+    fs.rmSync(output);
+  } else if (!fs.existsSync(dir)) {
+    mkdirp(dir);
+  }
+
+  const location = (await getRedirectedLocation(url, options))[1] ?? url;
+
+  const ws = fs.createWriteStream(output);
+
+  let pipedSize = 0;
+  let totalSize: number | undefined = undefined;
+
+  const [err, size] = await new Promise<[RequestError, null] | [null, number]>(resolve => {
+    needle.get(
+      location,
+      {
+        timeout: actualOptions.timeout
+      }
+    ).on('readable', function (this: PassThrough & { request: ClientRequest & { res: IncomingMessage } }) {
+      while (true) {
+        const header = this.request.res.rawHeaders;
+        const idx = header.indexOf('Content-Length');
+
+        if (idx !== -1 && header[idx + 1]) {
+          totalSize = parseInt(header[idx + 1] as string, 10);
+        }
+
+        const data = this.read();
+        
+        if (!data) {
+          break;
+        }
+
+        ws.write(data);
+
+        const size = Buffer.from(data).byteLength;
+        pipedSize += size;
+
+        if (onProgress) {
+          onProgress(pipedSize, totalSize);
+        }        
+      }
+    }).on('done', (err: Error) => {
+      ws.end();
+
+      if (err) {
+        return resolve([err, null]);
+      } else {
+        return resolve([null, pipedSize]);
+      }
+    });
+  });
+  
+  return [err, size] as [RequestError, null] | [null, number];
+};
 
 const request = {
   get,
+  download,
   npm
 };
 

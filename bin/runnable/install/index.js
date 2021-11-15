@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-14 02:00:17
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-15 00:15:23
+ * @Last Modified time: 2021-11-16 01:42:46
  */
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -20,6 +20,10 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cooked, raw) {
+    if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
+    return cooked;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -56,16 +60,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
 Object.defineProperty(exports, "__esModule", { value: true });
+var chalk = require("chalk");
 var __1 = require("../..");
 var __2 = require("..");
 var read_deps_1 = require("./utils/read-deps");
@@ -73,6 +69,8 @@ var env_1 = require("../../utils/env");
 var resolve_deps_1 = require("./utils/resolve-deps");
 var lock_1 = require("./utils/lock");
 var logger_1 = require("../../utils/ui/logger");
+var validate_package_1 = require("../../utils/workspace/validate-package");
+var download_deps_1 = require("./utils/download-deps");
 /**
  * Creates an install task.
  *
@@ -87,36 +85,107 @@ var InstallTask = /** @class */ (function (_super) {
     }
     InstallTask.prototype.exec = function () {
         return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var modules, scopes, _i, _a, p, scope;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
-                        if (!(this.params.length === 0)) return [3 /*break*/, 2];
-                        return [4 /*yield*/, this.installAll()];
+                        modules = [];
+                        scopes = [];
+                        for (_i = 0, _a = this.params; _i < _a.length; _i++) {
+                            p = _a[_i];
+                            if (p.startsWith(':')) {
+                                scope = (0, validate_package_1.default)(p);
+                                if (scope) {
+                                    scopes.push(scope);
+                                }
+                                else {
+                                    logger_1.default.error(chalk(templateObject_1 || (templateObject_1 = __makeTemplateObject(["{redBright {bold \u2716 } \"{blue.bold ", "}\" is not an existing package.}"], ["{redBright {bold \\u2716 } \"{blue.bold ", "}\" is not an existing package.}"])), p));
+                                    return [2 /*return*/, __1.ExitCode.BAD_PARAMS];
+                                }
+                            }
+                            else {
+                                modules.push(p);
+                            }
+                        }
+                        if (!(modules.length === 0)) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.installAll(scopes.length ? scopes : 'all')];
                     case 1:
-                        _a.sent();
-                        return [3 /*break*/, 2];
-                    case 2: return [2 /*return*/, __1.ExitCode.OPERATION_NOT_FOUND];
+                        _b.sent();
+                        return [3 /*break*/, 4];
+                    case 2: return [4 /*yield*/, this.installAndSave(scopes.length ? scopes : 'all', modules)];
+                    case 3:
+                        _b.sent();
+                        _b.label = 4;
+                    case 4: return [2 /*return*/, __1.ExitCode.OPERATION_NOT_FOUND];
                 }
             });
         });
     };
-    InstallTask.prototype.installAll = function () {
+    /**
+     * Install local dependencies.
+     *
+     * @private
+     * @param {(string[] | 'all')} [scopes='all']
+     * @memberof InstallTask
+     */
+    InstallTask.prototype.installAll = function (scopes) {
+        if (scopes === void 0) { scopes = 'all'; }
         return __awaiter(this, void 0, void 0, function () {
-            var NAME, sw, dependencies, resolvedDeps, diff;
+            var NAME, sw, dependencies, resolvedDeps, diff, results;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         NAME = 'Install local dependencies';
                         sw = logger_1.default.startStopWatch(NAME);
-                        dependencies = this.loadDependencies();
+                        dependencies = this.loadDependencies(scopes);
                         return [4 /*yield*/, this.resolveDependencies(dependencies)];
                     case 1:
                         resolvedDeps = _a.sent();
                         (0, lock_1.writeLockFile)(resolvedDeps);
+                        return [4 /*yield*/, this.diffLocal(resolvedDeps)];
+                    case 2:
+                        diff = _a.sent();
+                        return [4 /*yield*/, this.createInstallTask(diff)];
+                    case 3:
+                        results = _a.sent();
                         logger_1.default.stopStopWatch(sw);
                         process.exit(0);
-                        diff = this.diffLocal(dependencies);
-                        // await this.createInstallTask(modules);
+                        console.log({ results: results });
+                        throw new Error('Method is not implemented');
+                }
+            });
+        });
+    };
+    /**
+     * Install new dependencies, and add them to `package.json`.
+     *
+     * @private
+     * @param {(string[] | 'all')} scopes
+     * @param {string[]} modules
+     * @memberof InstallTask
+     */
+    InstallTask.prototype.installAndSave = function (scopes, modules) {
+        return __awaiter(this, void 0, void 0, function () {
+            var NAME, sw, dependencies, resolvedDeps, diff, results;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        NAME = 'Install new dependencies';
+                        sw = logger_1.default.startStopWatch(NAME);
+                        dependencies = this.loadDependencies(scopes);
+                        return [4 /*yield*/, this.resolveDependencies(dependencies)];
+                    case 1:
+                        resolvedDeps = _a.sent();
+                        (0, lock_1.writeLockFile)(resolvedDeps);
+                        return [4 /*yield*/, this.diffLocal(resolvedDeps)];
+                    case 2:
+                        diff = _a.sent();
+                        return [4 /*yield*/, this.createInstallTask(diff)];
+                    case 3:
+                        results = _a.sent();
+                        // console.log({ results });
+                        logger_1.default.stopStopWatch(sw);
+                        process.exit(0);
                         throw new Error('Method is not implemented');
                 }
             });
@@ -125,11 +194,18 @@ var InstallTask = /** @class */ (function (_super) {
     /**
      * Loads all the explicit dependencies from all `package.json`.
      */
-    InstallTask.prototype.loadDependencies = function () {
-        // load all `package.json`
-        var packages = __spreadArray([
-            env_1.default.rootPkg
-        ], env_1.default.packages.map(function (p) { return env_1.default.packageMap[p]; }), true);
+    InstallTask.prototype.loadDependencies = function (scopes) {
+        if (scopes === void 0) { scopes = 'all'; }
+        var packages = [];
+        if (scopes === 'all' || scopes.includes(validate_package_1.WorkspaceRoot)) {
+            packages.push(env_1.default.rootPkg);
+        }
+        env_1.default.packages.forEach(function (p) {
+            var pkg = env_1.default.packageMap[p];
+            if (scopes === 'all' || scopes.includes(p)) {
+                packages.push(pkg);
+            }
+        });
         var keys = [
             'dependencies',
             this.options.production ? null : 'devDependencies'
@@ -165,7 +241,8 @@ var InstallTask = /** @class */ (function (_super) {
     InstallTask.prototype.diffLocal = function (dependencies) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                throw new Error('Method is not implemented');
+                // TODO:
+                return [2 /*return*/, dependencies];
             });
         });
     };
@@ -173,18 +250,13 @@ var InstallTask = /** @class */ (function (_super) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.hoistDependencies(modules)];
+                    case 0:
+                        logger_1.default.info(chalk(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\uD83E\uDDF1 {yellow.bold ", " }modules will be installed "], ["\uD83E\uDDF1 {yellow.bold ", " }modules will be installed "])), modules.length));
+                        return [4 /*yield*/, (0, download_deps_1.default)(modules)];
                     case 1:
                         _a.sent();
-                        throw new Error('Method is not implemented');
+                        return [2 /*return*/];
                 }
-            });
-        });
-    };
-    InstallTask.prototype.hoistDependencies = function (modules) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                throw new Error('Method is not implemented');
             });
         });
     };
@@ -208,3 +280,4 @@ var InstallTask = /** @class */ (function (_super) {
     return InstallTask;
 }(__2.default));
 exports.default = InstallTask;
+var templateObject_1, templateObject_2;

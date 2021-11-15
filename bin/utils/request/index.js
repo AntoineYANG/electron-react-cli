@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-14 18:13:35
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-14 23:59:14
+ * @Last Modified time: 2021-11-16 01:23:52
  */
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -80,9 +80,11 @@ var __rest = (this && this.__rest) || function (s, e) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RequestError = exports.StatusCode = void 0;
+var fs = require("fs");
+var path = require("path");
+var mkdirp_1 = require("mkdirp");
 var needle = require("needle");
 var npm = require("./request-npm");
-var cache_1 = require("./cache");
 var StatusCode;
 (function (StatusCode) {
     StatusCode[StatusCode["ok"] = 200] = "ok";
@@ -114,23 +116,11 @@ exports.RequestError = RequestError;
  * @returns {(Promise<[Error, null] | [null, RT]>)}
  */
 var get = function (url, options, filter) { return __awaiter(void 0, void 0, void 0, function () {
-    var actualOptions, memoized, cached, _a, err, resp;
+    var actualOptions, _a, err, resp;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
                 actualOptions = __assign(__assign({}, defaultOptions), options);
-                if (actualOptions.memo) {
-                    memoized = (0, cache_1.useMemoized)(url);
-                    if (memoized) {
-                        return [2 /*return*/, Promise.resolve([null, memoized])];
-                    }
-                }
-                if (actualOptions.cache) {
-                    cached = (0, cache_1.useLocalCache)(url);
-                    if (cached) {
-                        return [2 /*return*/, Promise.resolve([null, cached])];
-                    }
-                }
                 return [4 /*yield*/, new Promise(function (resolve) {
                         needle('get', url, {
                             timeout: actualOptions.timeout
@@ -139,6 +129,9 @@ var get = function (url, options, filter) { return __awaiter(void 0, void 0, voi
                             switch (statusCode) {
                                 case StatusCode.ok: {
                                     var body = resp.body;
+                                    if (filter) {
+                                        return resolve([null, filter(body)]);
+                                    }
                                     return resolve([null, body]);
                                 }
                                 case StatusCode.redirected: {
@@ -164,20 +157,109 @@ var get = function (url, options, filter) { return __awaiter(void 0, void 0, voi
                     })];
             case 1:
                 _a = _b.sent(), err = _a[0], resp = _a[1];
-                if (resp) {
-                    if (actualOptions.memo) {
-                        (0, cache_1.memoize)(url, resp, filter !== null && filter !== void 0 ? filter : (function (d) { return d; }));
-                    }
-                    if (actualOptions.cache) {
-                        (0, cache_1.writeLocalCache)(url, resp, actualOptions.expiresSpan, filter !== null && filter !== void 0 ? filter : (function (d) { return d; }));
-                    }
-                }
                 return [2 /*return*/, [err, resp]];
+        }
+    });
+}); };
+var getRedirectedLocation = function (url, options) { return __awaiter(void 0, void 0, void 0, function () {
+    var actualOptions, _a, err, resp;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                actualOptions = __assign(__assign({}, defaultOptions), options);
+                return [4 /*yield*/, new Promise(function (resolve) {
+                        needle('get', url, {
+                            timeout: actualOptions.timeout
+                        }).then(function (_a) {
+                            var statusCode = _a.statusCode, resp = __rest(_a, ["statusCode"]);
+                            switch (statusCode) {
+                                case StatusCode.redirected: {
+                                    var redirectUrl = resp.rawHeaders[resp.rawHeaders.indexOf('Location') + 1];
+                                    return resolve([null, redirectUrl]);
+                                }
+                                default: {
+                                    return resolve([null, null]);
+                                }
+                            }
+                        }).catch(function (reason) {
+                            return [reason, null];
+                        });
+                    })];
+            case 1:
+                _a = _b.sent(), err = _a[0], resp = _a[1];
+                return [2 /*return*/, [err, resp]];
+        }
+    });
+}); };
+/**
+ * Downloads a file using GET request.
+ *
+ * @param {string} url
+ * @param {string} output
+ * @param {Partial<RequestOptions>} [options]
+ * @param {(done: number, total: number) => void} [onProgress]
+ * @returns {(Promise<[Error, null] | [null, number]>)}
+ */
+var download = function (url, output, options, onProgress) { return __awaiter(void 0, void 0, void 0, function () {
+    var actualOptions, dir, location, ws, pipedSize, totalSize, _a, err, size;
+    var _b;
+    return __generator(this, function (_c) {
+        switch (_c.label) {
+            case 0:
+                actualOptions = __assign(__assign({}, defaultOptions), options);
+                dir = path.resolve(output, '..');
+                if (fs.existsSync(output)) {
+                    fs.rmSync(output);
+                }
+                else if (!fs.existsSync(dir)) {
+                    (0, mkdirp_1.sync)(dir);
+                }
+                return [4 /*yield*/, getRedirectedLocation(url, options)];
+            case 1:
+                location = (_b = (_c.sent())[1]) !== null && _b !== void 0 ? _b : url;
+                ws = fs.createWriteStream(output);
+                pipedSize = 0;
+                totalSize = undefined;
+                return [4 /*yield*/, new Promise(function (resolve) {
+                        needle.get(location, {
+                            timeout: actualOptions.timeout
+                        }).on('readable', function () {
+                            while (true) {
+                                var header = this.request.res.rawHeaders;
+                                var idx = header.indexOf('Content-Length');
+                                if (idx !== -1 && header[idx + 1]) {
+                                    totalSize = parseInt(header[idx + 1], 10);
+                                }
+                                var data = this.read();
+                                if (!data) {
+                                    break;
+                                }
+                                ws.write(data);
+                                var size_1 = Buffer.from(data).byteLength;
+                                pipedSize += size_1;
+                                if (onProgress) {
+                                    onProgress(pipedSize, totalSize);
+                                }
+                            }
+                        }).on('done', function (err) {
+                            ws.end();
+                            if (err) {
+                                return resolve([err, null]);
+                            }
+                            else {
+                                return resolve([null, pipedSize]);
+                            }
+                        });
+                    })];
+            case 2:
+                _a = _c.sent(), err = _a[0], size = _a[1];
+                return [2 /*return*/, [err, size]];
         }
     });
 }); };
 var request = {
     get: get,
+    download: download,
     npm: npm
 };
 exports.default = request;

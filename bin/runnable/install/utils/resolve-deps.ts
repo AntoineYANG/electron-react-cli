@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 17:53:51 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-15 00:31:09
+ * @Last Modified time: 2021-11-15 20:58:33
  */
 
 import * as semver from 'semver';
@@ -141,7 +141,6 @@ export const resolveDependencies = async (
 
     // add it to the list
     entering.push(target);
-    console.log(target.name, target.version);
 
     return;
   });
@@ -184,7 +183,7 @@ export const resolveDependencies = async (
       )
     ).flat(1);
     
-    const results = await resolveDependencies(items, data);
+    const results = await resolveDependencies(items, data, noCache);
   
     data.push(...results);
   }

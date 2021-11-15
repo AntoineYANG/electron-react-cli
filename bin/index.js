@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-12 15:19:20
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-14 23:38:38
+ * @Last Modified time: 2021-11-15 22:55:20
  */
 var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cooked, raw) {
     if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
@@ -45,15 +45,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ExitCode = void 0;
 var chalk = require("chalk");
 var install_1 = require("./runnable/install");
 var logger_1 = require("./utils/ui/logger");
-// const fs = require('fs');
-// const env = require('./utils/env.js');
-// const install = require('./scripts/install.js');
 var ExitCode;
 (function (ExitCode) {
     ExitCode[ExitCode["OPERATION_NOT_FOUND"] = -2] = "OPERATION_NOT_FOUND";
@@ -107,5 +103,26 @@ var main = function (script, args) { return __awaiter(void 0, void 0, void 0, fu
         }
     });
 }); };
-main((_a = process.argv[2]) !== null && _a !== void 0 ? _a : '', process.argv.slice(3)).then(process.exit);
+var cli = function () {
+    var args = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        args[_i] = arguments[_i];
+    }
+    return __awaiter(void 0, void 0, void 0, function () {
+        var returnCode;
+        var _a;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0: return [4 /*yield*/, main((_a = args[0]) !== null && _a !== void 0 ? _a : '', args.slice(1))];
+                case 1:
+                    returnCode = _b.sent();
+                    return [2 /*return*/, returnCode];
+            }
+        });
+    });
+};
+if (require.main === module) {
+    cli.apply(void 0, process.argv.slice(2)).then(process.exit);
+}
+exports.default = cli;
 var templateObject_1, templateObject_2;

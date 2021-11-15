@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-14 01:43:49
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-15 00:23:39
+ * @Last Modified time: 2021-11-15 23:18:28
  */
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -58,23 +58,20 @@ var Runnable = /** @class */ (function () {
         var uncompletedArg = args.reduce(function (name, arg) {
             var _a;
             if (name === undefined) {
-                var match = /^-(?<flag>-)?(?<n>[a-zA-Z\-]+)$/.exec(arg);
+                var match = /^-(?<full>-)?(?<n>[a-zA-Z\-]+)$/.exec(arg);
                 if (match) {
                     if (name) {
                         throw new OptionParseError("Argument " + name + " requires a value");
                     }
-                    var _b = match.groups, flag_1 = _b.flag, n_1 = _b.n;
-                    var key = (_a = Object.entries(_this.optionConfig.args).filter(function (_a) {
-                        var _name = _a[0], config = _a[1];
-                        return flag_1 ? !config.requiresValue : config.requiresValue;
-                    }).find(function (_a) {
+                    var _b = match.groups, full_1 = _b.full, n_1 = _b.n;
+                    var key = (_a = Object.entries(_this.optionConfig.args).find(function (_a) {
                         var name = _a[0], shorthands = _a[1].shorthands;
-                        return (name === n_1 || (shorthands === null || shorthands === void 0 ? void 0 : shorthands.includes(n_1)));
+                        return (full_1 ? name === n_1 : shorthands === null || shorthands === void 0 ? void 0 : shorthands.includes(n_1));
                     })) === null || _a === void 0 ? void 0 : _a[0];
                     if (!key) {
                         throw new OptionParseError("No argument match \"" + n_1 + "\"");
                     }
-                    var isFlag = Boolean(flag_1);
+                    var isFlag = !Boolean(_this.optionConfig.args[key].requiresValue);
                     if (isFlag) {
                         options[key] = true;
                         return undefined;

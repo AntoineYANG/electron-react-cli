@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-14 17:53:51
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-15 00:31:09
+ * @Last Modified time: 2021-11-15 20:58:33
  */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -172,7 +172,6 @@ var resolveDependencies = function (dependencies, memoized, noCache) {
                                     target = satisfied[0];
                                     // add it to the list
                                     entering.push(target);
-                                    console.log(target.name, target.version);
                                     return [2 /*return*/];
                             }
                         });
@@ -207,7 +206,7 @@ var resolveDependencies = function (dependencies, memoized, noCache) {
                     return [4 /*yield*/, Promise.all(unresolved.map(function (d) { return (0, exports.getMinIncompatibleSet)(d, noCache); }))];
                 case 2:
                     items = (_a.sent()).flat(1);
-                    return [4 /*yield*/, (0, exports.resolveDependencies)(items, data)];
+                    return [4 /*yield*/, (0, exports.resolveDependencies)(items, data, noCache)];
                 case 3:
                     results = _a.sent();
                     data.push.apply(data, results);

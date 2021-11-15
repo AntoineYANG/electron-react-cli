@@ -2,17 +2,21 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 02:00:17 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-15 00:15:23
+ * @Last Modified time: 2021-11-16 01:42:46
  */
+
+import * as chalk from 'chalk';
 
 import { ExitCode } from '../..';
 import Runnable from '..';
 import { Dependency, DependencyTag, getAllDependencies } from './utils/read-deps';
 import env, { PackageJSON } from '../../utils/env';
 import { getMinIncompatibleSet, resolveDependencies } from './utils/resolve-deps';
-import { VersionInfo } from '../../utils/request/request-npm';
+import type { VersionInfo } from '../../utils/request/request-npm';
 import { writeLockFile } from './utils/lock';
 import Logger from '../../utils/ui/logger';
+import validatePackage, { WorkspaceRoot } from '../../utils/workspace/validate-package';
+import batchDownload from './utils/download-deps';
 
 
 /**
@@ -48,37 +52,99 @@ export default class InstallTask extends Runnable<typeof InstallTask.rules> {
   }
 
   override async exec() {
-    if (this.params.length === 0) {
-      await this.installAll();
+    const modules: string[] = [];
+    const scopes: string[] = [];
+
+    for (const p of this.params) {
+      if (p.startsWith(':')) {
+        const scope = validatePackage(p);
+  
+        if (scope) {
+          scopes.push(scope);
+        } else {
+          Logger.error(
+            chalk`{redBright {bold \u2716 } "{blue.bold ${p}}" is not an existing package.}`
+          );
+  
+          return ExitCode.BAD_PARAMS;
+        }
+      } else {
+        modules.push(p);
+      }
+    }
+
+    if (modules.length === 0) {
+      await this.installAll(scopes.length ? scopes : 'all');
     } else {
-      // TODO: others
+      await this.installAndSave(
+        scopes.length ? scopes : 'all',
+        modules
+      );
     }
     
     return ExitCode.OPERATION_NOT_FOUND;
   }
 
-  private async installAll() {
+  /**
+   * Install local dependencies.
+   * 
+   * @private
+   * @param {(string[] | 'all')} [scopes='all']
+   * @memberof InstallTask
+   */
+  private async installAll(scopes: string[] | 'all' = 'all') {
     const NAME = 'Install local dependencies';
     const sw = Logger.startStopWatch(NAME);
-    const dependencies = this.loadDependencies();
+    const dependencies = this.loadDependencies(scopes);
     const resolvedDeps = await this.resolveDependencies(dependencies);
     writeLockFile(resolvedDeps);
+    const diff = await this.diffLocal(resolvedDeps);
+    const results = await this.createInstallTask(diff);
     Logger.stopStopWatch(sw);
     process.exit(0);
-    const diff = this.diffLocal(dependencies);
-    // await this.createInstallTask(modules);
+    console.log({ results });
+    throw new Error('Method is not implemented');
+  }
+
+  /**
+   * Install new dependencies, and add them to `package.json`.
+   * 
+   * @private
+   * @param {(string[] | 'all')} scopes
+   * @param {string[]} modules
+   * @memberof InstallTask
+   */
+  private async installAndSave(scopes: string[] | 'all', modules: string[]) {
+    const NAME = 'Install new dependencies';
+    const sw = Logger.startStopWatch(NAME);
+    const dependencies = this.loadDependencies(scopes);
+    const resolvedDeps = await this.resolveDependencies(dependencies);
+    writeLockFile(resolvedDeps);
+    const diff = await this.diffLocal(resolvedDeps);
+    const results = await this.createInstallTask(diff);
+    // console.log({ results });
+    Logger.stopStopWatch(sw);
+    process.exit(0);
     throw new Error('Method is not implemented');
   }
 
   /**
    * Loads all the explicit dependencies from all `package.json`.
    */
-  private loadDependencies(): Dependency[] {
-    // load all `package.json`
-    const packages = [
-      env.rootPkg,
-      ...env.packages.map(p => env.packageMap[p] as PackageJSON)
-    ];
+  private loadDependencies(scopes: string[] | 'all' = 'all'): Dependency[] {
+    const packages: PackageJSON[] = [];
+
+    if (scopes === 'all' || scopes.includes(WorkspaceRoot)) {
+      packages.push(env.rootPkg);
+    }
+
+    env.packages.forEach(p => {
+      const pkg = env.packageMap[p] as PackageJSON;
+
+      if (scopes === 'all' || scopes.includes(p)) {
+        packages.push(pkg);
+      }
+    });
 
     const keys = [
       'dependencies',
@@ -109,17 +175,19 @@ export default class InstallTask extends Runnable<typeof InstallTask.rules> {
     return resolved;
   }
   
-  private async diffLocal(dependencies: Dependency[]): Promise<any> {
-    throw new Error('Method is not implemented');
+  private async diffLocal(dependencies: VersionInfo[]): Promise<VersionInfo[]> {
+    // TODO:
+    return dependencies;
   }
 
-  private async createInstallTask(modules: any) {
-    await this.hoistDependencies(modules);
-    throw new Error('Method is not implemented')
-  }
+  private async createInstallTask(modules: VersionInfo[]) {
+    Logger.info(
+      chalk`🧱 {yellow.bold ${modules.length} }modules will be installed `
+    );
 
-  private async hoistDependencies(modules: any) {
-    throw new Error('Method is not implemented')
+    await batchDownload(modules);
+
+    return;
   }
 
 }
