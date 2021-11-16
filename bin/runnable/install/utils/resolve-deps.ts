@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 17:53:51 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-15 20:58:33
+ * @Last Modified time: 2021-11-16 19:00:14
  */
 
 import * as semver from 'semver';
@@ -110,15 +110,21 @@ export const getMinIncompatibleSet = async (
 export const resolveDependencies = async (
   dependencies: SingleDependency[],
   memoized: VersionInfo[] = [],
-  noCache: boolean = false
+  noCache: boolean = false,
+  onProgress?: (resolved: number, unresolved: number) => void
 ): Promise<VersionInfo[]> => {
   const data: VersionInfo[] = [...memoized];
   const entering: VersionInfo[] = [];
 
   const unresolved: Dependency[] = [];
+  let running = 0;
 
   const tasks = dependencies.map(async dep => {
     const isDeclared = () => Boolean(
+      entering.find(
+        d => d.name === dep.name && semver.satisfies(d.version, dep.version)
+      )
+    ) || Boolean(
       data.find(
         d => d.name === dep.name && semver.satisfies(d.version, dep.version)
       )
@@ -129,7 +135,13 @@ export const resolveDependencies = async (
       return;
     }
 
+    running += 1;
+
     const satisfied = await getAvailableVersions(dep.name, dep.version, noCache);
+
+    running -= 1;
+
+    onProgress?.(data.length + entering.length + 1, running + entering.length);
     
     if (isDeclared()) {
       // this dependency is already resolved when checking
@@ -138,7 +150,7 @@ export const resolveDependencies = async (
 
     // FIXME: pick the most suitable one
     const target = satisfied[0] as VersionInfo;
-
+    
     // add it to the list
     entering.push(target);
 
@@ -182,10 +194,22 @@ export const resolveDependencies = async (
         unresolved.map(d => getMinIncompatibleSet(d, noCache))
       )
     ).flat(1);
+
+    onProgress?.(data.length, items.length);
     
-    const results = await resolveDependencies(items, data, noCache);
+    const results = await resolveDependencies(items, data, noCache, onProgress);
   
-    data.push(...results);
+    data.push(...results.filter(r => {
+      return !Boolean(
+        entering.find(
+          d => d.name === r.name && semver.satisfies(d.version, r.version)
+        )
+      ) && !Boolean(
+        data.find(
+          d => d.name === r.name && semver.satisfies(d.version, r.version)
+        )
+      );
+    }));
   }
 
   return data;

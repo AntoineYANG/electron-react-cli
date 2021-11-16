@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 20:49:31 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-15 00:01:44
+ * @Last Modified time: 2021-11-16 20:57:02
  */
 
 import * as fs from 'fs';
@@ -11,15 +11,13 @@ import env from '../../../utils/env';
 import { VersionInfo } from '../../../utils/request/request-npm';
 
 
-export type LockRequireData = {
-  range: string;
-  target: string;
-};
-
 export type LockInfo = {
   resolved: string;
+  path: string;
+  target: string;
+  integrity: string;
   requires: {
-    [name: string]: LockRequireData;
+    [name: string]: string;
   }
 };
 
@@ -31,7 +29,12 @@ export type LockData = {
   [name: string]: LockItem;
 };
 
-const createLockData = (data: VersionInfo[]): LockData => {
+/**
+ * Generates espoir lock data from version info.
+ *
+ * @param {VersionInfo[]} data
+ */
+export const createLockData = (data: VersionInfo[]): LockData => {
   const result = {} as LockData;
 
   data.forEach(d => {
@@ -43,16 +46,16 @@ const createLockData = (data: VersionInfo[]): LockData => {
 
     thisModule[d.version] = {
       resolved: d.dist.tarball,
+      integrity: d.dist.integrity,
+      path: '', // `path` will be assigned after calling map()
+      target: '', // `target` will be assigned after calling map()
       requires: {}
     };
     
     const requires = thisModule[d.version]?.requires as LockInfo['requires'];
 
     Object.entries(d.dependencies ?? {}).forEach(([name, range]) => {
-      requires[name] = {
-        range,
-        target: '' // FIXME:
-      }
+      requires[name] = range;
     });
   });
 
@@ -65,9 +68,9 @@ const fn = env.resolvePath('.espoir', 'espoir-lock.json');
 /**
  * Writes `.espoir/espoir-lock.json`.
  *
- * @param {VersionInfo[]} data
+ * @param {LockData} data
  */
-export const writeLockFile = (data: VersionInfo[]): void => {
+export const writeLockFile = (data: LockData): void => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir);
   }
@@ -75,7 +78,7 @@ export const writeLockFile = (data: VersionInfo[]): void => {
   fs.writeFileSync(
     fn,
     JSON.stringify(
-      createLockData(data),
+      data,
       undefined,
       2
     ),

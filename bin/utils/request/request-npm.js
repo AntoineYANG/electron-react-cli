@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-14 18:34:47
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-15 00:12:47
+ * @Last Modified time: 2021-11-16 20:56:17
  */
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -36,7 +36,9 @@ var view = function (name, options) {
                 name: d.name,
                 version: d.version,
                 dist: {
-                    tarball: d.dist.tarball
+                    tarball: d.dist.tarball,
+                    unpackedSize: d.dist.unpackedSize,
+                    integrity: d.dist.integrity
                 },
                 dependencies: d.dependencies
             };

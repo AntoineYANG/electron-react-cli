@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-14 02:35:46
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-16 01:26:30
+ * @Last Modified time: 2021-11-16 16:03:27
  */
 var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cooked, raw) {
     if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
@@ -12,6 +12,7 @@ var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cook
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.StopWatch = exports.LogLevel = void 0;
 var chalk = require("chalk");
+var logUpdate = require("log-update");
 /* eslint-disable no-console */
 var LogLevel;
 (function (LogLevel) {
@@ -105,20 +106,11 @@ var Logger = /** @class */ (function () {
         this.info(chalk(templateObject_2 || (templateObject_2 = __makeTemplateObject(["{rgb(206,145,91) [StopWatch]} {rgb(0,125,206).bold ", "} finished. total cost: {yellow ", "}"], ["{rgb(206,145,91) [StopWatch]} {rgb(0,125,206).bold ", "} finished. total cost: {yellow ", "}"])), sw.label, time));
         return finalCost;
     };
-    Logger.writeRow = function (content) {
-        process.stdout.write(content);
-        process.stdout.write('\n');
+    Logger.writeCanOverwrite = function (content) {
+        logUpdate(content);
     };
-    Logger.backRow = function (rows) {
-        if (rows === void 0) { rows = 1; }
-        for (var i = 0; i < rows; i += 1) {
-            process.stdout.cursorTo(0);
-            // eslint-disable-next-line no-magic-numbers
-            process.stdout.write(' '.repeat(160));
-            process.stdout.cursorTo(0);
-            process.stdout.clearLine(0);
-            process.stdout.moveCursor(0, -1);
-        }
+    Logger.clearRow = function () {
+        logUpdate.clear();
     };
     Logger.level = LogLevel.ALL;
     return Logger;

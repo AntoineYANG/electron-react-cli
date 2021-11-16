@@ -2,10 +2,11 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 02:35:46 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-16 01:26:30
+ * @Last Modified time: 2021-11-16 16:03:27
  */
 
 import * as chalk from 'chalk';
+import * as logUpdate from 'log-update';
 
 
 /* eslint-disable no-console */
@@ -129,20 +130,12 @@ abstract class Logger {
     return finalCost;
   }
 
-  static writeRow(content: string): void {
-    process.stdout.write(content);
-    process.stdout.write('\n');
+  static writeCanOverwrite(content: string): void {
+    logUpdate(content);
   }
 
-  static backRow(rows: number = 1): void {
-    for (let i = 0; i < rows; i += 1) {
-      process.stdout.cursorTo(0);
-      // eslint-disable-next-line no-magic-numbers
-      process.stdout.write(' '.repeat(160));
-      process.stdout.cursorTo(0);
-      process.stdout.clearLine(0);
-      process.stdout.moveCursor(0, -1);
-    }
+  static clearRow(): void {
+    logUpdate.clear();
   }
 
 }

@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 18:34:47 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-15 00:12:47
+ * @Last Modified time: 2021-11-16 20:56:17
  */
 
 import env, { PackageAuthor, PackageJSON } from '../../utils/env';
@@ -99,7 +99,9 @@ export const view = (
           name: d.name,
           version: d.version,
           dist: {
-            tarball: d.dist.tarball
+            tarball: d.dist.tarball,
+            unpackedSize: d.dist.unpackedSize,
+            integrity: d.dist.integrity
           },
           dependencies: d.dependencies
         } as VersionInfo;

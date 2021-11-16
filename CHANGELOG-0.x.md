@@ -10,6 +10,10 @@
 
   - + install package dependencies. ([@AntoineYANG](https://github.com/AntoineYANG))&nbsp;&nbsp;&nbsp;<small data-date="1636741417724">2021/11/13上午2:23:37</small>
 
+- `bin/install`
+
+  - download .tgz. ([@AntoineYANG](https://github.com/AntoineYANG))&nbsp;&nbsp;&nbsp;<small data-date="1636998230927">2021/11/16上午1:43:50</small>
+
 #### 🔗  refactor
 
 - `bin`

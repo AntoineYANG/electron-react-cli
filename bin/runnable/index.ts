@@ -2,10 +2,11 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 01:43:49 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-15 23:18:28
+ * @Last Modified time: 2021-11-16 16:16:09
  */
 
 import { ExitCode } from '..';
+import { ListrBaseClassOptions, Manager } from 'listr2';
 
 
 export type ArgConfig<
@@ -180,3 +181,19 @@ export interface RunnableConstructor<RC extends RunnableConfig = RunnableConfig>
   /** aliases to call */
   readonly aliases: string[];
 }
+
+/**
+ * @see https://listr2.kilic.dev/task-manager/use-case
+ */
+export const TaskManagerFactory = <T = any>(override?: ListrBaseClassOptions): Manager<T> => {
+  const myDefaultOptions: ListrBaseClassOptions = {
+    concurrent: false,
+    exitOnError: false,
+    rendererOptions: {
+      collapse: false,
+      collapseSkips: false
+    }
+  };
+
+  return new Manager({ ...myDefaultOptions, ...override });
+};

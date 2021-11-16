@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-14 01:43:49
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-15 23:18:28
+ * @Last Modified time: 2021-11-16 16:16:09
  */
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -20,8 +20,20 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.OptionParseError = void 0;
+exports.TaskManagerFactory = exports.OptionParseError = void 0;
+var listr2_1 = require("listr2");
 var OptionParseError = /** @class */ (function (_super) {
     __extends(OptionParseError, _super);
     function OptionParseError(msg) {
@@ -93,3 +105,18 @@ var Runnable = /** @class */ (function () {
     return Runnable;
 }());
 exports.default = Runnable;
+/**
+ * @see https://listr2.kilic.dev/task-manager/use-case
+ */
+var TaskManagerFactory = function (override) {
+    var myDefaultOptions = {
+        concurrent: false,
+        exitOnError: false,
+        rendererOptions: {
+            collapse: false,
+            collapseSkips: false
+        }
+    };
+    return new listr2_1.Manager(__assign(__assign({}, myDefaultOptions), override));
+};
+exports.TaskManagerFactory = TaskManagerFactory;

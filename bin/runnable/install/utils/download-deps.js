@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-16 00:03:04
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-16 01:17:23
+ * @Last Modified time: 2021-11-16 21:30:46
  */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -43,40 +43,186 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var path = require("path");
+var fs = require("fs");
 var semver = require("semver");
+var compressing = require("compressing");
+var mkdirp_1 = require("mkdirp");
 var env_1 = require("../../../utils/env");
 var request_1 = require("../../../utils/request");
 var progress_1 = require("./progress");
-var batchDownload = function (modules) { return __awaiter(void 0, void 0, void 0, function () {
-    var tasks;
-    return __generator(this, function (_a) {
-        tasks = modules.map(function (mod) { return __awaiter(void 0, void 0, void 0, function () {
-            var name, dir, url, fn, p, _a, downloadErr, size;
+var dirSyncAll = function (dir) {
+    var files = [];
+    fs.readdirSync(dir).forEach(function (fn) {
+        var p = path.join(dir, fn);
+        if (fs.statSync(p).isDirectory()) {
+            files.push.apply(files, dirSyncAll(p));
+        }
+        else {
+            files.push(p);
+        }
+    });
+    return files;
+};
+var MAX_ROWS = 6;
+var batchDownload = function (modules, onProgress, onEnd) {
+    var count = {
+        completed: [],
+        failed: [],
+        total: modules.map(function (d) { return d.name + "@" + d.version; })
+    };
+    var state = modules.map(function (_) { return progress_1.ProgressTag.prepare; });
+    var canDisplay = function (idx) {
+        if ([progress_1.ProgressTag.done, progress_1.ProgressTag.failed].includes(state[idx])) {
+            return false;
+        }
+        var nowDisplaying = 0;
+        for (var i = 0; i <= idx && i < state.length && nowDisplaying < MAX_ROWS; i += 1) {
+            if (![progress_1.ProgressTag.done, progress_1.ProgressTag.failed].includes(state[i])) {
+                nowDisplaying += 1;
+            }
+            if (nowDisplaying < MAX_ROWS && i === idx) {
+                return true;
+            }
+        }
+        return false;
+    };
+    var tasks = modules.map(function (mod, i) {
+        var name = mod.name, version = mod.version;
+        var dir = path.join(env_1.default.resolvePath('.espoir', '.modules'), name, semver.valid(semver.coerce(version)).replace(/\./g, '_'));
+        var url = mod.dist.tarball;
+        var fn = url.split(/\/+/).reverse()[0];
+        var p = path.join(dir, fn);
+        var updateLog = function (task, tag, value) {
+            state[i] = tag;
+            progress_1.default.set(name, tag, value !== null && value !== void 0 ? value : -1);
+            if (canDisplay(i)) {
+                task.output = progress_1.default.stringify(name, tag, value);
+            }
+        };
+        var run = function (_ctx, task) { return __awaiter(void 0, void 0, void 0, function () {
+            var reportFailed, _a, downloadErr, size, error_1, pp, unPackErr;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        name = mod.name;
-                        dir = path.join(env_1.default.resolvePath('.espoir', '.download'), name, semver.valid(semver.coerce(mod.version)).replace(/\./g, '_'));
-                        url = mod.dist.tarball;
-                        fn = url.split(/\/+/).reverse()[0];
-                        p = path.join(dir, fn);
-                        (0, progress_1.default)(name, progress_1.ProgressTag.prepare, -1);
+                        reportFailed = function (err) {
+                            updateLog(task, progress_1.ProgressTag.failed);
+                            count.failed.push(name + "@" + version);
+                        };
+                        updateLog(task, progress_1.ProgressTag.prepare);
                         return [4 /*yield*/, request_1.default.download(url, p, {}, function (done, total) {
-                                (0, progress_1.default)(name, progress_1.ProgressTag.download, total ? done / total : 0);
+                                updateLog(task, progress_1.ProgressTag.download, total ? done / total : 0);
                             })];
                     case 1:
                         _a = _b.sent(), downloadErr = _a[0], size = _a[1];
                         if (downloadErr) {
-                            (0, progress_1.default)(name, progress_1.ProgressTag.failed, -1);
+                            reportFailed(downloadErr);
+                            return [2 /*return*/, {
+                                    name: name,
+                                    version: version,
+                                    err: downloadErr,
+                                    _request: {
+                                        url: url
+                                    }
+                                }];
                         }
-                        else {
-                            (0, progress_1.default)(name, progress_1.ProgressTag.done, -1); // FIXME: not here
+                        _b.label = 2;
+                    case 2:
+                        _b.trys.push([2, 4, , 5]);
+                        updateLog(task, progress_1.ProgressTag['un-compress'], 0);
+                        return [4 /*yield*/, compressing.tgz.uncompress(p, dir)];
+                    case 3:
+                        _b.sent();
+                        fs.rmSync(p);
+                        updateLog(task, progress_1.ProgressTag['un-compress'], 1);
+                        return [3 /*break*/, 5];
+                    case 4:
+                        error_1 = _b.sent();
+                        reportFailed(error_1);
+                        return [2 /*return*/, {
+                                name: name,
+                                version: version,
+                                err: error_1,
+                                _request: {
+                                    url: url
+                                }
+                            }];
+                    case 5:
+                        pp = path.join(dir, 'package');
+                        if (!fs.existsSync(pp)) return [3 /*break*/, 7];
+                        // some packages such as type declarations do not have a `/package` directory
+                        updateLog(task, progress_1.ProgressTag.unpack, 0);
+                        return [4 /*yield*/, new Promise(function (resolve) {
+                                try {
+                                    var files = dirSyncAll(pp);
+                                    files.forEach(function (_fn) {
+                                        var _rp = path.relative(pp, _fn);
+                                        var _to = path.join(dir, _rp);
+                                        var _td = path.resolve(_to, '..');
+                                        if (!fs.existsSync(_td)) {
+                                            (0, mkdirp_1.sync)(_td);
+                                        }
+                                        fs.renameSync(_fn, _to);
+                                    });
+                                    fs.rmdirSync(pp, {
+                                        recursive: true
+                                    });
+                                    return resolve([null, null]);
+                                }
+                                catch (error) {
+                                    return resolve([error, null]);
+                                }
+                            })];
+                    case 6:
+                        unPackErr = (_b.sent())[0];
+                        if (unPackErr) {
+                            reportFailed(unPackErr);
+                            return [2 /*return*/, {
+                                    name: name,
+                                    version: version,
+                                    err: unPackErr,
+                                    _request: {
+                                        url: url
+                                    }
+                                }];
                         }
-                        return [2 /*return*/];
+                        updateLog(task, progress_1.ProgressTag.unpack, 1);
+                        _b.label = 7;
+                    case 7:
+                        updateLog(task, progress_1.ProgressTag.done); // FIXME: not here
+                        count.completed.push(name + "@" + mod.version);
+                        onProgress === null || onProgress === void 0 ? void 0 : onProgress(count.completed, count.failed, count.total);
+                        return [2 /*return*/, {
+                                name: name,
+                                version: mod.version,
+                                err: null,
+                                data: {
+                                    size: size,
+                                    unpackedSize: mod.dist.unpackedSize,
+                                    /** where is me, absolute path */
+                                    dir: dir
+                                },
+                                _request: {
+                                    url: url
+                                }
+                            }];
                 }
             });
-        }); });
-        return [2 /*return*/, Promise.all(tasks)];
+        }); };
+        return {
+            task: function (ctx, task) { return __awaiter(void 0, void 0, void 0, function () {
+                var res;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, run(ctx, task)];
+                        case 1:
+                            res = _a.sent();
+                            onEnd === null || onEnd === void 0 ? void 0 : onEnd(res);
+                            return [2 /*return*/];
+                    }
+                });
+            }); }
+        };
     });
-}); };
+    return tasks;
+};
 exports.default = batchDownload;

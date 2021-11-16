@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-14 02:00:17
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-16 01:42:46
+ * @Last Modified time: 2021-11-16 20:44:39
  */
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -71,6 +71,7 @@ var lock_1 = require("./utils/lock");
 var logger_1 = require("../../utils/ui/logger");
 var validate_package_1 = require("../../utils/workspace/validate-package");
 var download_deps_1 = require("./utils/download-deps");
+var map_1 = require("./utils/map");
 /**
  * Creates an install task.
  *
@@ -131,26 +132,117 @@ var InstallTask = /** @class */ (function (_super) {
     InstallTask.prototype.installAll = function (scopes) {
         if (scopes === void 0) { scopes = 'all'; }
         return __awaiter(this, void 0, void 0, function () {
-            var NAME, sw, dependencies, resolvedDeps, diff, results;
+            var NAME, sw, tasks, ctx;
+            var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         NAME = 'Install local dependencies';
                         sw = logger_1.default.startStopWatch(NAME);
-                        dependencies = this.loadDependencies(scopes);
-                        return [4 /*yield*/, this.resolveDependencies(dependencies)];
+                        tasks = (0, __2.TaskManagerFactory)();
+                        tasks.add([{
+                                title: 'Loading all the explicit dependencies from all `package.json`.',
+                                task: function (ctx, task) {
+                                    task.output = 'Resolving `package.json`';
+                                    ctx.dependencies = _this.loadDependencies(scopes);
+                                    task.output = 'Successfully resolved `package.json`';
+                                }
+                            }, {
+                                title: 'Resolving declared dependencies.',
+                                task: function (ctx, task) { return __awaiter(_this, void 0, void 0, function () {
+                                    var printProgress, _a;
+                                    return __generator(this, function (_b) {
+                                        switch (_b.label) {
+                                            case 0:
+                                                task.output = 'Viewing declared dependencies';
+                                                printProgress = function (resolved, unresolved) {
+                                                    task.output = chalk(templateObject_2 || (templateObject_2 = __makeTemplateObject([" \u23F3  {green ", " }dependencies resolved, {yellow ", " }left"], [" \\u23f3  {green ", " }dependencies resolved, {yellow ", " }left"])), resolved, unresolved);
+                                                };
+                                                _a = ctx;
+                                                return [4 /*yield*/, this.resolveDependencies(ctx.dependencies, printProgress)];
+                                            case 1:
+                                                _a.resolvedDeps = _b.sent();
+                                                ctx.lockData = (0, lock_1.createLockData)(ctx.resolvedDeps);
+                                                task.output = 'Successfully resolved declared dependencies';
+                                                return [2 /*return*/];
+                                        }
+                                    });
+                                }); }
+                            }, {
+                                title: 'Diffing local files.',
+                                task: function (ctx, task) { return __awaiter(_this, void 0, void 0, function () {
+                                    var _a;
+                                    return __generator(this, function (_b) {
+                                        switch (_b.label) {
+                                            case 0:
+                                                task.output = 'Checking installed modules';
+                                                _a = ctx;
+                                                return [4 /*yield*/, this.diffLocal(ctx.resolvedDeps)];
+                                            case 1:
+                                                _a.diff = _b.sent();
+                                                task.output = 'Diffing succeeded';
+                                                return [2 /*return*/];
+                                        }
+                                    });
+                                }); }
+                            }, {
+                                title: 'Installing resolved modules.',
+                                task: function (ctx, task) {
+                                    task.output = chalk(templateObject_3 || (templateObject_3 = __makeTemplateObject(["\uD83E\uDDF1 {yellow.bold ", " }modules will be installed "], ["\uD83E\uDDF1 {yellow.bold ", " }modules will be installed "])), ctx.diff.length);
+                                    var printProgress = function (completed, failed, total) {
+                                        var pending = total.length - completed.length - failed.length;
+                                        var output = chalk(templateObject_4 || (templateObject_4 = __makeTemplateObject(["\uD83E\uDDF1 {yellow.bold ", " }modules will be installed "], ["\uD83E\uDDF1 {yellow.bold ", " }modules will be installed "])), ctx.diff.length);
+                                        if (pending) {
+                                            output += chalk(templateObject_5 || (templateObject_5 = __makeTemplateObject([" {yellow ", " pending }"], [" {yellow ", " pending }"])), pending);
+                                        }
+                                        if (completed.length) {
+                                            output += chalk(templateObject_6 || (templateObject_6 = __makeTemplateObject([" {green ", " succeeded }"], [" {green ", " succeeded }"])), completed.length);
+                                        }
+                                        if (failed.length) {
+                                            output += chalk(templateObject_7 || (templateObject_7 = __makeTemplateObject([" {red ", " failed }"], [" {red ", " failed }"])), failed.length);
+                                        }
+                                        task.output = output;
+                                    };
+                                    ctx.installResults = [];
+                                    var subtasks = _this.createInstallTask(ctx.diff, printProgress, function (res) { return ctx.installResults.push(res); });
+                                    return task.newListr(subtasks, {
+                                        concurrent: true,
+                                        rendererOptions: {
+                                            collapse: true
+                                        }
+                                    });
+                                }
+                            }, {
+                                title: 'Linking.',
+                                task: function (ctx, task) { return __awaiter(_this, void 0, void 0, function () {
+                                    return __generator(this, function (_a) {
+                                        switch (_a.label) {
+                                            case 0:
+                                                task.output = 'Linking /node_modules/';
+                                                return [4 /*yield*/, (0, map_1.default)(ctx.dependencies, ctx.lockData, ctx.installResults)];
+                                            case 1:
+                                                _a.sent();
+                                                task.output = 'Linked successfully';
+                                                return [2 /*return*/];
+                                        }
+                                    });
+                                }); }
+                            }, {
+                                title: 'Saving lock file.',
+                                task: function (ctx, task) {
+                                    task.output = 'Saving espoir lock file';
+                                    (0, lock_1.writeLockFile)(ctx.lockData);
+                                    task.output = 'Espoir lock file saved';
+                                }
+                            }], {
+                            exitOnError: true,
+                            concurrent: false
+                        });
+                        return [4 /*yield*/, tasks.runAll()];
                     case 1:
-                        resolvedDeps = _a.sent();
-                        (0, lock_1.writeLockFile)(resolvedDeps);
-                        return [4 /*yield*/, this.diffLocal(resolvedDeps)];
-                    case 2:
-                        diff = _a.sent();
-                        return [4 /*yield*/, this.createInstallTask(diff)];
-                    case 3:
-                        results = _a.sent();
+                        ctx = _a.sent();
                         logger_1.default.stopStopWatch(sw);
                         process.exit(0);
-                        console.log({ results: results });
                         throw new Error('Method is not implemented');
                 }
             });
@@ -166,28 +258,19 @@ var InstallTask = /** @class */ (function (_super) {
      */
     InstallTask.prototype.installAndSave = function (scopes, modules) {
         return __awaiter(this, void 0, void 0, function () {
-            var NAME, sw, dependencies, resolvedDeps, diff, results;
+            var NAME;
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        NAME = 'Install new dependencies';
-                        sw = logger_1.default.startStopWatch(NAME);
-                        dependencies = this.loadDependencies(scopes);
-                        return [4 /*yield*/, this.resolveDependencies(dependencies)];
-                    case 1:
-                        resolvedDeps = _a.sent();
-                        (0, lock_1.writeLockFile)(resolvedDeps);
-                        return [4 /*yield*/, this.diffLocal(resolvedDeps)];
-                    case 2:
-                        diff = _a.sent();
-                        return [4 /*yield*/, this.createInstallTask(diff)];
-                    case 3:
-                        results = _a.sent();
-                        // console.log({ results });
-                        logger_1.default.stopStopWatch(sw);
-                        process.exit(0);
-                        throw new Error('Method is not implemented');
-                }
+                NAME = 'Install new dependencies';
+                // const sw = Logger.startStopWatch(NAME);
+                // const dependencies = this.loadDependencies(scopes);
+                // const resolvedDeps = await this.resolveDependencies(dependencies);
+                // writeLockFile(resolvedDeps);
+                // const diff = await this.diffLocal(resolvedDeps);
+                // const results = await this.createInstallTask(diff);
+                // // console.log({ results });
+                // Logger.stopStopWatch(sw);
+                // process.exit(0);
+                throw new Error('Method is not implemented');
             });
         });
     };
@@ -221,7 +304,7 @@ var InstallTask = /** @class */ (function (_super) {
      * @param {Dependency[]} dependencies
      * @returns {Promise<VersionInfo[]>}
      */
-    InstallTask.prototype.resolveDependencies = function (dependencies) {
+    InstallTask.prototype.resolveDependencies = function (dependencies, onProgress) {
         return __awaiter(this, void 0, void 0, function () {
             var items, resolved;
             var _this = this;
@@ -230,7 +313,7 @@ var InstallTask = /** @class */ (function (_super) {
                     case 0: return [4 /*yield*/, Promise.all(dependencies.map(function (d) { return (0, resolve_deps_1.getMinIncompatibleSet)(d, _this.options['no-cache']); }))];
                     case 1:
                         items = (_a.sent()).flat(1);
-                        return [4 /*yield*/, (0, resolve_deps_1.resolveDependencies)(items, [], this.options['no-cache'])];
+                        return [4 /*yield*/, (0, resolve_deps_1.resolveDependencies)(items, [], this.options['no-cache'], onProgress)];
                     case 2:
                         resolved = _a.sent();
                         return [2 /*return*/, resolved];
@@ -246,19 +329,8 @@ var InstallTask = /** @class */ (function (_super) {
             });
         });
     };
-    InstallTask.prototype.createInstallTask = function (modules) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        logger_1.default.info(chalk(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\uD83E\uDDF1 {yellow.bold ", " }modules will be installed "], ["\uD83E\uDDF1 {yellow.bold ", " }modules will be installed "])), modules.length));
-                        return [4 /*yield*/, (0, download_deps_1.default)(modules)];
-                    case 1:
-                        _a.sent();
-                        return [2 /*return*/];
-                }
-            });
-        });
+    InstallTask.prototype.createInstallTask = function (modules, onProgress, onEnd) {
+        return (0, download_deps_1.default)(modules, onProgress, onEnd);
     };
     InstallTask.fullName = 'install';
     InstallTask.displayName = 'install';
@@ -280,4 +352,4 @@ var InstallTask = /** @class */ (function (_super) {
     return InstallTask;
 }(__2.default));
 exports.default = InstallTask;
-var templateObject_1, templateObject_2;
+var templateObject_1, templateObject_2, templateObject_3, templateObject_4, templateObject_5, templateObject_6, templateObject_7;

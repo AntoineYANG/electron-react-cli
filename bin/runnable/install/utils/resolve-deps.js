@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-14 17:53:51
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-15 20:58:33
+ * @Last Modified time: 2021-11-16 19:00:14
  */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -141,30 +141,34 @@ exports.getMinIncompatibleSet = getMinIncompatibleSet;
  * @param {boolean} [noCache=false]
  * @returns {Promise<VersionInfo[]>}
  */
-var resolveDependencies = function (dependencies, memoized, noCache) {
+var resolveDependencies = function (dependencies, memoized, noCache, onProgress) {
     if (memoized === void 0) { memoized = []; }
     if (noCache === void 0) { noCache = false; }
     return __awaiter(void 0, void 0, void 0, function () {
-        var data, entering, unresolved, tasks, items, results;
+        var data, entering, unresolved, running, tasks, items, results;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     data = __spreadArray([], memoized, true);
                     entering = [];
                     unresolved = [];
+                    running = 0;
                     tasks = dependencies.map(function (dep) { return __awaiter(void 0, void 0, void 0, function () {
                         var isDeclared, satisfied, target;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
-                                    isDeclared = function () { return Boolean(data.find(function (d) { return d.name === dep.name && semver.satisfies(d.version, dep.version); })); };
+                                    isDeclared = function () { return Boolean(entering.find(function (d) { return d.name === dep.name && semver.satisfies(d.version, dep.version); })) || Boolean(data.find(function (d) { return d.name === dep.name && semver.satisfies(d.version, dep.version); })); };
                                     if (isDeclared()) {
                                         // this dependency is already resolved
                                         return [2 /*return*/];
                                     }
+                                    running += 1;
                                     return [4 /*yield*/, getAvailableVersions(dep.name, dep.version, noCache)];
                                 case 1:
                                     satisfied = _a.sent();
+                                    running -= 1;
+                                    onProgress === null || onProgress === void 0 ? void 0 : onProgress(data.length + entering.length + 1, running + entering.length);
                                     if (isDeclared()) {
                                         // this dependency is already resolved when checking
                                         return [2 /*return*/];
@@ -206,10 +210,13 @@ var resolveDependencies = function (dependencies, memoized, noCache) {
                     return [4 /*yield*/, Promise.all(unresolved.map(function (d) { return (0, exports.getMinIncompatibleSet)(d, noCache); }))];
                 case 2:
                     items = (_a.sent()).flat(1);
-                    return [4 /*yield*/, (0, exports.resolveDependencies)(items, data, noCache)];
+                    onProgress === null || onProgress === void 0 ? void 0 : onProgress(data.length, items.length);
+                    return [4 /*yield*/, (0, exports.resolveDependencies)(items, data, noCache, onProgress)];
                 case 3:
                     results = _a.sent();
-                    data.push.apply(data, results);
+                    data.push.apply(data, results.filter(function (r) {
+                        return !Boolean(entering.find(function (d) { return d.name === r.name && semver.satisfies(d.version, r.version); })) && !Boolean(data.find(function (d) { return d.name === r.name && semver.satisfies(d.version, r.version); }));
+                    }));
                     _a.label = 4;
                 case 4: return [2 /*return*/, data];
             }

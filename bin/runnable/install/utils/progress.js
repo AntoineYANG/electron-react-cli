@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-16 01:05:00
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-16 01:42:20
+ * @Last Modified time: 2021-11-16 21:40:53
  */
 var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cooked, raw) {
     if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
@@ -49,7 +49,6 @@ var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProgressTag = void 0;
 var chalk = require("chalk");
-var logger_1 = require("../../../utils/ui/logger");
 var ProgressTag;
 (function (ProgressTag) {
     ProgressTag[ProgressTag["prepare"] = 0] = "prepare";
@@ -69,58 +68,8 @@ var desc = (_a = {
     _a[-1] = chalk.red.bold(templateObject_6 || (templateObject_6 = __makeTemplateObject(["[Failed]"], ["[Failed]"]))),
     _a);
 var tasks = [];
-/** Mark if the list is already requested to be shown */
-var dirty = false;
 var NAME_LEN = 30;
 var STAGE_LEN = 14;
-var MAX_ROWS = 12;
-var lines = 0;
-var firstTime = true;
-/**
- * Displays all progresses.
- */
-var display = function () {
-    // let the list be sorted
-    tasks = tasks.sort(function (a, b) {
-        if (a[1] !== b[1]) {
-            return b[1] - a[1];
-        }
-        return b[2] - a[2];
-    });
-    if (firstTime) {
-        // print a blank line
-        logger_1.default.writeRow('');
-        firstTime = false;
-    }
-    // clear, use '<=' because there's a blank line at the end
-    logger_1.default.backRow(Math.min(lines, MAX_ROWS));
-    // print
-    tasks.slice(0, MAX_ROWS).forEach(function (t) {
-        var name = t[0].slice(0, NAME_LEN);
-        var leftSpan = ' '.repeat(NAME_LEN - name.length + 2);
-        var stage = desc[t[1]].slice(0, STAGE_LEN) + 2;
-        var rightSpan = ' '.repeat(STAGE_LEN - stage.length + 2);
-        var p = (t[2] === -1 || [ProgressTag.done, ProgressTag.failed].includes(t[1])) ? '' : chalk.green(templateObject_7 || (templateObject_7 = __makeTemplateObject(["", "%"], ["", "%"])), (t[2] * 100).toFixed(2));
-        logger_1.default.info(leftSpan, chalk.blueBright.bold(name), ' ', desc[t[1]], rightSpan, p, ' '.repeat(10));
-    });
-    lines = tasks.length;
-    // remove the completed ones
-    tasks = tasks.filter(function (t) { return ![ProgressTag.done, ProgressTag.failed].includes(t[1]); });
-    if (tasks.length !== lines) {
-        process.nextTick(display);
-    }
-    else if (resolver) {
-        resolver();
-        resolver = null;
-        // clean the flag
-        process.nextTick(function () {
-            dirty = false;
-        });
-    }
-    // print a blank line
-    logger_1.default.info();
-};
-var resolver = null;
 /**
  * Updates progress of a task.
  *
@@ -129,33 +78,32 @@ var resolver = null;
  * @param {number} p progress of this stage, (0, 1) or -1 if the rate is meaningless
  * @returns {Promise<void>}
  */
-var progress = function (name, task, p) { return __awaiter(void 0, void 0, void 0, function () {
+var setProgress = function (name, task, p) { return __awaiter(void 0, void 0, void 0, function () {
     var idx, item;
     return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                idx = tasks.map(function (t) { return t[0]; }).indexOf(name);
-                if (idx === -1 && ![ProgressTag.done, ProgressTag.failed].includes(task)) {
-                    tasks.push([name, task, p]);
-                }
-                else if (tasks[idx]) {
-                    item = tasks[idx];
-                    item[1] = task;
-                    item[2] = p;
-                }
-                if (!!dirty) return [3 /*break*/, 2];
-                dirty = true;
-                // avoid sync
-                process.nextTick(display);
-                return [4 /*yield*/, new Promise(function (resolve) {
-                        resolver = resolve;
-                    })];
-            case 1:
-                _a.sent();
-                _a.label = 2;
-            case 2: return [2 /*return*/];
+        idx = tasks.map(function (t) { return t[0]; }).indexOf(name);
+        if (idx === -1 && ![ProgressTag.done, ProgressTag.failed].includes(task)) {
+            tasks.push([name, task, p]);
         }
+        else if (tasks[idx]) {
+            item = tasks[idx];
+            item[1] = task;
+            item[2] = p;
+        }
+        return [2 /*return*/];
     });
 }); };
+var stringify = function (name, tag, value) {
+    var _name = name.slice(0, NAME_LEN);
+    var leftSpan = ' '.repeat(NAME_LEN - _name.length + 2);
+    var stage = desc[tag].slice(0, STAGE_LEN) + 2;
+    var rightSpan = ' '.repeat(STAGE_LEN - stage.length + 2);
+    var p = (value && value >= 0 && value <= 1 && ![ProgressTag.done, ProgressTag.failed].includes(tag)) ? chalk.green(templateObject_7 || (templateObject_7 = __makeTemplateObject(["", "% "], ["", "% "])), (value * 100).toFixed(2)) : '';
+    return ("" + leftSpan + chalk.green.bold(_name + ' ') + desc[tag] + rightSpan + " " + p + ' '.repeat(10));
+};
+var progress = {
+    set: setProgress,
+    stringify: stringify
+};
 exports.default = progress;
 var templateObject_1, templateObject_2, templateObject_3, templateObject_4, templateObject_5, templateObject_6, templateObject_7;
