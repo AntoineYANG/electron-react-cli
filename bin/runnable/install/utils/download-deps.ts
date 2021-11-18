@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-16 00:03:04 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-16 21:30:46
+ * @Last Modified time: 2021-11-17 22:30:23
  */
 
 import { ListrRenderer, ListrTask } from 'listr2';
@@ -19,14 +19,14 @@ import { VersionInfo } from '../../../utils/request/request-npm';
 import progress, { ProgressTag } from './progress';
 
 
-const dirSyncAll = (dir: string): string[] => {
+export const readDirAll = (dir: string): string[] => {
   const files: string[] = [];
 
   fs.readdirSync(dir).forEach(fn => {
     const p = path.join(dir, fn);
 
     if (fs.statSync(p).isDirectory()) {
-      files.push(...dirSyncAll(p));
+      files.push(...readDirAll(p));
     } else {
       files.push(p);
     }
@@ -174,7 +174,7 @@ const batchDownload = (
 
         const [unPackErr] = await new Promise<[Error, null] | [null, null]>(resolve => {
           try {
-            const files = dirSyncAll(pp);
+            const files = readDirAll(pp);
 
             files.forEach(_fn => {
               const _rp = path.relative(pp, _fn);
@@ -226,7 +226,7 @@ const batchDownload = (
         err: null,
         data: {
           size: size as number,
-          unpackedSize: mod.dist.unpackedSize,
+          unpackedSize: mod.dist.unpackedSize as number,
           /** where is me, absolute path */
           dir
         },

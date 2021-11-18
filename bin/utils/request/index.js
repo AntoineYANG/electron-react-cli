@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-14 18:13:35
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-16 01:23:52
+ * @Last Modified time: 2021-11-17 21:03:30
  */
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -97,6 +97,9 @@ var defaultOptions = {
     timeout: 5000,
     maxRedirect: 1
 };
+var MAX_SYNC_SIZE = 8;
+var nowRunning = 0;
+var blockedRequests = [];
 var RequestError = /** @class */ (function (_super) {
     __extends(RequestError, _super);
     function RequestError(msg) {
@@ -107,6 +110,32 @@ var RequestError = /** @class */ (function (_super) {
     return RequestError;
 }(Error));
 exports.RequestError = RequestError;
+var runOrWait = function () { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                if (nowRunning < MAX_SYNC_SIZE) {
+                    nowRunning += 1;
+                    return [2 /*return*/];
+                }
+                return [4 /*yield*/, new Promise(function (resolve) {
+                        blockedRequests.push(resolve);
+                    })];
+            case 1:
+                _a.sent();
+                return [2 /*return*/];
+        }
+    });
+}); };
+var next = function () {
+    var req = blockedRequests.shift();
+    if (req) {
+        req();
+    }
+    else {
+        nowRunning -= 1;
+    }
+};
 /**
  * Sends a GET request.
  *
@@ -121,6 +150,9 @@ var get = function (url, options, filter) { return __awaiter(void 0, void 0, voi
         switch (_b.label) {
             case 0:
                 actualOptions = __assign(__assign({}, defaultOptions), options);
+                return [4 /*yield*/, runOrWait()];
+            case 1:
+                _b.sent();
                 return [4 /*yield*/, new Promise(function (resolve) {
                         needle('get', url, {
                             timeout: actualOptions.timeout
@@ -146,7 +178,7 @@ var get = function (url, options, filter) { return __awaiter(void 0, void 0, voi
                                 }
                                 default: {
                                     return resolve([
-                                        new RequestError("[" + statusCode + "] " + resp.body + "."),
+                                        new RequestError("[".concat(statusCode, "] Error occurred when requesting \"").concat(url, "\": ").concat(JSON.stringify(resp.body), ".")),
                                         null
                                     ]);
                                 }
@@ -155,8 +187,9 @@ var get = function (url, options, filter) { return __awaiter(void 0, void 0, voi
                             return [reason, null];
                         });
                     })];
-            case 1:
+            case 2:
                 _a = _b.sent(), err = _a[0], resp = _a[1];
+                next();
                 return [2 /*return*/, [err, resp]];
         }
     });
@@ -220,6 +253,9 @@ var download = function (url, output, options, onProgress) { return __awaiter(vo
                 ws = fs.createWriteStream(output);
                 pipedSize = 0;
                 totalSize = undefined;
+                return [4 /*yield*/, runOrWait()];
+            case 2:
+                _c.sent();
                 return [4 /*yield*/, new Promise(function (resolve) {
                         needle.get(location, {
                             timeout: actualOptions.timeout
@@ -251,8 +287,9 @@ var download = function (url, output, options, onProgress) { return __awaiter(vo
                             }
                         });
                     })];
-            case 2:
+            case 3:
                 _a = _c.sent(), err = _a[0], size = _a[1];
+                next();
                 return [2 /*return*/, [err, size]];
         }
     });

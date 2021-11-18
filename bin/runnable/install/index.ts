@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 02:00:17 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-16 20:44:39
+ * @Last Modified time: 2021-11-19 00:48:40
  */
 
 import * as chalk from 'chalk';
@@ -10,7 +10,7 @@ import { ListrTask } from 'listr2';
 
 import { ExitCode } from '../..';
 import Runnable, { TaskManagerFactory } from '..';
-import { Dependency, DependencyTag, getAllDependencies } from './utils/read-deps';
+import { Dependency, DependencyTag, FailedDependency, getAllDependencies, MinIncompatibleSet, SingleDependency } from './utils/read-deps';
 import env, { PackageJSON } from '../../utils/env';
 import { getMinIncompatibleSet, resolveDependencies } from './utils/resolve-deps';
 import type { VersionInfo } from '../../utils/request/request-npm';
@@ -75,14 +75,24 @@ export default class InstallTask extends Runnable<typeof InstallTask.rules> {
       }
     }
 
-    if (modules.length === 0) {
-      await this.installAll(scopes.length ? scopes : 'all');
-    } else {
-      await this.installAndSave(
-        scopes.length ? scopes : 'all',
-        modules
-      );
+    try {
+      if (modules.length === 0) {
+        await this.installAll(scopes.length ? scopes : 'all');
+
+        return ExitCode.OK;
+      } else {
+        await this.installAndSave(
+          scopes.length ? scopes : 'all',
+          modules
+        );
+      }
+    } catch (error) {
+      Logger.error(error);
+      Logger.error(error.stack);
+
+      return ExitCode.OPERATION_FAILED;
     }
+
     
     return ExitCode.OPERATION_NOT_FOUND;
   }
@@ -94,13 +104,14 @@ export default class InstallTask extends Runnable<typeof InstallTask.rules> {
    * @param {(string[] | 'all')} [scopes='all']
    * @memberof InstallTask
    */
-  private async installAll(scopes: string[] | 'all' = 'all') {
+  private async installAll(scopes: string[] | 'all' = 'all'): Promise<void> {
     const NAME = 'Install local dependencies';
     const sw = Logger.startStopWatch(NAME);
 
     const tasks = TaskManagerFactory<{
       dependencies: Dependency[];
       resolvedDeps: VersionInfo[];
+      unsatisfiedDeps: SingleDependency[];
       diff: VersionInfo[];
       lockData: LockData;
       installResults: InstallResult[];
@@ -120,12 +131,24 @@ export default class InstallTask extends Runnable<typeof InstallTask.rules> {
         const printProgress = (resolved: number, unresolved: number) => {
           task.output = chalk` \u23f3  {green ${resolved} }dependencies resolved, {yellow ${unresolved} }left`;
         };
-        ctx.resolvedDeps = await this.resolveDependencies(
+        const { succeeded, failed } = await this.resolveDependencies(
           ctx.dependencies,
           printProgress
         );
+        ctx.resolvedDeps = succeeded;
+        ctx.unsatisfiedDeps = failed;
         ctx.lockData = createLockData(ctx.resolvedDeps);
-        task.output = 'Successfully resolved declared dependencies';
+
+        if (failed.length) {
+          task.output = chalk`Resolved declared dependencies while {red ${
+            failed.length
+          }} dependencies cannot be satisfied`;
+          task.title = chalk`Resolving declared dependencies. {redBright {bold \u2716 } ${
+            failed.length
+          } unsatisfied }`;
+        } else {
+          task.output = 'Successfully resolved declared dependencies';
+        }
       }
     }, {
       title: 'Diffing local files.',
@@ -194,10 +217,10 @@ export default class InstallTask extends Runnable<typeof InstallTask.rules> {
       concurrent: false
     });
 
-    const ctx = await tasks.runAll();
+    const _ctx = await tasks.runAll();
     Logger.stopStopWatch(sw);
-    process.exit(0);
-    throw new Error('Method is not implemented');
+
+    return;
   }
 
   /**
@@ -256,20 +279,42 @@ export default class InstallTask extends Runnable<typeof InstallTask.rules> {
    * Resolves all the dependencies.
    *
    * @param {Dependency[]} dependencies
-   * @returns {Promise<VersionInfo[]>}
+   * @returns {Promise<{ succeeded: VersionInfo[]; failed: FailedDependency[] }>}
    */
   private async resolveDependencies(
     dependencies: Dependency[],
     onProgress?: (resolved: number, unresolved: number) => void
-  ): Promise<VersionInfo[]> {
+  ): Promise<{ succeeded: VersionInfo[]; failed: FailedDependency[] }> {
+    const failed: FailedDependency[] = [];
+    
     const items = (
       await Promise.all(
-        dependencies.map(d => getMinIncompatibleSet(d, this.options['no-cache']))
+        dependencies.map(async d => {
+          const { value, failed: f } = await getMinIncompatibleSet(d, this.options['no-cache']);
+          
+          if (f.length) {
+            d.versions.forEach(v => {
+              failed.push({
+                name: d.name,
+                version: v,
+                reasons: f
+              });
+            });
+
+            return null;
+          }
+          
+          return value;
+        })
       )
-    ).flat(1);
+    ).flat(1).filter(Boolean) as MinIncompatibleSet;
+
     const resolved = await resolveDependencies(items, [], this.options['no-cache'], onProgress);
 
-    return resolved;
+    return {
+      succeeded: resolved.succeeded,
+      failed: resolved.failed.concat(failed)
+    };
   }
   
   private async diffLocal(dependencies: VersionInfo[]): Promise<VersionInfo[]> {

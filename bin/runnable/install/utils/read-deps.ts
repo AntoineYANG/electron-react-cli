@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-13 23:44:59 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-14 22:36:15
+ * @Last Modified time: 2021-11-18 11:19:17
  */
 
 import Logger from '../../../utils/ui/logger';
@@ -17,6 +17,10 @@ export type Dependency = {
 export type SingleDependency = {
   name: string;
   version: string;
+};
+
+export type FailedDependency = SingleDependency & {
+  reasons: Error[];
 };
 
 export type MinIncompatibleSet = SingleDependency[];

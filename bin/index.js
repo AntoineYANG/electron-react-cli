@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-12 15:19:20
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-15 22:55:20
+ * @Last Modified time: 2021-11-17 20:26:47
  */
 var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cooked, raw) {
     if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
@@ -55,6 +55,7 @@ var ExitCode;
     ExitCode[ExitCode["OPERATION_NOT_FOUND"] = -2] = "OPERATION_NOT_FOUND";
     ExitCode[ExitCode["BAD_PARAMS"] = -1] = "BAD_PARAMS";
     ExitCode[ExitCode["OK"] = 0] = "OK";
+    ExitCode[ExitCode["OPERATION_FAILED"] = 1] = "OPERATION_FAILED";
 })(ExitCode = exports.ExitCode || (exports.ExitCode = {}));
 ;
 var supportedCommand = [
@@ -75,7 +76,7 @@ var main = function (script, args) { return __awaiter(void 0, void 0, void 0, fu
             case 1:
                 _a.trys.push([1, 3, , 4]);
                 task = new Task(args);
-                process.title = "espoir script [" + Task.displayName + "]";
+                process.title = "espoir script [".concat(Task.displayName, "]");
                 return [4 /*yield*/, task.exec()];
             case 2:
                 code = _a.sent();

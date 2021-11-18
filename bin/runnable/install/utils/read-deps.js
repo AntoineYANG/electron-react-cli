@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-13 23:44:59
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-14 22:36:15
+ * @Last Modified time: 2021-11-18 11:19:17
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAllDependencies = void 0;
@@ -24,7 +24,7 @@ var getAllDependencies = function (pkgJSON, keys) {
     keys.forEach(function (key) {
         var _a;
         if (isRoot && keysNotAllowedInRoot.includes(key) && pkgJSON[key]) {
-            logger_1.default.warn("`" + key + "` in root `package.json` is found, which is not suggested. "
+            logger_1.default.warn("`".concat(key, "` in root `package.json` is found, which is not suggested. ")
                 + 'Move them to `devDependencies` or any child package instead. ');
             return;
         }

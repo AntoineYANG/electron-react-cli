@@ -99,7 +99,7 @@ var stringify = function (name, tag, value) {
     var stage = desc[tag].slice(0, STAGE_LEN) + 2;
     var rightSpan = ' '.repeat(STAGE_LEN - stage.length + 2);
     var p = (value && value >= 0 && value <= 1 && ![ProgressTag.done, ProgressTag.failed].includes(tag)) ? chalk.green(templateObject_7 || (templateObject_7 = __makeTemplateObject(["", "% "], ["", "% "])), (value * 100).toFixed(2)) : '';
-    return ("" + leftSpan + chalk.green.bold(_name + ' ') + desc[tag] + rightSpan + " " + p + ' '.repeat(10));
+    return ("".concat(leftSpan).concat(chalk.green.bold(_name + ' ')).concat(desc[tag]).concat(rightSpan, " ").concat(p).concat(' '.repeat(10)));
 };
 var progress = {
     set: setProgress,

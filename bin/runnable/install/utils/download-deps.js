@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-16 00:03:04
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-16 21:30:46
+ * @Last Modified time: 2021-11-17 22:30:23
  */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -42,6 +42,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.readDirAll = void 0;
 var path = require("path");
 var fs = require("fs");
 var semver = require("semver");
@@ -50,12 +51,12 @@ var mkdirp_1 = require("mkdirp");
 var env_1 = require("../../../utils/env");
 var request_1 = require("../../../utils/request");
 var progress_1 = require("./progress");
-var dirSyncAll = function (dir) {
+var readDirAll = function (dir) {
     var files = [];
     fs.readdirSync(dir).forEach(function (fn) {
         var p = path.join(dir, fn);
         if (fs.statSync(p).isDirectory()) {
-            files.push.apply(files, dirSyncAll(p));
+            files.push.apply(files, (0, exports.readDirAll)(p));
         }
         else {
             files.push(p);
@@ -63,12 +64,13 @@ var dirSyncAll = function (dir) {
     });
     return files;
 };
+exports.readDirAll = readDirAll;
 var MAX_ROWS = 6;
 var batchDownload = function (modules, onProgress, onEnd) {
     var count = {
         completed: [],
         failed: [],
-        total: modules.map(function (d) { return d.name + "@" + d.version; })
+        total: modules.map(function (d) { return "".concat(d.name, "@").concat(d.version); })
     };
     var state = modules.map(function (_) { return progress_1.ProgressTag.prepare; });
     var canDisplay = function (idx) {
@@ -106,7 +108,7 @@ var batchDownload = function (modules, onProgress, onEnd) {
                     case 0:
                         reportFailed = function (err) {
                             updateLog(task, progress_1.ProgressTag.failed);
-                            count.failed.push(name + "@" + version);
+                            count.failed.push("".concat(name, "@").concat(version));
                         };
                         updateLog(task, progress_1.ProgressTag.prepare);
                         return [4 /*yield*/, request_1.default.download(url, p, {}, function (done, total) {
@@ -153,7 +155,7 @@ var batchDownload = function (modules, onProgress, onEnd) {
                         updateLog(task, progress_1.ProgressTag.unpack, 0);
                         return [4 /*yield*/, new Promise(function (resolve) {
                                 try {
-                                    var files = dirSyncAll(pp);
+                                    var files = (0, exports.readDirAll)(pp);
                                     files.forEach(function (_fn) {
                                         var _rp = path.relative(pp, _fn);
                                         var _to = path.join(dir, _rp);
@@ -189,7 +191,7 @@ var batchDownload = function (modules, onProgress, onEnd) {
                         _b.label = 7;
                     case 7:
                         updateLog(task, progress_1.ProgressTag.done); // FIXME: not here
-                        count.completed.push(name + "@" + mod.version);
+                        count.completed.push("".concat(name, "@").concat(mod.version));
                         onProgress === null || onProgress === void 0 ? void 0 : onProgress(count.completed, count.failed, count.total);
                         return [2 /*return*/, {
                                 name: name,

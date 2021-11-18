@@ -73,7 +73,7 @@ var Runnable = /** @class */ (function () {
                 var match = /^-(?<full>-)?(?<n>[a-zA-Z\-]+)$/.exec(arg);
                 if (match) {
                     if (name) {
-                        throw new OptionParseError("Argument " + name + " requires a value");
+                        throw new OptionParseError("Argument ".concat(name, " requires a value"));
                     }
                     var _b = match.groups, full_1 = _b.full, n_1 = _b.n;
                     var key = (_a = Object.entries(_this.optionConfig.args).find(function (_a) {
@@ -81,7 +81,7 @@ var Runnable = /** @class */ (function () {
                         return (full_1 ? name === n_1 : shorthands === null || shorthands === void 0 ? void 0 : shorthands.includes(n_1));
                     })) === null || _a === void 0 ? void 0 : _a[0];
                     if (!key) {
-                        throw new OptionParseError("No argument match \"" + n_1 + "\"");
+                        throw new OptionParseError("No argument match \"".concat(n_1, "\""));
                     }
                     var isFlag = !Boolean(_this.optionConfig.args[key].requiresValue);
                     if (isFlag) {
@@ -98,7 +98,7 @@ var Runnable = /** @class */ (function () {
             return undefined;
         }, undefined);
         if (uncompletedArg) {
-            throw new OptionParseError("Argument " + uncompletedArg + " requires a value");
+            throw new OptionParseError("Argument ".concat(uncompletedArg, " requires a value"));
         }
         return [params, options];
     };

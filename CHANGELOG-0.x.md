@@ -12,6 +12,8 @@
 
 - `bin/install`
 
+  - linking. ([@AntoineYANG](https://github.com/AntoineYANG))&nbsp;&nbsp;&nbsp;<small data-date="1637077104537">2021/11/16下午11:38:24</small>
+
   - download .tgz. ([@AntoineYANG](https://github.com/AntoineYANG))&nbsp;&nbsp;&nbsp;<small data-date="1636998230927">2021/11/16上午1:43:50</small>
 
 #### 🔗  refactor

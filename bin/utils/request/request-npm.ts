@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 18:34:47 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-16 20:56:17
+ * @Last Modified time: 2021-11-18 11:13:41
  */
 
 import env, { PackageAuthor, PackageJSON } from '../../utils/env';
@@ -19,9 +19,10 @@ export type VersionInfo = PackageJSON & {
   dist: {
     integrity: `${'sha256'|'sha384'|'sha512'}-${string}`;
     shasum: string;
-    tarball: `${string}/${string}/-/${string}-${string}.tgz`; // 'https://registry.npmjs.org/{name}/-/{name}-{version}.tgz'
-    fileCount: number;
-    unpackedSize: number;
+    tarball: string; // 'https://registry.npmjs.org/{name}/-/{name}-{version}.tgz'
+    fileCount?: number;
+    size?: number;
+    unpackedSize?: number;
   };
   _npmUser: PackageAuthor;
   directories: {};
@@ -39,6 +40,7 @@ export type NpmPackage = {
   name: string;
   'dist-tags': {
     latest: string;
+    [ts: `ts${number}.${number}`]: string;
   };
   versions: {
     [version: string]: VersionInfo;
@@ -53,6 +55,38 @@ export type NpmPackage = {
   license: string;
   readme: string;
   readmeFilename: string;
+};
+
+export type NpmPackageSingle = PackageJSON & {
+  name: string;
+  version: string;
+  types?: string;
+  typesPublisherContentHash?: string;
+  typeScriptVersion?: `${number}.${number}`;
+  _id: string;
+  dist: {
+    integrity?: string;
+    shasum: string;
+    tarball: string; // 'https://registry.npmjs.org/{name}/-/{name}-{version}.tgz'
+    noattachment?: boolean;
+    fileCount?: number;
+    size?: number;
+    unpackedSize?: number;
+  };
+  _npmUser?: PackageAuthor;
+  directories?: {};
+  _npmOperationalInternal?: {
+    host: string;
+    tmp: string;
+  };
+  _hasShrinkwrap: boolean;
+  publish_time: number;
+  _cnpm_publish_time: number;
+  'dist-tags': {
+    latest: string;
+    [ts: `ts${number}.${number}`]: string;
+  };
+  readme: string;
 };
 
 export type DownloadInfo = {
@@ -91,7 +125,7 @@ export const view = (
       ...options,
       memo: false,
       cache: false
-    }, np => {
+    }, (np: NpmPackage) => {
       const versions = {} as NpmPackage['versions'];
 
       Object.entries(np.versions).forEach(([v, d]) => {
@@ -100,6 +134,7 @@ export const view = (
           version: d.version,
           dist: {
             tarball: d.dist.tarball,
+            size: d.dist.size,
             unpackedSize: d.dist.unpackedSize,
             integrity: d.dist.integrity
           },
@@ -109,8 +144,42 @@ export const view = (
 
       return {
         name: np.name,
+        'dist-tags': np['dist-tags'],
         versions
       };
+    }
+  );
+};
+
+
+/**
+ * Gets information of the certain version for the package from npm registry.
+ *
+ * @param {string} name
+ * @param {string} version
+ * @param {Partial<RequestOptions>} [options]
+ * @returns {(Promise<[Error, null] | [null, NpmPackageSingle]>)}
+ */
+export const find = (
+  name: string, version: string, options?: Partial<RequestOptions>
+): Promise<[Error, null] | [null, NpmPackageSingle]> => {
+  return request.get<NpmPackageSingle>(
+    `${env.runtime.npm.registry}${name}/${version}`, {
+      expiresSpan: 1_000 * 60 * 60 * 24 * 15,
+      ...options,
+      memo: false,
+      cache: false
+    }, (np: NpmPackageSingle) => {
+      return {
+        name: np.name,
+        version: np.version,
+        dependencies: np.dependencies,
+        dist: {
+          tarball: np.dist.tarball,
+          unpackedSize: np.dist.unpackedSize,
+          integrity: np.dist.integrity
+        }
+      } as NpmPackageSingle;
     }
   );
 };

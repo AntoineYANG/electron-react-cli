@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-16 20:00:09
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-16 23:36:00
+ * @Last Modified time: 2021-11-17 15:32:48
  */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -72,7 +72,7 @@ var link = function (at, to) { return __awaiter(void 0, void 0, void 0, function
                             force: true
                         });
                     }
-                    child_process.exec("mklink /j \"" + at + "\" \"" + to + "\"", function (err) {
+                    child_process.exec("mklink /j \"".concat(at, "\" \"").concat(to, "\""), function (err) {
                         if (err) {
                             return reject(err);
                         }
@@ -80,7 +80,7 @@ var link = function (at, to) { return __awaiter(void 0, void 0, void 0, function
                     });
                 })];
         }
-        return [2 /*return*/, Promise.reject(new Error("Cannot create links on " + process.platform))];
+        return [2 /*return*/, Promise.reject(new Error("Cannot create links on ".concat(process.platform)))];
     });
 }); };
 /**
@@ -91,7 +91,7 @@ var link = function (at, to) { return __awaiter(void 0, void 0, void 0, function
  * @param {InstallResult[]} installResults results of installation
  */
 var map = function (explicit, lockData, installResults) { return __awaiter(void 0, void 0, void 0, function () {
-    var modulesDir, outer, whereIs, linking, deps, linking2;
+    var modulesDir, outer, whereIs, linking, deps;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -108,6 +108,7 @@ var map = function (explicit, lockData, installResults) { return __awaiter(void 
                     return null;
                 };
                 linking = [];
+                // mark the explicit dependencies
                 Object.entries(lockData).forEach(function (_a) {
                     var name = _a[0], versions = _a[1];
                     Object.entries(versions).forEach(function (_a) {
@@ -126,40 +127,43 @@ var map = function (explicit, lockData, installResults) { return __awaiter(void 
                         linking.push(link(d.path, d.target));
                     });
                 });
+                // link the dependencies in each module in the download directory
+                Object.entries(lockData).forEach(function (_a) {
+                    var name = _a[0], versions = _a[1];
+                    Object.entries(versions).forEach(function (_a) {
+                        var v = _a[0], d = _a[1];
+                        var p = whereIs(name);
+                        if (!p) {
+                            // create links in download directory
+                            var requires = d.requires;
+                            if (Object.keys(requires).length) {
+                                var _dir_1 = path.join(d.target, 'node_modules');
+                                if (fs.existsSync(_dir_1)) {
+                                    fs.rmSync(_dir_1, {
+                                        recursive: true,
+                                        force: true
+                                    });
+                                }
+                                Object.entries(requires).forEach(function (_a) {
+                                    var name = _a[0], range = _a[1];
+                                    var what = lockData[name];
+                                    var which = what[Object.entries(what).find(function (_a) {
+                                        var wv = _a[0];
+                                        return semver.satisfies(wv, range);
+                                    })[0]];
+                                    linking.push(link(path.join(_dir_1, name), which.target));
+                                });
+                            }
+                            return;
+                        }
+                        d.path = p;
+                        linking.push(link(d.path, d.target));
+                    });
+                });
                 return [4 /*yield*/, Promise.all(linking)];
             case 1:
                 deps = _a.sent();
-                linking2 = [];
-                deps.forEach(function (dep) {
-                    var fn = path.join(dep, 'package.json');
-                    if (fs.existsSync(fn)) {
-                        var _a = JSON.parse(fs.readFileSync(fn, { encoding: 'utf-8' })).dependencies, dependencies = _a === void 0 ? null : _a;
-                        if (dependencies) {
-                            var _dir_1 = path.join(dep, 'node_modules');
-                            if (fs.existsSync(_dir_1)) {
-                                fs.rmSync(_dir_1, {
-                                    recursive: true,
-                                    force: true
-                                });
-                            }
-                            (0, mkdirp_1.sync)(_dir_1);
-                            Object.entries(dependencies).forEach(function (_a) {
-                                var k = _a[0], v = _a[1];
-                                var what = lockData[k];
-                                var which = what[Object.entries(what).find(function (_a) {
-                                    var vi = _a[0];
-                                    return semver.satisfies(vi, v);
-                                })[0]];
-                                var _p = path.join(_dir_1, k);
-                                linking2.push(link(_p, which.target));
-                            });
-                        }
-                    }
-                });
-                return [4 /*yield*/, Promise.all(linking2)];
-            case 2:
-                _a.sent();
-                return [2 /*return*/];
+                return [2 /*return*/, deps];
         }
     });
 }); };

@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-12 15:19:20 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-15 22:55:20
+ * @Last Modified time: 2021-11-17 20:26:47
  */
 
 import * as chalk from 'chalk';
@@ -16,6 +16,7 @@ export enum ExitCode {
   OPERATION_NOT_FOUND = -2,
   BAD_PARAMS = -1,
   OK = 0,
+  OPERATION_FAILED = 1
 };
 
 const supportedCommand: Array<RunnableConstructor> = [

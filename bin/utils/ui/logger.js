@@ -102,7 +102,7 @@ var Logger = /** @class */ (function () {
     };
     Logger.stopStopWatch = function (sw) {
         var finalCost = sw.stop();
-        var time = finalCost < 1000 ? finalCost + "ms" : (finalCost / 1000).toFixed(2).replace(/0+$/, '') + "s";
+        var time = finalCost < 1000 ? "".concat(finalCost, "ms") : "".concat((finalCost / 1000).toFixed(2).replace(/0+$/, ''), "s");
         this.info(chalk(templateObject_2 || (templateObject_2 = __makeTemplateObject(["{rgb(206,145,91) [StopWatch]} {rgb(0,125,206).bold ", "} finished. total cost: {yellow ", "}"], ["{rgb(206,145,91) [StopWatch]} {rgb(0,125,206).bold ", "} finished. total cost: {yellow ", "}"])), sw.label, time));
         return finalCost;
     };

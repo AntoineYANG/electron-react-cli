@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 18:13:35 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-16 01:23:52
+ * @Last Modified time: 2021-11-17 21:03:30
  */
 
 import * as fs from 'fs';
@@ -39,6 +39,11 @@ const defaultOptions: RequestOptions = {
   maxRedirect: 1
 };
 
+const MAX_SYNC_SIZE = 8;
+let nowRunning = 0;
+
+const blockedRequests: (() => void)[] = [];
+
 export class RequestError extends Error {
 
   constructor(msg: string) {
@@ -47,6 +52,28 @@ export class RequestError extends Error {
   }
 
 }
+
+const runOrWait = async (): Promise<void> => {
+  if (nowRunning < MAX_SYNC_SIZE) {
+    nowRunning += 1;
+
+    return;
+  }
+
+  await new Promise<void>(resolve => {
+    blockedRequests.push(resolve);
+  });
+};
+
+const next = (): void => {
+  const req = blockedRequests.shift();
+
+  if (req) {
+    req();
+  } else {
+    nowRunning -= 1;
+  }
+};
 
 /**
  * Sends a GET request.
@@ -63,6 +90,8 @@ const get = async <RT>(
     ...defaultOptions,
     ...options
   };
+
+  await runOrWait();
 
   const [err, resp] = await new Promise<[RequestError, null] | [null, RT]>(resolve => {
     needle(
@@ -107,7 +136,10 @@ const get = async <RT>(
 
         default: {
           return resolve([
-            new RequestError(`[${statusCode}] ${resp.body}.`),
+            new RequestError(
+              `[${statusCode}] Error occurred when requesting "${
+                url
+              }": ${JSON.stringify(resp.body)}.`),
             null
           ]);
         }
@@ -116,6 +148,8 @@ const get = async <RT>(
       return [reason as Error, null];
     });
   });
+
+  next();
   
   return [err, resp] as [RequestError, null] | [null, RT];
 };
@@ -192,6 +226,8 @@ const download = async (
   let pipedSize = 0;
   let totalSize: number | undefined = undefined;
 
+  await runOrWait();
+
   const [err, size] = await new Promise<[RequestError, null] | [null, number]>(resolve => {
     needle.get(
       location,
@@ -232,6 +268,8 @@ const download = async (
       }
     });
   });
+
+  next();
   
   return [err, size] as [RequestError, null] | [null, number];
 };

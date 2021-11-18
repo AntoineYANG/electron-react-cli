@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-16 20:00:09 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-16 23:36:00
+ * @Last Modified time: 2021-11-17 15:32:48
  */
 
 import * as path from 'path';
@@ -11,7 +11,7 @@ import * as child_process from 'child_process';
 import { sync as mkdirp } from 'mkdirp';
 import * as semver from 'semver';
 
-import env, { PackageJSON } from '../../../utils/env';
+import env from '../../../utils/env';
 import { InstallResult } from './download-deps';
 import { LockData, LockInfo, LockItem } from './lock';
 import { Dependency } from './read-deps';
@@ -56,7 +56,9 @@ const link = async (at: string, to: string): Promise<string> => {
  * @param {LockData} lockData generated lock data
  * @param {InstallResult[]} installResults results of installation
  */
-const map = async (explicit: Dependency[], lockData: LockData, installResults: InstallResult[]) => {
+const map = async (
+  explicit: Dependency[], lockData: LockData, installResults: InstallResult[]
+): Promise<string[]> => {
   const modulesDir = env.resolvePath('node_modules_');
 
   const outer = [...explicit];
@@ -77,6 +79,7 @@ const map = async (explicit: Dependency[], lockData: LockData, installResults: I
 
   const linking: Promise<string>[] = [];
 
+  // mark the explicit dependencies
   Object.entries(lockData).forEach(([name, versions]) => {
     Object.entries(versions).forEach(([v, d]) => {
       const p = whereIs(name);
@@ -89,6 +92,55 @@ const map = async (explicit: Dependency[], lockData: LockData, installResults: I
 
       if (!p) {
         d.path = d.target;
+
+        return;
+      }
+
+      d.path = p;
+
+      linking.push(
+        link(d.path, d.target)
+      );
+    });
+  });
+
+  // link the dependencies in each module in the download directory
+  Object.entries(lockData).forEach(([name, versions]) => {
+    Object.entries(versions).forEach(([v, d]) => {
+      const p = whereIs(name);
+
+      if (!p) {
+        // create links in download directory
+
+        const { requires } = d;
+
+        if (Object.keys(requires).length) {
+          const _dir = path.join(d.target, 'node_modules');
+
+          if (fs.existsSync(_dir)) {
+            fs.rmSync(
+              _dir, {
+                recursive: true,
+                force: true
+              }
+            );
+          }
+  
+          Object.entries(requires).forEach(([name, range]) => {
+            const what = lockData[name] as LockItem;
+            const which = what[
+              (Object.entries(what).find(([wv]) => {
+                return semver.satisfies(wv, range);
+              }) as [string, LockInfo])[0]
+            ] as LockInfo;
+
+            linking.push(
+              link(path.join(_dir, name), which.target)
+            );
+          });
+        }
+
+
         return;
       }
 
@@ -102,51 +154,7 @@ const map = async (explicit: Dependency[], lockData: LockData, installResults: I
 
   const deps = await Promise.all(linking);
 
-  // FIXME: 先遍历下载目录，再链接过去
-
-  const linking2: Promise<string>[] = [];
-
-  deps.forEach(dep => {
-    const fn = path.join(dep, 'package.json');
-    
-    if (fs.existsSync(fn)) {
-      const { dependencies = null } = JSON.parse(
-        fs.readFileSync(fn, { encoding: 'utf-8'})
-      ) as PackageJSON;
-
-      if (dependencies) {
-        const _dir = path.join(dep, 'node_modules');
-
-        if (fs.existsSync(_dir)) {
-          fs.rmSync(
-            _dir, {
-              recursive: true,
-              force: true
-            }
-          );
-        }
-
-        mkdirp(_dir);
-
-        Object.entries(dependencies).forEach(([k, v]) => {
-          const what = lockData[k] as LockItem;
-          const which = what[
-            (Object.entries(what).find(([vi]) => {
-              return semver.satisfies(vi, v);
-            }) as [string, LockInfo])[0]
-          ] as LockInfo;
-
-          const _p = path.join(_dir, k);
-
-          linking2.push(
-            link(_p, which.target)
-          );
-        });
-      }
-    }
-  });
-
-  await Promise.all(linking2);
+  return deps;
 };
 
 

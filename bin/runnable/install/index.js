@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-14 02:00:17
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-16 20:44:39
+ * @Last Modified time: 2021-11-19 00:48:40
  */
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -86,7 +86,7 @@ var InstallTask = /** @class */ (function (_super) {
     }
     InstallTask.prototype.exec = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var modules, scopes, _i, _a, p, scope;
+            var modules, scopes, _i, _a, p, scope, error_1;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -108,16 +108,25 @@ var InstallTask = /** @class */ (function (_super) {
                                 modules.push(p);
                             }
                         }
-                        if (!(modules.length === 0)) return [3 /*break*/, 2];
-                        return [4 /*yield*/, this.installAll(scopes.length ? scopes : 'all')];
+                        _b.label = 1;
                     case 1:
+                        _b.trys.push([1, 6, , 7]);
+                        if (!(modules.length === 0)) return [3 /*break*/, 3];
+                        return [4 /*yield*/, this.installAll(scopes.length ? scopes : 'all')];
+                    case 2:
                         _b.sent();
-                        return [3 /*break*/, 4];
-                    case 2: return [4 /*yield*/, this.installAndSave(scopes.length ? scopes : 'all', modules)];
-                    case 3:
+                        return [2 /*return*/, __1.ExitCode.OK];
+                    case 3: return [4 /*yield*/, this.installAndSave(scopes.length ? scopes : 'all', modules)];
+                    case 4:
                         _b.sent();
-                        _b.label = 4;
-                    case 4: return [2 /*return*/, __1.ExitCode.OPERATION_NOT_FOUND];
+                        _b.label = 5;
+                    case 5: return [3 /*break*/, 7];
+                    case 6:
+                        error_1 = _b.sent();
+                        logger_1.default.error(error_1);
+                        logger_1.default.error(error_1.stack);
+                        return [2 /*return*/, __1.ExitCode.OPERATION_FAILED];
+                    case 7: return [2 /*return*/, __1.ExitCode.OPERATION_NOT_FOUND];
                 }
             });
         });
@@ -132,7 +141,7 @@ var InstallTask = /** @class */ (function (_super) {
     InstallTask.prototype.installAll = function (scopes) {
         if (scopes === void 0) { scopes = 'all'; }
         return __awaiter(this, void 0, void 0, function () {
-            var NAME, sw, tasks, ctx;
+            var NAME, sw, tasks, _ctx;
             var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
@@ -150,7 +159,7 @@ var InstallTask = /** @class */ (function (_super) {
                             }, {
                                 title: 'Resolving declared dependencies.',
                                 task: function (ctx, task) { return __awaiter(_this, void 0, void 0, function () {
-                                    var printProgress, _a;
+                                    var printProgress, _a, succeeded, failed;
                                     return __generator(this, function (_b) {
                                         switch (_b.label) {
                                             case 0:
@@ -158,12 +167,19 @@ var InstallTask = /** @class */ (function (_super) {
                                                 printProgress = function (resolved, unresolved) {
                                                     task.output = chalk(templateObject_2 || (templateObject_2 = __makeTemplateObject([" \u23F3  {green ", " }dependencies resolved, {yellow ", " }left"], [" \\u23f3  {green ", " }dependencies resolved, {yellow ", " }left"])), resolved, unresolved);
                                                 };
-                                                _a = ctx;
                                                 return [4 /*yield*/, this.resolveDependencies(ctx.dependencies, printProgress)];
                                             case 1:
-                                                _a.resolvedDeps = _b.sent();
+                                                _a = _b.sent(), succeeded = _a.succeeded, failed = _a.failed;
+                                                ctx.resolvedDeps = succeeded;
+                                                ctx.unsatisfiedDeps = failed;
                                                 ctx.lockData = (0, lock_1.createLockData)(ctx.resolvedDeps);
-                                                task.output = 'Successfully resolved declared dependencies';
+                                                if (failed.length) {
+                                                    task.output = chalk(templateObject_3 || (templateObject_3 = __makeTemplateObject(["Resolved declared dependencies while {red ", "} dependencies cannot be satisfied"], ["Resolved declared dependencies while {red ", "} dependencies cannot be satisfied"])), failed.length);
+                                                    task.title = chalk(templateObject_4 || (templateObject_4 = __makeTemplateObject(["Resolving declared dependencies. {redBright {bold \u2716 } ", " unsatisfied }"], ["Resolving declared dependencies. {redBright {bold \\u2716 } ", " unsatisfied }"])), failed.length);
+                                                }
+                                                else {
+                                                    task.output = 'Successfully resolved declared dependencies';
+                                                }
                                                 return [2 /*return*/];
                                         }
                                     });
@@ -188,18 +204,18 @@ var InstallTask = /** @class */ (function (_super) {
                             }, {
                                 title: 'Installing resolved modules.',
                                 task: function (ctx, task) {
-                                    task.output = chalk(templateObject_3 || (templateObject_3 = __makeTemplateObject(["\uD83E\uDDF1 {yellow.bold ", " }modules will be installed "], ["\uD83E\uDDF1 {yellow.bold ", " }modules will be installed "])), ctx.diff.length);
+                                    task.output = chalk(templateObject_5 || (templateObject_5 = __makeTemplateObject(["\uD83E\uDDF1 {yellow.bold ", " }modules will be installed "], ["\uD83E\uDDF1 {yellow.bold ", " }modules will be installed "])), ctx.diff.length);
                                     var printProgress = function (completed, failed, total) {
                                         var pending = total.length - completed.length - failed.length;
-                                        var output = chalk(templateObject_4 || (templateObject_4 = __makeTemplateObject(["\uD83E\uDDF1 {yellow.bold ", " }modules will be installed "], ["\uD83E\uDDF1 {yellow.bold ", " }modules will be installed "])), ctx.diff.length);
+                                        var output = chalk(templateObject_6 || (templateObject_6 = __makeTemplateObject(["\uD83E\uDDF1 {yellow.bold ", " }modules will be installed "], ["\uD83E\uDDF1 {yellow.bold ", " }modules will be installed "])), ctx.diff.length);
                                         if (pending) {
-                                            output += chalk(templateObject_5 || (templateObject_5 = __makeTemplateObject([" {yellow ", " pending }"], [" {yellow ", " pending }"])), pending);
+                                            output += chalk(templateObject_7 || (templateObject_7 = __makeTemplateObject([" {yellow ", " pending }"], [" {yellow ", " pending }"])), pending);
                                         }
                                         if (completed.length) {
-                                            output += chalk(templateObject_6 || (templateObject_6 = __makeTemplateObject([" {green ", " succeeded }"], [" {green ", " succeeded }"])), completed.length);
+                                            output += chalk(templateObject_8 || (templateObject_8 = __makeTemplateObject([" {green ", " succeeded }"], [" {green ", " succeeded }"])), completed.length);
                                         }
                                         if (failed.length) {
-                                            output += chalk(templateObject_7 || (templateObject_7 = __makeTemplateObject([" {red ", " failed }"], [" {red ", " failed }"])), failed.length);
+                                            output += chalk(templateObject_9 || (templateObject_9 = __makeTemplateObject([" {red ", " failed }"], [" {red ", " failed }"])), failed.length);
                                         }
                                         task.output = output;
                                     };
@@ -240,10 +256,9 @@ var InstallTask = /** @class */ (function (_super) {
                         });
                         return [4 /*yield*/, tasks.runAll()];
                     case 1:
-                        ctx = _a.sent();
+                        _ctx = _a.sent();
                         logger_1.default.stopStopWatch(sw);
-                        process.exit(0);
-                        throw new Error('Method is not implemented');
+                        return [2 /*return*/];
                 }
             });
         });
@@ -302,21 +317,46 @@ var InstallTask = /** @class */ (function (_super) {
      * Resolves all the dependencies.
      *
      * @param {Dependency[]} dependencies
-     * @returns {Promise<VersionInfo[]>}
+     * @returns {Promise<{ succeeded: VersionInfo[]; failed: FailedDependency[] }>}
      */
     InstallTask.prototype.resolveDependencies = function (dependencies, onProgress) {
         return __awaiter(this, void 0, void 0, function () {
-            var items, resolved;
+            var failed, items, resolved;
             var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, Promise.all(dependencies.map(function (d) { return (0, resolve_deps_1.getMinIncompatibleSet)(d, _this.options['no-cache']); }))];
+                    case 0:
+                        failed = [];
+                        return [4 /*yield*/, Promise.all(dependencies.map(function (d) { return __awaiter(_this, void 0, void 0, function () {
+                                var _a, value, f;
+                                return __generator(this, function (_b) {
+                                    switch (_b.label) {
+                                        case 0: return [4 /*yield*/, (0, resolve_deps_1.getMinIncompatibleSet)(d, this.options['no-cache'])];
+                                        case 1:
+                                            _a = _b.sent(), value = _a.value, f = _a.failed;
+                                            if (f.length) {
+                                                d.versions.forEach(function (v) {
+                                                    failed.push({
+                                                        name: d.name,
+                                                        version: v,
+                                                        reasons: f
+                                                    });
+                                                });
+                                                return [2 /*return*/, null];
+                                            }
+                                            return [2 /*return*/, value];
+                                    }
+                                });
+                            }); }))];
                     case 1:
-                        items = (_a.sent()).flat(1);
+                        items = (_a.sent()).flat(1).filter(Boolean);
                         return [4 /*yield*/, (0, resolve_deps_1.resolveDependencies)(items, [], this.options['no-cache'], onProgress)];
                     case 2:
                         resolved = _a.sent();
-                        return [2 /*return*/, resolved];
+                        return [2 /*return*/, {
+                                succeeded: resolved.succeeded,
+                                failed: resolved.failed.concat(failed)
+                            }];
                 }
             });
         });
@@ -352,4 +392,4 @@ var InstallTask = /** @class */ (function (_super) {
     return InstallTask;
 }(__2.default));
 exports.default = InstallTask;
-var templateObject_1, templateObject_2, templateObject_3, templateObject_4, templateObject_5, templateObject_6, templateObject_7;
+var templateObject_1, templateObject_2, templateObject_3, templateObject_4, templateObject_5, templateObject_6, templateObject_7, templateObject_8, templateObject_9;
