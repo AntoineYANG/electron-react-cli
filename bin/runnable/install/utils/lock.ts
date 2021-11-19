@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 20:49:31 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-16 20:57:02
+ * @Last Modified time: 2021-11-20 01:37:28
  */
 
 import * as fs from 'fs';
@@ -32,10 +32,12 @@ export type LockData = {
 /**
  * Generates espoir lock data from version info.
  *
+ * @param {LockData} origin
  * @param {VersionInfo[]} data
+ * @returns {LockData}
  */
-export const createLockData = (data: VersionInfo[]): LockData => {
-  const result = {} as LockData;
+export const createLockData = (origin: LockData, data: VersionInfo[]): LockData => {
+  const result = origin;
 
   data.forEach(d => {
     if (!result[d.name]) {
@@ -86,4 +88,18 @@ export const writeLockFile = (data: LockData): void => {
       encoding: 'utf-8'
     }
   );
+};
+
+export const useLockFileData = (): LockData => {
+  if (fs.existsSync(fn)) {
+    return JSON.parse(
+      fs.readFileSync(
+        fn, {
+          encoding: 'utf-8'
+        }
+      )
+    ) as LockData;
+  }
+
+  return {};
 };

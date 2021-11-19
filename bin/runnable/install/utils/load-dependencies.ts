@@ -2,11 +2,11 @@
  * @Author: Kanata You 
  * @Date: 2021-11-13 23:44:59 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-18 11:19:17
+ * @Last Modified time: 2021-11-20 00:09:42
  */
 
 import Logger from '../../../utils/ui/logger';
-import { PackageJSON } from '../../../utils/env';
+import env, { PackageJSON } from '../../../utils/env';
 
 
 export type Dependency = {
@@ -77,3 +77,35 @@ export const getAllDependencies = (pkgJSON: PackageJSON, keys: DependencyTag[]):
 
   return dependencies;
 };
+
+/**
+ * Loads all the explicit dependencies from all `package.json`.
+ */
+const loadDependencies = (scopes: string[], isProd: boolean): Dependency[] => {
+  const packages: PackageJSON[] = [];
+
+  if (scopes.includes('root')) {
+    packages.push(env.rootPkg);
+  }
+
+  env.packages.forEach(p => {
+    const pkg = env.packageMap[p] as PackageJSON;
+
+    if (scopes.includes(p)) {
+      packages.push(pkg);
+    }
+  });
+
+  const keys = [
+    'dependencies',
+    isProd ? null : 'devDependencies'
+  ].filter(Boolean) as DependencyTag[];
+
+  const dependencies = packages.reduce<Dependency[]>((list, pkgJSON) => {
+    return list.concat(getAllDependencies(pkgJSON, keys));
+  }, []);
+
+  return dependencies;
+};
+
+export default loadDependencies;

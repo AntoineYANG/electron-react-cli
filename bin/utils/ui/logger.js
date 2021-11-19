@@ -5,14 +5,10 @@
  * @Last Modified by: Kanata You
  * @Last Modified time: 2021-11-16 16:03:27
  */
-var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cooked, raw) {
-    if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
-    return cooked;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.StopWatch = exports.LogLevel = void 0;
-var chalk = require("chalk");
-var logUpdate = require("log-update");
+const chalk = require("chalk");
+const logUpdate = require("log-update");
 /* eslint-disable no-console */
 var LogLevel;
 (function (LogLevel) {
@@ -21,38 +17,39 @@ var LogLevel;
     LogLevel["ERROR_WARNING"] = "error|warning";
     LogLevel["ALL"] = "error|warning|info";
 })(LogLevel = exports.LogLevel || (exports.LogLevel = {}));
-var StopWatch = /** @class */ (function () {
-    function StopWatch(label) {
+class StopWatch {
+    label;
+    beginTime;
+    endTime;
+    _ms;
+    get ms() {
+        const now = Date.now();
+        this._ms = now - this.beginTime;
+        return this._ms;
+    }
+    finalCost;
+    resolvers;
+    constructor(label) {
         this.label = label;
         this.beginTime = Date.now();
-        var resolvers = [];
-        this.endTime = new Promise(function (resolver) {
+        const resolvers = [];
+        this.endTime = new Promise(resolver => {
             resolvers.push(resolver);
         });
-        this.finalCost = new Promise(function (resolver) {
+        this.finalCost = new Promise(resolver => {
             resolvers.push(resolver);
         });
         this.resolvers = resolvers;
         this._ms = 0;
     }
-    Object.defineProperty(StopWatch.prototype, "ms", {
-        get: function () {
-            var now = Date.now();
-            this._ms = now - this.beginTime;
-            return this._ms;
-        },
-        enumerable: false,
-        configurable: true
-    });
-    StopWatch.prototype.stop = function () {
-        var now = Date.now();
+    stop() {
+        const now = Date.now();
         this._ms = now - this.beginTime;
         this.resolvers[0](now);
         this.resolvers[1](this._ms);
         return this._ms;
-    };
-    return StopWatch;
-}());
+    }
+}
 exports.StopWatch = StopWatch;
 /**
  * Logging methods.
@@ -60,60 +57,44 @@ exports.StopWatch = StopWatch;
  * @abstract
  * @class Logger
  */
-var Logger = /** @class */ (function () {
-    function Logger() {
-    }
-    Logger.info = function () {
-        var msgs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            msgs[_i] = arguments[_i];
-        }
+class Logger {
+    static level = LogLevel.ALL;
+    static info(...msgs) {
         if (this.level.includes('info')) {
-            console.info.apply(console, msgs);
+            console.info(...msgs);
             return true;
         }
         return false;
-    };
-    Logger.warn = function () {
-        var msgs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            msgs[_i] = arguments[_i];
-        }
+    }
+    static warn(...msgs) {
         if (this.level.includes('warning')) {
-            console.warn.apply(console, msgs);
+            console.warn(...msgs);
             return true;
         }
         return false;
-    };
-    Logger.error = function () {
-        var msgs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            msgs[_i] = arguments[_i];
-        }
+    }
+    static error(...msgs) {
         if (this.level.includes('error')) {
-            console.error.apply(console, msgs);
+            console.error(...msgs);
             return true;
         }
         return false;
-    };
-    Logger.startStopWatch = function (label) {
-        this.info(chalk(templateObject_1 || (templateObject_1 = __makeTemplateObject(["{rgb(206,145,91) [StopWatch]} {rgb(0,125,206).bold ", "}"], ["{rgb(206,145,91) [StopWatch]} {rgb(0,125,206).bold ", "}"])), label));
+    }
+    static startStopWatch(label) {
+        this.info(chalk `{rgb(206,145,91) [StopWatch]} {rgb(0,125,206).bold ${label}}`);
         return new StopWatch(label);
-    };
-    Logger.stopStopWatch = function (sw) {
-        var finalCost = sw.stop();
-        var time = finalCost < 1000 ? "".concat(finalCost, "ms") : "".concat((finalCost / 1000).toFixed(2).replace(/0+$/, ''), "s");
-        this.info(chalk(templateObject_2 || (templateObject_2 = __makeTemplateObject(["{rgb(206,145,91) [StopWatch]} {rgb(0,125,206).bold ", "} finished. total cost: {yellow ", "}"], ["{rgb(206,145,91) [StopWatch]} {rgb(0,125,206).bold ", "} finished. total cost: {yellow ", "}"])), sw.label, time));
+    }
+    static stopStopWatch(sw) {
+        const finalCost = sw.stop();
+        const time = finalCost < 1_000 ? `${finalCost}ms` : `${(finalCost / 1000).toFixed(2).replace(/0+$/, '')}s`;
+        this.info(chalk `{rgb(206,145,91) [StopWatch]} {rgb(0,125,206).bold ${sw.label}} finished. total cost: {yellow ${time}}`);
         return finalCost;
-    };
-    Logger.writeCanOverwrite = function (content) {
+    }
+    static writeCanOverwrite(content) {
         logUpdate(content);
-    };
-    Logger.clearRow = function () {
+    }
+    static clearRow() {
         logUpdate.clear();
-    };
-    Logger.level = LogLevel.ALL;
-    return Logger;
-}());
+    }
+}
 exports.default = Logger;
-var templateObject_1, templateObject_2;

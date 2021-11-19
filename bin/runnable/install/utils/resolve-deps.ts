@@ -2,32 +2,56 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 17:53:51 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-18 14:27:58
+ * @Last Modified time: 2021-11-20 01:18:13
  */
 
 import * as semver from 'semver';
 
 import { NpmPackage, VersionInfo } from '../../../utils/request/request-npm';
 import request from '../../../utils/request';
-import { Dependency, FailedDependency, MinIncompatibleSet, SingleDependency } from './read-deps';
+import { Dependency, FailedDependency, MinIncompatibleSet, SingleDependency } from './load-dependencies';
+import { coalesceVersions } from './extra-semver';
+import { LockData } from './lock';
 
 
 /**
  * Returns available versions of a module.
  * Results is sorted by version in descending order.
  *
- * @param {string} name name of the module
- * @param {string} version semver range
- * @param {boolean} [noCache=false]
- * @returns {Promise<[null, VersionInfo[]] | [Error, null]>}
+ * @param {string} name
+ * @param {string} version
+ * @param {LockData} lockData
+ * @returns {(Promise<[null, VersionInfo[]] | [Error, null]>)}
  */
 const getAvailableVersions = (
-  name: string, version: string, noCache: boolean = false
+  name: string,
+  version: string,
+  lockData: LockData
 ): Promise<[null, VersionInfo[]] | [Error, null]> => new Promise(resolve => {
+  // check lock file first
+
+  const what = Object.entries(lockData[name] ?? {});
+  const which = what.find(([v]) => semver.satisfies(v, version));
+
+  if (which) {
+    // use locked version
+    return resolve([
+      null, [{
+        name: name,
+        version: which[0],
+        _id: `${name}@${which[0]}`,
+        dist: {
+          integrity: which[1].integrity,
+          tarball: which[1].resolved
+        },
+        dependencies: which[1].requires,
+        lockInfo: which[1]
+      } as VersionInfo]
+    ]);
+  }
+
   request.npm.view(
-    name, {
-      cache: !noCache
-    }
+    name
   ).then(([err, data]) => {
     if (err) {
       return resolve([err, null]);
@@ -87,46 +111,21 @@ const getAvailableVersions = (
  * Returns the minimum incompatible set of the dependency.
  *
  * @param {Dependency} dependency
- * @param {boolean} [noCache=false]
- * @returns {Promise<MinIncompatibleSet>}
+ * @param {LockData} lockData
+ * @returns {Promise<{ value: MinIncompatibleSet; failed: Error[]; }>}
  */
-export const getMinIncompatibleSet = async (
-  dependency: Dependency, noCache: boolean = false
+const getMinIncompatibleSet = async (
+  dependency: Dependency,
+  lockData: LockData
 ): Promise<{ value: MinIncompatibleSet; failed: Error[]; }> => {
   const minSet: MinIncompatibleSet = [];
   const failed: Error[] = [];
 
-  // map: range => declared versions
-  const versions: Record<string, string[]> = dependency.versions.reduce<Record<string, string[]>>(
-    (prev, v) => {
-      const curFloor = semver.minVersion(v);
-
-      if (curFloor) {
-        const curMajor = semver.major(curFloor);
-        const curMinor = semver.minor(curFloor);
-
-        const label = `${curMajor}.${curMinor}`;
-
-        if (prev[label]) {
-          if ((prev[label] as string[]).includes(v)) {
-            return prev;
-          }
-
-          (prev[label] as string[]).push(v);
-        } else {
-          prev[label] = [v];
-        }
-      }
-
-      return prev;
-    },
-    {}
-  );
+  const coalesced = coalesceVersions(dependency.versions);
 
   const satisfied = (await Promise.all(
-
-    dependency.versions.map<Promise<VersionInfo[] | null>>(async v => {
-      const [err, list] = await getAvailableVersions(dependency.name, v, noCache);
+    coalesced.map<Promise<VersionInfo[] | null>>(async v => {
+      const [err, list] = await getAvailableVersions(dependency.name, v, lockData);
       
       if (err) {
         failed.push(err);
@@ -138,7 +137,6 @@ export const getMinIncompatibleSet = async (
     })
   )).filter(Boolean) as VersionInfo[][];
 
-  // FIXME:
   satisfied.forEach(sl => {
     if (sl.length) {
       minSet.push({
@@ -158,14 +156,15 @@ export const getMinIncompatibleSet = async (
  * Resolves all the implicit dependencies.
  *
  * @param {SingleDependency[]} dependencies
+ * @param {LockData} lockData
  * @param {VersionInfo[]} [memoized=[]]
- * @param {boolean} [noCache=false]
- * @returns {Promise<VersionInfo[]>}
+ * @param {(resolved: number, unresolved: number) => void} [onProgress]
+ * @returns {Promise<{ succeeded: VersionInfo[]; failed: FailedDependency[] }>}
  */
-export const resolveDependencies = async (
+const resolveDependencies = async (
   dependencies: SingleDependency[],
+  lockData: LockData,
   memoized: VersionInfo[] = [],
-  noCache: boolean = false,
   onProgress?: (resolved: number, unresolved: number) => void
 ): Promise<{ succeeded: VersionInfo[]; failed: FailedDependency[] }> => {
   const data: VersionInfo[] = [...memoized];
@@ -194,7 +193,7 @@ export const resolveDependencies = async (
 
     running += 1;
 
-    const [err, satisfied] = await getAvailableVersions(dep.name, dep.version, noCache);
+    const [err, satisfied] = await getAvailableVersions(dep.name, dep.version, lockData);
 
     running -= 1;
 
@@ -261,7 +260,7 @@ export const resolveDependencies = async (
     const items = (
       await Promise.all(
         unresolved.map(async d => {
-          const { value, failed: f } = await getMinIncompatibleSet(d, noCache);
+          const { value, failed: f } = await getMinIncompatibleSet(d, lockData);
           
           if (f.length) {
             d.versions.forEach(v => {
@@ -282,7 +281,7 @@ export const resolveDependencies = async (
 
     onProgress?.(data.length, items.length);
     
-    const results = await resolveDependencies(items, data, noCache, onProgress);
+    const results = await resolveDependencies(items, lockData, data, onProgress);
   
     data.push(...results.succeeded.filter(r => {
       return !Boolean(
@@ -302,5 +301,54 @@ export const resolveDependencies = async (
   return {
     succeeded: data,
     failed
+  };
+};
+
+/**
+ * Resolves all the dependencies given in package.json.
+ *
+ * @param {Dependency[]} dependencies
+ * @param {Readonly<LockData>} lockData
+ * @param {(resolved: number, unresolved: number) => void} [onProgress]
+ * @returns {Promise<{ succeeded: VersionInfo[]; failed: FailedDependency[] }>}
+ */
+export const resolvePackageDeps = async (
+  dependencies: Dependency[],
+  lockData: Readonly<LockData>,
+  onProgress?: (resolved: number, unresolved: number) => void
+): Promise<{ succeeded: VersionInfo[]; failed: FailedDependency[] }> => {
+  const locked: VersionInfo[] = [];
+  const failed: FailedDependency[] = [];
+
+  const items: MinIncompatibleSet = [];
+
+  for (const d of dependencies) {
+    const { value, failed: f } = await getMinIncompatibleSet(d, lockData);
+        
+    if (f.length) {
+      d.versions.forEach(v => {
+        failed.push({
+          name: d.name,
+          version: v,
+          reasons: f
+        });
+      });
+
+      continue;
+    }
+    
+    items.push(...value);
+  }
+
+  const resolved = await resolveDependencies(
+    items,
+    lockData,
+    [],
+    onProgress
+  );
+
+  return {
+    succeeded: resolved.succeeded,
+    failed: resolved.failed.concat(failed)
   };
 };

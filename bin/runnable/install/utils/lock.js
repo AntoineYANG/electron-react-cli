@@ -3,25 +3,26 @@
  * @Author: Kanata You
  * @Date: 2021-11-14 20:49:31
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-16 20:57:02
+ * @Last Modified time: 2021-11-20 01:37:28
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.writeLockFile = exports.createLockData = void 0;
-var fs = require("fs");
-var env_1 = require("../../../utils/env");
+exports.useLockFileData = exports.writeLockFile = exports.createLockData = void 0;
+const fs = require("fs");
+const env_1 = require("../../../utils/env");
 /**
  * Generates espoir lock data from version info.
  *
+ * @param {LockData} origin
  * @param {VersionInfo[]} data
+ * @returns {LockData}
  */
-var createLockData = function (data) {
-    var result = {};
-    data.forEach(function (d) {
-        var _a, _b;
+const createLockData = (origin, data) => {
+    const result = origin;
+    data.forEach(d => {
         if (!result[d.name]) {
             result[d.name] = {};
         }
-        var thisModule = result[d.name];
+        const thisModule = result[d.name];
         thisModule[d.version] = {
             resolved: d.dist.tarball,
             integrity: d.dist.integrity,
@@ -29,23 +30,22 @@ var createLockData = function (data) {
             target: '',
             requires: {}
         };
-        var requires = (_a = thisModule[d.version]) === null || _a === void 0 ? void 0 : _a.requires;
-        Object.entries((_b = d.dependencies) !== null && _b !== void 0 ? _b : {}).forEach(function (_a) {
-            var name = _a[0], range = _a[1];
+        const requires = thisModule[d.version]?.requires;
+        Object.entries(d.dependencies ?? {}).forEach(([name, range]) => {
             requires[name] = range;
         });
     });
     return result;
 };
 exports.createLockData = createLockData;
-var dir = env_1.default.resolvePath('.espoir');
-var fn = env_1.default.resolvePath('.espoir', 'espoir-lock.json');
+const dir = env_1.default.resolvePath('.espoir');
+const fn = env_1.default.resolvePath('.espoir', 'espoir-lock.json');
 /**
  * Writes `.espoir/espoir-lock.json`.
  *
  * @param {LockData} data
  */
-var writeLockFile = function (data) {
+const writeLockFile = (data) => {
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir);
     }
@@ -54,3 +54,12 @@ var writeLockFile = function (data) {
     });
 };
 exports.writeLockFile = writeLockFile;
+const useLockFileData = () => {
+    if (fs.existsSync(fn)) {
+        return JSON.parse(fs.readFileSync(fn, {
+            encoding: 'utf-8'
+        }));
+    }
+    return {};
+};
+exports.useLockFileData = useLockFileData;

@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-16 20:00:09 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-17 15:32:48
+ * @Last Modified time: 2021-11-20 01:57:38
  */
 
 import * as path from 'path';
@@ -14,7 +14,7 @@ import * as semver from 'semver';
 import env from '../../../utils/env';
 import { InstallResult } from './download-deps';
 import { LockData, LockInfo, LockItem } from './lock';
-import { Dependency } from './read-deps';
+import { Dependency } from './load-dependencies';
 
 
 const link = async (at: string, to: string): Promise<string> => {
@@ -31,6 +31,12 @@ const link = async (at: string, to: string): Promise<string> => {
             force: true
           }
         );
+      }
+
+      try {
+        fs.readdirSync(to);
+      } catch (error) {
+        return reject(error);
       }
 
       child_process.exec(
@@ -82,6 +88,11 @@ const map = async (
   // mark the explicit dependencies
   Object.entries(lockData).forEach(([name, versions]) => {
     Object.entries(versions).forEach(([v, d]) => {
+      if (d.target) {
+        // already downloaded
+        return;
+      }
+
       const p = whereIs(name);
       
       const t = installResults.find(r => {
@@ -107,6 +118,11 @@ const map = async (
   // link the dependencies in each module in the download directory
   Object.entries(lockData).forEach(([name, versions]) => {
     Object.entries(versions).forEach(([v, d]) => {
+      if (d.path && d.path !== d.target && fs.existsSync(d.path)) {
+        // already linked
+        return;
+      }
+      
       const p = whereIs(name);
 
       if (!p) {

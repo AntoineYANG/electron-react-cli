@@ -8,7 +8,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import { execSync } from 'child_process';
-import { DependencySet, DependencyTag } from 'runnable/install/utils/read-deps';
+import { DependencySet, DependencyTag } from 'runnable/install/utils/load-dependencies';
 
 
 export type PackageAuthor = string | Partial<{

@@ -2,11 +2,12 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 18:34:47 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-18 11:13:41
+ * @Last Modified time: 2021-11-20 01:17:17
  */
 
 import env, { PackageAuthor, PackageJSON } from '../../utils/env';
 import request, { RequestOptions } from '.';
+import { LockInfo } from '../../runnable/install/utils/lock';
 
 
 export type VersionInfo = PackageJSON & {
@@ -31,7 +32,9 @@ export type VersionInfo = PackageJSON & {
     host: string; // 's3://npm-registry-packages'
     tmp: string; // 'tmp/{name}_{version}_<int>_<float>'
   };
-  _hasShrinkwrap: false
+  _hasShrinkwrap: false;
+} & {
+  lockInfo?: LockInfo;
 };
 
 export type NpmPackage = {

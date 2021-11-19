@@ -39,7 +39,7 @@ const defaultOptions: RequestOptions = {
   maxRedirect: 1
 };
 
-const MAX_SYNC_SIZE = 8;
+const MAX_SYNC_SIZE = 2;
 let nowRunning = 0;
 
 const blockedRequests: (() => void)[] = [];

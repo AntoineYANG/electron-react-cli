@@ -5,19 +5,10 @@
  * @Last Modified by: Kanata You
  * @Last Modified time: 2021-11-19 00:46:39
  */
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.coalesceVersions = exports.coalesce = void 0;
-var semver = require("semver");
-var coalesce = function (prev, entering) {
+const semver = require("semver");
+const coalesce = (prev, entering) => {
     if (semver.intersects(prev, entering)) {
         if (semver.subset(prev, entering)) {
             return prev;
@@ -25,7 +16,7 @@ var coalesce = function (prev, entering) {
         if (semver.subset(entering, prev)) {
             return entering;
         }
-        return semver.validRange("".concat(prev, " ").concat(entering));
+        return semver.validRange(`${prev} ${entering}`);
     }
     return null;
 };
@@ -33,15 +24,15 @@ exports.coalesce = coalesce;
 /**
  * Gets the minimum incompatible set of the given ranges.
  */
-var coalesceVersions = function (ranges) {
+const coalesceVersions = (ranges) => {
     if (ranges.length < 2) {
-        return ranges.map(function (d) { return semver.validRange(d); });
+        return ranges.map(d => semver.validRange(d));
     }
-    var fullSet = __spreadArray([], ranges, true);
-    var results = [];
-    fullSet.forEach(function (set) {
-        for (var i = 0; i < results.length; i += 1) {
-            var coalesced = (0, exports.coalesce)(results[i], set);
+    const fullSet = [...ranges];
+    const results = [];
+    fullSet.forEach(set => {
+        for (let i = 0; i < results.length; i += 1) {
+            const coalesced = (0, exports.coalesce)(results[i], set);
             if (coalesced) {
                 // move the matched one, and insert the coalesced set, then break
                 results.splice(i, 1, semver.validRange(coalesced));

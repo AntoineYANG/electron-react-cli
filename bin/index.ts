@@ -2,82 +2,112 @@
  * @Author: Kanata You 
  * @Date: 2021-11-12 15:19:20 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-17 20:26:47
+ * @Last Modified time: 2021-11-20 00:43:35
  */
 
-import * as chalk from 'chalk';
+import { Command } from 'commander';
 
-import { RunnableConstructor } from './runnable';
-import InstallTask from './runnable/install';
-import Logger from './utils/ui/logger';
+import RunnableScript from './runnable';
+import Install from './runnable/install';
+import Logger, { StopWatch } from './utils/ui/logger';
 
 
 export enum ExitCode {
-  OPERATION_NOT_FOUND = -2,
-  BAD_PARAMS = -1,
   OK = 0,
-  OPERATION_FAILED = 1
+  OPERATION_FAILED = 1,
+  UNDEFINED_BEHAVIOR = 2,
 };
 
-const supportedCommand: Array<RunnableConstructor> = [
-  InstallTask
+const supportedScripts: Array<RunnableScript> = [
+  Install
 ];
 
-const main = async (script: string, args: string[]) => {
-  const originTitle = process.title;
+const program = new Command();
 
-  let code: ExitCode = ExitCode.OPERATION_NOT_FOUND;
+// TODO: read from package.json
+program.name(
+  'espoir-cli'
+).version(
+  '0.0.0'
+);
 
-  const Task = supportedCommand.find(cmd => {
-    return cmd.fullName === script || cmd.aliases.includes(script);
+const cli = async (argv?: string[]) => {
+  let resolve: (value: ExitCode) => void = () => {};
+
+  const run = new Promise<ExitCode>(_resolve => {
+    resolve = _resolve;
   });
 
-  if (Task) {
-    
-    try {
-      const task = new Task(args);
-      
-      process.title = `espoir script [${Task.displayName}]`;
-  
-      code = await task.exec();
-
-      if (code !== ExitCode.OK) {
-        Logger.error(
-          chalk`{redBright {bold \u2716 } {blue.underline [${Task.displayName}]} failed with code {yellow.bold ${code}}.}`
-        );
-      }
-    } catch (err) {
-      if (err.name === 'OptionParseError') {
-        Logger.error(
-          err.message
-        );
-
-        code = ExitCode.BAD_PARAMS;
-      } else {
-        throw err;
-      }
-    }
-  } else {
-    Logger.error(
-      chalk`{redBright {bold \u2716 } Script "{blue.underline ${script}}" is not found.}`
+  // init all the commands
+  supportedScripts.forEach(script => {
+    let thisCommand = program.command(
+      script.fullName
+    ).description(
+      script.description
+    ).aliases(
+      script.aliases
+    ).usage(
+      script.usage
     );
-  }
 
-  process.title = originTitle;
+    script.args.forEach(arg => {
+      thisCommand = thisCommand.addArgument(arg);
+    });
 
-  return code;
-};
+    script.options.forEach(opt => {
+      thisCommand = thisCommand.addOption(opt);
+    });
 
-const cli = async (...args: string[]) => {
-  const returnCode = await main(
-    args[0] ?? '', args.slice(1)
-  );
+    thisCommand.action(async (...args) => {
+      const rCode = await script.exec(...args);
+      
+      return resolve(rCode);
+    });
+  });
 
-  return returnCode;
+  let sw: StopWatch | null = null;
+
+  // hooks
+
+  let finalize = () => {};
+  
+  const waitForLifeCycle = new Promise<void>(_resolve => {
+    finalize = _resolve;
+  });
+
+  const originTitle = process.title;
+
+  program.hook('preAction', (thisCommand, actionCommand) => {
+    const title = `${thisCommand.name()}/${actionCommand.name()}`;
+    process.title = title;
+    sw = Logger.startStopWatch(title);
+  });
+
+  program.hook('postAction', (thisCommand, actionCommand) => {
+    if (sw) {
+      Logger.stopStopWatch(sw);
+    }
+
+    process.title = originTitle;
+
+    return finalize();
+  });
+
+  program.showHelpAfterError('(add --help for additional information)');
+
+  program.showSuggestionAfterError(true);
+
+  program.parse(argv); // implicitly use process.argv and auto-detect node vs electron conventions
+
+  const rCode = await run;
+  
+  await waitForLifeCycle;
+
+  return rCode;
 };
 
 if (require.main === module) {
-  cli(...process.argv.slice(2)).then(
+  cli().then(
     process.exit
   );
 }

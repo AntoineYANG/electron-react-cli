@@ -7,11 +7,11 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sortedStrings = void 0;
-var sortedStrings = function (data) {
-    return data.sort(function (a, b) {
-        for (var i = 0; i < a.length && i < b.length; i += 1) {
-            var ca = a.charCodeAt(i);
-            var cb = b.charCodeAt(i);
+const sortedStrings = (data) => {
+    return data.sort((a, b) => {
+        for (let i = 0; i < a.length && i < b.length; i += 1) {
+            const ca = a.charCodeAt(i);
+            const cb = b.charCodeAt(i);
             if (ca !== cb) {
                 return ca - cb;
             }

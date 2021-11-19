@@ -7,34 +7,34 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.useMemoized = exports.memoize = exports.useLocalCache = exports.writeLocalCache = void 0;
-var path = require("path");
-var fs = require("fs");
-var mkdirp = require("mkdirp");
-var env_1 = require("../../utils/env");
-var cache = [];
-var memo = [];
+const path = require("path");
+const fs = require("fs");
+const mkdirp = require("mkdirp");
+const env_1 = require("../../utils/env");
+const cache = [];
+const memo = [];
 // load local cache
-var loadLocalCache = function () {
-    var dir = path.join(env_1.default.configs.cacheDir, '.espoir', '.cache');
+const loadLocalCache = () => {
+    const dir = path.join(env_1.default.configs.cacheDir, '.espoir', '.cache');
     if (!fs.existsSync(dir)) {
         mkdirp(dir);
         return;
     }
-    var fn = path.join(dir, 'requests.json');
+    const fn = path.join(dir, 'requests.json');
     fs.readFile(fn, {
         encoding: 'utf-8'
-    }, function (err, data) {
+    }, (err, data) => {
         if (err) {
             return;
         }
-        var content = JSON.parse(data).filter(function (d) { return d.expiresTime >= Date.now(); });
-        content.forEach(function (d) { return cache.push(d); });
+        const content = JSON.parse(data).filter(d => d.expiresTime >= Date.now());
+        content.forEach(d => cache.push(d));
     });
 };
 loadLocalCache();
-var writeLocalCache = function (url, resp, expires, filter) {
+const writeLocalCache = (url, resp, expires, filter) => {
     cache.push({
-        url: url,
+        url,
         resp: filter(resp),
         expiresTime: Date.now() + expires
     });
@@ -43,23 +43,23 @@ var writeLocalCache = function (url, resp, expires, filter) {
     });
 };
 exports.writeLocalCache = writeLocalCache;
-var useLocalCache = function (url) {
-    var found = cache.find(function (d) { return d.url === url; });
+const useLocalCache = (url) => {
+    const found = cache.find(d => d.url === url);
     if (found) {
         return found.resp;
     }
     return null;
 };
 exports.useLocalCache = useLocalCache;
-var memoize = function (url, resp, filter) {
+const memoize = (url, resp, filter) => {
     memo.push({
-        url: url,
+        url,
         resp: filter(resp)
     });
 };
 exports.memoize = memoize;
-var useMemoized = function (url) {
-    var found = memo.find(function (d) { return d.url === url; });
+const useMemoized = (url) => {
+    const found = memo.find(d => d.url === url);
     if (found) {
         return found.resp;
     }
