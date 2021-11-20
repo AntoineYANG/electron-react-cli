@@ -3,12 +3,15 @@
  * @Author: Kanata You
  * @Date: 2021-11-14 02:35:46
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-16 16:03:27
+ * @Last Modified time: 2021-11-20 23:28:43
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.StopWatch = exports.LogLevel = void 0;
+const fs = require("fs");
+const mkdirp_1 = require("mkdirp");
 const chalk = require("chalk");
 const logUpdate = require("log-update");
+const env_1 = require("../../utils/env");
 /* eslint-disable no-console */
 var LogLevel;
 (function (LogLevel) {
@@ -51,6 +54,9 @@ class StopWatch {
     }
 }
 exports.StopWatch = StopWatch;
+const logDir = env_1.default.resolvePath('.espoir', 'logs');
+const today = new Date();
+const logFile = env_1.default.resolvePath('.espoir', 'logs', `${today.toISOString().split('T')[0]}.log`);
 /**
  * Logging methods.
  *
@@ -59,6 +65,19 @@ exports.StopWatch = StopWatch;
  */
 class Logger {
     static level = LogLevel.ALL;
+    static get path() {
+        return logFile;
+    }
+    static saveLog(tag, msg) {
+        if (!fs.existsSync(logDir)) {
+            (0, mkdirp_1.sync)(logDir);
+        }
+        const formattedMsg = `<${tag}>[${new Date().toISOString()}]\n${msg}\n\n`;
+        fs.appendFileSync(this.path, formattedMsg);
+    }
+    static log(msg) {
+        this.saveLog('log', msg);
+    }
     static info(...msgs) {
         if (this.level.includes('info')) {
             console.info(...msgs);
@@ -80,14 +99,29 @@ class Logger {
         }
         return false;
     }
+    static logError(err) {
+        this.saveLog('error', err.message + '\n' + err.stack ?? '');
+        if (this.level.includes('error')) {
+            console.error(chalk `{redBright {bold \u2716 }${err.name}: ${err.message} }`);
+            console.info(chalk `{blue 🗊 See ${logFile} for more details.}`);
+            return true;
+        }
+        return false;
+    }
     static startStopWatch(label) {
-        this.info(chalk `{rgb(206,145,91) [StopWatch]} {rgb(0,125,206).bold ${label}}`);
+        if (this.level.includes('info')) {
+            this.info(chalk `{rgb(206,145,91) [StopWatch]} {rgb(0,125,206).bold ${label}}`);
+        }
+        this.saveLog('preference', `"${label}" begins. `);
         return new StopWatch(label);
     }
     static stopStopWatch(sw) {
         const finalCost = sw.stop();
         const time = finalCost < 1_000 ? `${finalCost}ms` : `${(finalCost / 1000).toFixed(2).replace(/0+$/, '')}s`;
-        this.info(chalk `{rgb(206,145,91) [StopWatch]} {rgb(0,125,206).bold ${sw.label}} finished. total cost: {yellow ${time}}`);
+        if (this.level.includes('info')) {
+            this.info(chalk `{rgb(206,145,91) [StopWatch]} {rgb(0,125,206).bold ${sw.label}} finished. total cost: {yellow ${time}}`);
+        }
+        this.saveLog('preference', `"${sw.label}" finished. (total cost: ${time})`);
         return finalCost;
     }
     static writeCanOverwrite(content) {

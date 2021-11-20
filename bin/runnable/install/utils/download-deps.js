@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-16 00:03:04
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-20 00:18:03
+ * @Last Modified time: 2021-11-21 02:40:44
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.readDirAll = void 0;
@@ -29,7 +29,7 @@ const readDirAll = (dir) => {
     return files;
 };
 exports.readDirAll = readDirAll;
-const MAX_ROWS = 6;
+const MAX_ROWS = 8;
 const batchDownload = (modules, onProgress, onEnd) => {
     const count = {
         completed: [],
@@ -62,7 +62,10 @@ const batchDownload = (modules, onProgress, onEnd) => {
             state[i] = tag;
             progress_1.default.set(name, tag, value ?? -1);
             if (canDisplay(i)) {
-                task.output = progress_1.default.stringify(name, tag, value);
+                task.title = progress_1.default.stringify(name, tag, value);
+            }
+            else {
+                task.title = undefined;
             }
         };
         const run = async (_ctx, task) => {
@@ -143,7 +146,7 @@ const batchDownload = (modules, onProgress, onEnd) => {
                 }
                 updateLog(task, progress_1.ProgressTag.unpack, 1);
             }
-            updateLog(task, progress_1.ProgressTag.done); // FIXME: not here
+            updateLog(task, progress_1.ProgressTag.done);
             count.completed.push(`${name}@${mod.version}`);
             onProgress?.(count.completed, count.failed, count.total);
             return {

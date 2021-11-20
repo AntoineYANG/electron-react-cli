@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 18:34:47 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-20 01:17:17
+ * @Last Modified time: 2021-11-21 00:12:40
  */
 
 import env, { PackageAuthor, PackageJSON } from '../../utils/env';
@@ -119,10 +119,10 @@ export type InstallOptions = {
  * @param {Partial<RequestOptions>} [options]
  * @returns {(Promise<[Error, null] | [null, NpmPackage]>)}
  */
-export const view = (
+export const view = async (
   name: string, options?: Partial<RequestOptions>
 ): Promise<[Error, null] | [null, NpmPackage]> => {
-  return request.get<NpmPackage>(
+  const [err, data] = await request.get<NpmPackage>(
     `${env.runtime.npm.registry}${name}`, {
       expiresSpan: 1_000 * 60 * 60 * 24 * 15,
       ...options,
@@ -152,6 +152,15 @@ export const view = (
       };
     }
   );
+
+  if (err?.name === 'RequestError' && err.message.startsWith('[404] ')) {
+    return [
+      new Error(`Cannot find module ${name}. `),
+      null
+    ];
+  }
+
+  return [err, data] as [Error, null] | [null, NpmPackage];
 };
 
 

@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-14 18:34:47
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-20 01:17:17
+ * @Last Modified time: 2021-11-21 00:12:40
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.find = exports.view = void 0;
@@ -16,8 +16,8 @@ const _1 = require(".");
  * @param {Partial<RequestOptions>} [options]
  * @returns {(Promise<[Error, null] | [null, NpmPackage]>)}
  */
-const view = (name, options) => {
-    return _1.default.get(`${env_1.default.runtime.npm.registry}${name}`, {
+const view = async (name, options) => {
+    const [err, data] = await _1.default.get(`${env_1.default.runtime.npm.registry}${name}`, {
         expiresSpan: 1_000 * 60 * 60 * 24 * 15,
         ...options,
         memo: false,
@@ -43,6 +43,13 @@ const view = (name, options) => {
             versions
         };
     });
+    if (err?.name === 'RequestError' && err.message.startsWith('[404] ')) {
+        return [
+            new Error(`Cannot find module ${name}. `),
+            null
+        ];
+    }
+    return [err, data];
 };
 exports.view = view;
 /**

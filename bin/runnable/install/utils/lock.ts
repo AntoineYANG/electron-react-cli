@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 20:49:31 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-20 01:37:28
+ * @Last Modified time: 2021-11-21 01:33:18
  */
 
 import * as fs from 'fs';
@@ -11,6 +11,10 @@ import env from '../../../utils/env';
 import { VersionInfo } from '../../../utils/request/request-npm';
 
 
+export enum LockCheckFailedReason {
+  FILES_NOT_FOUND = 1,
+}
+
 export type LockInfo = {
   resolved: string;
   path: string;
@@ -18,7 +22,8 @@ export type LockInfo = {
   integrity: string;
   requires: {
     [name: string]: string;
-  }
+  };
+  failed?: LockCheckFailedReason;
 };
 
 export type LockItem = {
@@ -45,6 +50,15 @@ export const createLockData = (origin: LockData, data: VersionInfo[]): LockData 
     }
 
     const thisModule = result[d.name] as LockItem;
+
+    if (thisModule[d.version]) {
+      if (!d.lockInfo?.failed) {
+        console.log(d.name, thisModule[d.version]);
+        process.exit(-1);
+        throw new Error(`"${d.name}@${d.version}" is already recorded in lock file. `);
+      }
+      // else: overwrite
+    }
 
     thisModule[d.version] = {
       resolved: d.dist.tarball,
@@ -77,10 +91,32 @@ export const writeLockFile = (data: LockData): void => {
     fs.mkdirSync(dir);
   }
 
+  const sorted: LockData = {};
+
+  Object.entries(data).sort(
+    (a, b) => {
+      const an = a[0];
+      const bn = b[0];
+
+      for (let i = 0; i < an.length && i < bn.length; i += 1) {
+        const ac = an.charCodeAt(i);
+        const bc = bn.charCodeAt(i);
+
+        if (ac !== bc) {
+          return ac - bc;
+        }
+      }
+
+      return an.length - bn.length;
+    }
+  ).forEach(([k, v]) => {
+    sorted[k] = v;
+  });
+
   fs.writeFileSync(
     fn,
     JSON.stringify(
-      data,
+      sorted,
       undefined,
       2
     ),

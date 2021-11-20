@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-12 15:19:20 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-20 00:43:35
+ * @Last Modified time: 2021-11-21 00:45:24
  */
 
 import { Command } from 'commander';
@@ -16,6 +16,7 @@ export enum ExitCode {
   OK = 0,
   OPERATION_FAILED = 1,
   UNDEFINED_BEHAVIOR = 2,
+  UNCAUGHT_EXCEPTION = 3,
 };
 
 const supportedScripts: Array<RunnableScript> = [
@@ -81,6 +82,20 @@ const cli = async (argv?: string[]) => {
     const title = `${thisCommand.name()}/${actionCommand.name()}`;
     process.title = title;
     sw = Logger.startStopWatch(title);
+
+    process.once('uncaughtException', err => {
+      Logger.logError(err);
+
+      if (sw) {
+        Logger.stopStopWatch(sw);
+      }
+
+      process.title = originTitle;
+
+      resolve(ExitCode.UNCAUGHT_EXCEPTION);
+      
+      return finalize();
+    });
   });
 
   program.hook('postAction', (thisCommand, actionCommand) => {

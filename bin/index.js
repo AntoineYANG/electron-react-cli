@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-12 15:19:20
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-20 00:43:35
+ * @Last Modified time: 2021-11-21 00:45:24
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ExitCode = void 0;
@@ -15,6 +15,7 @@ var ExitCode;
     ExitCode[ExitCode["OK"] = 0] = "OK";
     ExitCode[ExitCode["OPERATION_FAILED"] = 1] = "OPERATION_FAILED";
     ExitCode[ExitCode["UNDEFINED_BEHAVIOR"] = 2] = "UNDEFINED_BEHAVIOR";
+    ExitCode[ExitCode["UNCAUGHT_EXCEPTION"] = 3] = "UNCAUGHT_EXCEPTION";
 })(ExitCode = exports.ExitCode || (exports.ExitCode = {}));
 ;
 const supportedScripts = [
@@ -53,6 +54,15 @@ const cli = async (argv) => {
         const title = `${thisCommand.name()}/${actionCommand.name()}`;
         process.title = title;
         sw = logger_1.default.startStopWatch(title);
+        process.once('uncaughtException', err => {
+            logger_1.default.logError(err);
+            if (sw) {
+                logger_1.default.stopStopWatch(sw);
+            }
+            process.title = originTitle;
+            resolve(ExitCode.UNCAUGHT_EXCEPTION);
+            return finalize();
+        });
     });
     program.hook('postAction', (thisCommand, actionCommand) => {
         if (sw) {

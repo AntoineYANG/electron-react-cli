@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-16 20:00:09
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-20 01:57:38
+ * @Last Modified time: 2021-11-20 22:17:01
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 const path = require("path");
@@ -85,10 +85,6 @@ const map = async (explicit, lockData, installResults) => {
     // link the dependencies in each module in the download directory
     Object.entries(lockData).forEach(([name, versions]) => {
         Object.entries(versions).forEach(([v, d]) => {
-            if (d.path && d.path !== d.target && fs.existsSync(d.path)) {
-                // already linked
-                return;
-            }
             const p = whereIs(name);
             if (!p) {
                 // create links in download directory

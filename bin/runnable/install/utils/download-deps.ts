@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-16 00:03:04 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-20 00:18:03
+ * @Last Modified time: 2021-11-21 02:40:44
  */
 
 import { ListrRenderer, ListrTask } from 'listr2';
@@ -50,7 +50,7 @@ export interface InstallResult {
   };
 }
 
-const MAX_ROWS = 6;
+const MAX_ROWS = 8;
 
 const batchDownload = (
   modules: VersionInfo[],
@@ -104,7 +104,9 @@ const batchDownload = (
       progress.set(name, tag, value ?? -1);
       
       if (canDisplay(i)) {
-        task.output = progress.stringify(name, tag, value);
+        task.title = progress.stringify(name, tag, value);
+      } else {
+        task.title = undefined as unknown as string;
       }
     };
     
@@ -215,7 +217,7 @@ const batchDownload = (
         updateLog(task, ProgressTag.unpack, 1);
       }
       
-      updateLog(task, ProgressTag.done); // FIXME: not here
+      updateLog(task, ProgressTag.done);
       count.completed.push(`${name}@${mod.version}`);
 
       onProgress?.(count.completed, count.failed, count.total);

@@ -3,12 +3,16 @@
  * @Author: Kanata You
  * @Date: 2021-11-14 20:49:31
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-20 01:37:28
+ * @Last Modified time: 2021-11-21 01:33:18
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.useLockFileData = exports.writeLockFile = exports.createLockData = void 0;
+exports.useLockFileData = exports.writeLockFile = exports.createLockData = exports.LockCheckFailedReason = void 0;
 const fs = require("fs");
 const env_1 = require("../../../utils/env");
+var LockCheckFailedReason;
+(function (LockCheckFailedReason) {
+    LockCheckFailedReason[LockCheckFailedReason["FILES_NOT_FOUND"] = 1] = "FILES_NOT_FOUND";
+})(LockCheckFailedReason = exports.LockCheckFailedReason || (exports.LockCheckFailedReason = {}));
 /**
  * Generates espoir lock data from version info.
  *
@@ -23,6 +27,14 @@ const createLockData = (origin, data) => {
             result[d.name] = {};
         }
         const thisModule = result[d.name];
+        if (thisModule[d.version]) {
+            if (!d.lockInfo?.failed) {
+                console.log(d.name, thisModule[d.version]);
+                process.exit(-1);
+                throw new Error(`"${d.name}@${d.version}" is already recorded in lock file. `);
+            }
+            // else: overwrite
+        }
         thisModule[d.version] = {
             resolved: d.dist.tarball,
             integrity: d.dist.integrity,
@@ -49,7 +61,22 @@ const writeLockFile = (data) => {
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir);
     }
-    fs.writeFileSync(fn, JSON.stringify(data, undefined, 2), {
+    const sorted = {};
+    Object.entries(data).sort((a, b) => {
+        const an = a[0];
+        const bn = b[0];
+        for (let i = 0; i < an.length && i < bn.length; i += 1) {
+            const ac = an.charCodeAt(i);
+            const bc = bn.charCodeAt(i);
+            if (ac !== bc) {
+                return ac - bc;
+            }
+        }
+        return an.length - bn.length;
+    }).forEach(([k, v]) => {
+        sorted[k] = v;
+    });
+    fs.writeFileSync(fn, JSON.stringify(sorted, undefined, 2), {
         encoding: 'utf-8'
     });
 };

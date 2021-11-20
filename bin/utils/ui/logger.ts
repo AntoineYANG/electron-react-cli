@@ -2,11 +2,15 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 02:35:46 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-16 16:03:27
+ * @Last Modified time: 2021-11-20 23:28:43
  */
 
+import * as fs from 'fs';
+import { sync as mkdirp } from 'mkdirp';
 import * as chalk from 'chalk';
 import * as logUpdate from 'log-update';
+
+import env from '../../utils/env';
 
 
 /* eslint-disable no-console */
@@ -67,6 +71,17 @@ export class StopWatch {
 
 }
 
+const logDir = env.resolvePath(
+  '.espoir',
+  'logs'
+);
+const today = new Date();
+const logFile = env.resolvePath(
+  '.espoir',
+  'logs',
+  `${today.toISOString().split('T')[0]}.log`
+);
+
 /**
  * Logging methods.
  *
@@ -76,6 +91,26 @@ export class StopWatch {
 abstract class Logger {
 
   static level: LogLevel = LogLevel.ALL;
+
+  static get path() {
+    return logFile;
+  }
+
+  private static saveLog(tag: string, msg: string): void {
+    if (!fs.existsSync(logDir)) {
+      mkdirp(logDir);
+    }
+
+    const formattedMsg = `<${tag}>[${
+      new Date().toISOString()
+    }]\n${msg}\n\n`;
+
+    fs.appendFileSync(this.path, formattedMsg);
+  }
+
+  static log(msg: string): void {
+    this.saveLog('log', msg);
+  }
 
   static info(...msgs: any[]): boolean {
     if (this.level.includes('info')) {
@@ -107,10 +142,32 @@ abstract class Logger {
     return false;
   }
 
+  static logError(err: Error): boolean {
+    this.saveLog('error', err.message + '\n' + err.stack ?? '');
+    
+    if (this.level.includes('error')) {
+      console.error(
+        chalk`{redBright {bold \u2716 }${err.name}: ${err.message} }`
+      );
+
+      console.info(
+        chalk`{blue 🗊 See ${logFile} for more details.}`
+      );
+
+      return true;
+    }
+
+    return false;
+  }
+
   static startStopWatch(label: string): StopWatch {
-    this.info(
-      chalk`{rgb(206,145,91) [StopWatch]} {rgb(0,125,206).bold ${label}}`
-    );
+    if (this.level.includes('info')) {
+      this.info(
+        chalk`{rgb(206,145,91) [StopWatch]} {rgb(0,125,206).bold ${label}}`
+      );
+    }
+
+    this.saveLog('preference', `"${label}" begins. `);
 
     return new StopWatch(label);
   }
@@ -121,11 +178,15 @@ abstract class Logger {
       (finalCost / 1000).toFixed(2).replace(/0+$/, '')
     }s`;
 
-    this.info(
-      chalk`{rgb(206,145,91) [StopWatch]} {rgb(0,125,206).bold ${
-        sw.label
-      }} finished. total cost: {yellow ${time}}`
-    );
+    if (this.level.includes('info')) {
+      this.info(
+        chalk`{rgb(206,145,91) [StopWatch]} {rgb(0,125,206).bold ${
+          sw.label
+        }} finished. total cost: {yellow ${time}}`
+      );
+    }
+
+    this.saveLog('preference', `"${sw.label}" finished. (total cost: ${time})`);
 
     return finalCost;
   }

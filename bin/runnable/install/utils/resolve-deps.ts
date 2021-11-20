@@ -2,12 +2,12 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 17:53:51 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-20 01:18:13
+ * @Last Modified time: 2021-11-21 01:49:36
  */
 
 import * as semver from 'semver';
 
-import { NpmPackage, VersionInfo } from '../../../utils/request/request-npm';
+import { VersionInfo } from '../../../utils/request/request-npm';
 import request from '../../../utils/request';
 import { Dependency, FailedDependency, MinIncompatibleSet, SingleDependency } from './load-dependencies';
 import { coalesceVersions } from './extra-semver';
@@ -53,16 +53,47 @@ const getAvailableVersions = (
   request.npm.view(
     name
   ).then(([err, data]) => {
-    if (err) {
-      return resolve([err, null]);
+    if (err || !data) {
+      return resolve([
+        err ?? new Error(`Failed to get data of "${name}". `),
+        null
+      ]);
     }
 
     const tagged = Object.values(
       data?.['dist-tags'] ?? {}
     );
 
+    if (version === 'latest') {
+      if (tagged.includes('latest')) {
+        const version = data['dist-tags'].latest;
+        const which = data.versions[version];
+
+        if (!which) {
+          request.npm.find(name, version).then(([err, latest]) => {
+            if (err || !latest) {
+              throw err ?? new Error(`Cannot get "${name}@${version}" (latest version). `);
+            }
+
+            return resolve([null, [latest as unknown as VersionInfo]]);
+          });
+
+          return;
+        }
+
+        return resolve([null, [which]]);
+      } else {
+        const version = Object.keys(data.versions).sort(
+          (a, b) => (semver.lt(a, b) ? 1 : -1)
+        )[0] as string;
+        const which = data.versions[version] as VersionInfo;
+
+        return resolve([null, [which]]);
+      }
+    }
+
     const versions = Object.entries(
-      (data as NpmPackage).versions
+      data.versions
     ).reduce<VersionInfo[]>((list, [v, d]) => {
       const td = tagged.findIndex(_v => v === _v);
 
@@ -89,18 +120,32 @@ const getAvailableVersions = (
           }
         });
 
-        resolve([
+        if (versions.length === 0) {
+          return resolve([
+            new Error(`No version of "${name}" satisfies "${version}". `),
+            null
+          ]);
+        }
+
+        return resolve([
           null,
           versions.sort(
-            ((a, b) => (semver.lt(a.version, b.version) ? 1 : -1))
+            (a, b) => (semver.lt(a.version, b.version) ? 1 : -1)
           )
         ]);
       });
     } else {
-      resolve([
+      if (versions.length === 0) {
+        return resolve([
+          new Error(`No version of "${name}" satisfies "${version}". `),
+          null
+        ]);
+      }
+
+      return resolve([
         null,
         versions.sort(
-          ((a, b) => (semver.lt(a.version, b.version) ? 1 : -1))
+          (a, b) => (semver.lt(a.version, b.version) ? 1 : -1)
         )
       ]);
     }
@@ -112,44 +157,33 @@ const getAvailableVersions = (
  *
  * @param {Dependency} dependency
  * @param {LockData} lockData
- * @returns {Promise<{ value: MinIncompatibleSet; failed: Error[]; }>}
+ * @returns {{ version: string; value?: VersionInfo; reason?: Error; }[]>}
  */
 const getMinIncompatibleSet = async (
   dependency: Dependency,
   lockData: LockData
-): Promise<{ value: MinIncompatibleSet; failed: Error[]; }> => {
-  const minSet: MinIncompatibleSet = [];
-  const failed: Error[] = [];
-
+): Promise<{ version: string; value?: VersionInfo; reason?: Error; }[]> => {
   const coalesced = coalesceVersions(dependency.versions);
 
-  const satisfied = (await Promise.all(
-    coalesced.map<Promise<VersionInfo[] | null>>(async v => {
+  const results = (await Promise.all(
+    coalesced.map<Promise<{ version: string; value?: VersionInfo; reason?: Error; }>>(async v => {
+      const resp: { version: string; value?: VersionInfo; reason?: Error; } = {
+        version: v
+      };
+
       const [err, list] = await getAvailableVersions(dependency.name, v, lockData);
       
-      if (err) {
-        failed.push(err);
-
-        return null;
+      if (err || !list?.[0]) {
+        resp.reason = err ?? new Error(`No version of "${dependency.name}" satisfies "${v}". `);
+      } else {
+        resp.value = list[0];
       }
 
-      return list as VersionInfo[];
+      return resp;
     })
-  )).filter(Boolean) as VersionInfo[][];
+  ));
 
-  satisfied.forEach(sl => {
-    if (sl.length) {
-      minSet.push({
-        name: (sl[0] as VersionInfo).name,
-        version: (sl[0] as VersionInfo).version
-      });
-    }
-  });
-  
-  return {
-    value: minSet,
-    failed
-  };
+  return results;
 };
 
 /**
@@ -159,21 +193,19 @@ const getMinIncompatibleSet = async (
  * @param {LockData} lockData
  * @param {VersionInfo[]} [memoized=[]]
  * @param {(resolved: number, unresolved: number) => void} [onProgress]
- * @returns {Promise<{ succeeded: VersionInfo[]; failed: FailedDependency[] }>}
+ * @returns {Promise<VersionInfo[]>}
  */
 const resolveDependencies = async (
   dependencies: SingleDependency[],
   lockData: LockData,
   memoized: VersionInfo[] = [],
   onProgress?: (resolved: number, unresolved: number) => void
-): Promise<{ succeeded: VersionInfo[]; failed: FailedDependency[] }> => {
+): Promise<VersionInfo[]> => {
   const data: VersionInfo[] = [...memoized];
   const entering: VersionInfo[] = [];
 
   const unresolved: Dependency[] = [];
   let running = 0;
-
-  const failed: FailedDependency[] = [];
 
   const tasks = dependencies.map(async dep => {
     const isDeclared = () => Boolean(
@@ -204,20 +236,13 @@ const resolveDependencies = async (
       return;
     }
 
-    if (err || ((satisfied?.length ?? 0) === 0)) {
+    if (err || !satisfied?.[0]) {
       // there's no versions satisfying the required range
-      failed.push({
-        ...dep,
-        reasons: err ? [err] : [
-          new Error(`no versions satisfy ${dep.version} for ${dep.name}`)
-        ]
-      });
-
-      return;
+      throw err ?? new Error(`No version of "${dep.name}" satisfies "${dep.version}". `);
     }
 
-    // FIXME: pick the most suitable one
-    const target = (satisfied as VersionInfo[])[0] as VersionInfo;
+    // use the latest one that satisfies required range
+    const target = satisfied[0];
     
     // add it to the list
     entering.push(target);
@@ -260,48 +285,36 @@ const resolveDependencies = async (
     const items = (
       await Promise.all(
         unresolved.map(async d => {
-          const { value, failed: f } = await getMinIncompatibleSet(d, lockData);
-          
-          if (f.length) {
-            d.versions.forEach(v => {
-              failed.push({
-                name: d.name,
-                version: v,
-                reasons: f
-              });
-            });
+          const list = (await getMinIncompatibleSet(d, lockData)).filter(res => {
+            if (res.reason ?? !res.value) {
+              throw res.reason ?? new Error(
+                `No version of "${d.name}" satisfies "${res.version}". `
+              );
+            }
 
-            return null;
-          }
+            return true;
+          }) as {
+            version: string;
+            value: VersionInfo;
+          }[];
           
-          return value;
+          return list.map(res => res.value);
         })
       )
-    ).flat(1).filter(Boolean) as SingleDependency[];
+    ).flat(1);
 
     onProgress?.(data.length, items.length);
     
-    const results = await resolveDependencies(items, lockData, data, onProgress);
-  
-    data.push(...results.succeeded.filter(r => {
-      return !Boolean(
-        entering.find(
-          d => d.name === r.name && semver.satisfies(d.version, r.version)
-        )
-      ) && !Boolean(
-        data.find(
-          d => d.name === r.name && semver.satisfies(d.version, r.version)
-        )
-      );
-    }));
+    const nextLevel = await resolveDependencies(items, lockData, data, onProgress);
 
-    failed.push(...results.failed);
+    nextLevel.forEach(vi => {
+      if (!data.find(d => d.name === vi.name && d.version === vi.version)) {
+        data.push(vi);
+      }
+    });
   }
   
-  return {
-    succeeded: data,
-    failed
-  };
+  return data;
 };
 
 /**
@@ -310,34 +323,30 @@ const resolveDependencies = async (
  * @param {Dependency[]} dependencies
  * @param {Readonly<LockData>} lockData
  * @param {(resolved: number, unresolved: number) => void} [onProgress]
- * @returns {Promise<{ succeeded: VersionInfo[]; failed: FailedDependency[] }>}
+ * @returns {Promise<VersionInfo[]>}
  */
 export const resolvePackageDeps = async (
   dependencies: Dependency[],
   lockData: Readonly<LockData>,
   onProgress?: (resolved: number, unresolved: number) => void
-): Promise<{ succeeded: VersionInfo[]; failed: FailedDependency[] }> => {
-  const locked: VersionInfo[] = [];
-  const failed: FailedDependency[] = [];
-
+): Promise<VersionInfo[]> => {
   const items: MinIncompatibleSet = [];
 
   for (const d of dependencies) {
-    const { value, failed: f } = await getMinIncompatibleSet(d, lockData);
-        
-    if (f.length) {
-      d.versions.forEach(v => {
-        failed.push({
-          name: d.name,
-          version: v,
-          reasons: f
-        });
-      });
+    const list = (await getMinIncompatibleSet(d, lockData)).filter(res => {
+      if (res.reason ?? !res.value) {
+        throw res.reason ?? new Error(
+          `No version of "${d.name}" satisfies "${res.version}". `
+        );
+      }
 
-      continue;
-    }
+      return true;
+    }) as {
+      version: string;
+      value: VersionInfo;
+    }[];
     
-    items.push(...value);
+    items.push(...list.map(res => res.value));
   }
 
   const resolved = await resolveDependencies(
@@ -347,8 +356,5 @@ export const resolvePackageDeps = async (
     onProgress
   );
 
-  return {
-    succeeded: resolved.succeeded,
-    failed: resolved.failed.concat(failed)
-  };
+  return resolved;
 };

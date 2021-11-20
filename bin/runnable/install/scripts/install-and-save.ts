@@ -1,8 +1,8 @@
 /*
  * @Author: Kanata You 
- * @Date: 2021-11-20 00:00:33 
+ * @Date: 2021-11-20 22:17:42 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-21 00:44:40
+ * @Last Modified time: 2021-11-21 02:46:31
  */
 
 import * as chalk from 'chalk';
@@ -19,21 +19,24 @@ import { createLockData, LockData, useLockFileData, writeLockFile } from '../uti
 import batchDownload, { InstallResult } from '../utils/download-deps';
 import map from '../utils/map';
 import diffLocal from '../utils/diff-local';
+import parseDependencies from '../utils/parse-dependencies';
 
 
 /**
- * Install local dependencies.
+ * Install modules and save as package dependencies.
  * 
- * @param {boolean} isProd
+ * @param {string[]} modules
  * @param {string[]} scopes
+ * @param {('dependencies' | 'devDependencies')} tag
  * @returns {Promise<ExitCode>}
  */
-const installAll = async (
-  isProd: boolean,
-  scopes: string[]
+const installAndSave = async (
+  modules: string[],
+  scopes: string[],
+  tag: 'dependencies' | 'devDependencies'
 ): Promise<ExitCode> => {
   const tasks = TaskManagerFactory<{
-    dependencies: Dependency[];
+    dependencies: SingleDependency[];
     resolvedDeps: VersionInfo[];
     diff: VersionInfo[];
     lockData: LockData;
@@ -41,22 +44,23 @@ const installAll = async (
   }>();
 
   tasks.add([{
-    title: 'Loading all the explicit dependencies from all `package.json`.',
-    task: (ctx, task) => {
-      task.output = 'Resolving `package.json`';
-      ctx.dependencies = loadDependencies(scopes, isProd);
-      task.output = 'Successfully resolved `package.json`';
-    }
-  }, {
-    title: 'Resolving declared dependencies.',
+    title: 'Viewing dependencies.',
     task: async (ctx, task) => {
-      task.output = 'Viewing declared dependencies';
+      // parse
+      task.output = 'Parsing dependencies';
+      ctx.dependencies = parseDependencies(modules);
+      ctx.lockData = useLockFileData();
+
+      // resolve
+      task.output = 'Resolving dependencies';
       const printProgress = (resolved: number, unresolved: number) => {
         task.output = chalk` \u23f3  {green ${resolved} }dependencies resolved, {yellow ${unresolved} }left`;
       };
-      ctx.lockData = useLockFileData();
       ctx.resolvedDeps = await resolvePackageDeps(
-        ctx.dependencies,
+        ctx.dependencies.map(dep => ({
+          name: dep.name,
+          versions: [dep.version]
+        })),
         ctx.lockData,
         printProgress
       );
@@ -68,7 +72,9 @@ const installAll = async (
     task: async (ctx, task) => {
       task.output = 'Checking installed modules';
       ctx.diff = await diffLocal(ctx.resolvedDeps);
+      
       ctx.lockData = createLockData(ctx.lockData, ctx.diff);
+
       task.output = 'Diffing succeeded';
     }
   }, {
@@ -107,6 +113,7 @@ const installAll = async (
         subtasks, {
           concurrent: true,
           rendererOptions: {
+            clearOutput: true,
             collapse: true
           }
         }
@@ -116,24 +123,49 @@ const installAll = async (
     title: 'Linking.',
     task: async (ctx, task) => {
       task.output = 'Linking /node_modules/';
-      await map(ctx.dependencies, ctx.lockData, ctx.installResults);
+      console.log(ctx.installResults.map(d => `${d.name}@${d.version}`));
+      process.exit(-1);
+      await map(
+        ctx.dependencies.map(dep => ({
+          name: dep.name,
+          versions: [dep.version]
+        })),
+        ctx.lockData,
+        ctx.installResults
+      );
       task.output = 'Linked successfully';
     }
   }, {
-    title: 'Saving lock file.',
+    title: '?',
     task: (ctx, task) => {
-      task.output = 'Saving espoir lock file';
-      writeLockFile(ctx.lockData);
-      task.output = 'Espoir lock file saved';
+      const failed = ctx.installResults.filter(d => d.err);
+      failed.forEach(f => {
+        console.log(f.name, f.version);
+        console.error(f.err);
+      });
+      console.log(ctx.installResults.length, failed.length);
+      process.exit(-1);
     }
   }], {
     exitOnError: true,
     concurrent: false
   });
 
+  // tasks.add([, {
+  //   title: 'Saving lock file.',
+  //   task: (ctx, task) => {
+  //     task.output = 'Saving espoir lock file';
+  //     writeLockFile(ctx.lockData);
+  //     task.output = 'Espoir lock file saved';
+  //   }
+  // }], {
+  //   exitOnError: true,
+  //   concurrent: false
+  // });
+
   const _ctx = await tasks.runAll();
 
   return ExitCode.OK;
 };
 
-export default installAll;
+export default installAndSave;

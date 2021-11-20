@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 02:00:17 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-20 00:18:23
+ * @Last Modified time: 2021-11-20 23:30:55
  */
 
 import { Argument, Option } from 'commander';
@@ -11,6 +11,7 @@ import { ExitCode } from '../..';
 import RunnableScript from '..';
 import env from '../../utils/env';
 import installAll from './scripts/install-all';
+import installAndSave from './scripts/install-and-save';
 
 
 const installTarget = [
@@ -52,12 +53,34 @@ const Install: RunnableScript = {
     options: {
       save: boolean;
       saveDev: boolean;
-      production: false;
+      production: boolean;
       workspace: string[];
     }
   ) => {
     if (moduleNames.length === 0) {
       return installAll(options.production, options.workspace);
+    } else if (options.production) {
+      const msg = `When use \`install --production\`, ${
+        'it\'s not supposed to give `moduleNames`. '
+      }`;
+
+      throw new Error(msg);
+    } else if (options.saveDev) {
+      return installAndSave(moduleNames, options.workspace, 'devDependencies');
+    } else if (options.save) {
+      if (options.workspace.includes('root')) {
+        const msg = `${
+          'Cannot install modules as dependencies of the root package. '
+        }${
+          options.workspace === installTarget ? (
+            'Did you forget to set `--workspace|-w` option? '
+          ) : ''
+        }`;
+
+        throw new Error(msg);
+      } else {
+        return installAndSave(moduleNames, options.workspace, 'dependencies')
+      }
     }
 
     return ExitCode.OPERATION_FAILED;
@@ -65,35 +88,3 @@ const Install: RunnableScript = {
 };
 
 export default Install;
-
-// /**
-//  * Creates an install task.
-//  * 
-//  * @export
-//  * @class InstallTask
-//  * @extends {Runnable}
-//  */
-// export class InstallTask extends Runnable<typeof InstallTask.rules> {
-
-//   /**
-//    * Install new dependencies, and add them to `package.json`.
-//    * 
-//    * @private
-//    * @param {(string[] | 'all')} scopes
-//    * @param {string[]} modules
-//    * @memberof InstallTask
-//    */
-//   private async installAndSave(scopes: string[] | 'all', modules: string[]) {
-//     const NAME = 'Install new dependencies';
-//     // const sw = Logger.startStopWatch(NAME);
-//     // const dependencies = this.loadDependencies(scopes);
-//     // const resolvedDeps = await this.resolveDependencies(dependencies);
-//     // writeLockFile(resolvedDeps);
-//     // const diff = await this.diffLocal(resolvedDeps);
-//     // const results = await this.createInstallTask(diff);
-//     // // console.log({ results });
-//     // Logger.stopStopWatch(sw);
-//     // process.exit(0);
-//     throw new Error('Method is not implemented');
-//   }
-// }
