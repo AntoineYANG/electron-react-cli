@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 20:49:31 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-21 01:33:18
+ * @Last Modified time: 2021-11-22 00:33:23
  */
 
 import * as fs from 'fs';
@@ -17,7 +17,9 @@ export enum LockCheckFailedReason {
 
 export type LockInfo = {
   resolved: string;
-  path: string;
+  /** exported link */
+  entry?: string;
+  /** real path */
   target: string;
   integrity: string;
   requires: {
@@ -53,8 +55,6 @@ export const createLockData = (origin: LockData, data: VersionInfo[]): LockData 
 
     if (thisModule[d.version]) {
       if (!d.lockInfo?.failed) {
-        console.log(d.name, thisModule[d.version]);
-        process.exit(-1);
         throw new Error(`"${d.name}@${d.version}" is already recorded in lock file. `);
       }
       // else: overwrite
@@ -63,7 +63,6 @@ export const createLockData = (origin: LockData, data: VersionInfo[]): LockData 
     thisModule[d.version] = {
       resolved: d.dist.tarball,
       integrity: d.dist.integrity,
-      path: '', // `path` will be assigned after calling map()
       target: '', // `target` will be assigned after calling map()
       requires: {}
     };
@@ -78,6 +77,26 @@ export const createLockData = (origin: LockData, data: VersionInfo[]): LockData 
   return result;
 };
 
+const validateLockData = (data: LockData): boolean => {
+  Object.entries(data).forEach(([name, item]) => {
+    Object.entries(item).forEach(([v, d]) => {
+      if (!d.target || !fs.existsSync(d.target)) {
+        throw new Error(
+          `Files of "${name}@${v}" (path='${d.target}') might be broken. `
+        );
+      }
+
+      if (d.entry && !fs.existsSync(d.entry)) {
+        throw new Error(
+          `Module entry of "${name}@${v}" (path='${d.target}') might be broken. `
+        );
+      }
+    });
+  });
+
+  return true;
+};
+
 const dir = env.resolvePath('.espoir');
 const fn = env.resolvePath('.espoir', 'espoir-lock.json');
 
@@ -87,6 +106,10 @@ const fn = env.resolvePath('.espoir', 'espoir-lock.json');
  * @param {LockData} data
  */
 export const writeLockFile = (data: LockData): void => {
+  if (!validateLockData(data)) {
+    return;
+  }
+
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir);
   }

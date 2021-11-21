@@ -2,17 +2,14 @@
  * @Author: Kanata You 
  * @Date: 2021-11-20 00:00:33 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-21 00:44:40
+ * @Last Modified time: 2021-11-22 00:02:18
  */
 
 import * as chalk from 'chalk';
 
 import { ExitCode } from '../../..';
 import { TaskManagerFactory } from '../..';
-import loadDependencies, {
-  Dependency,
-  SingleDependency
-} from '../utils/load-dependencies';
+import loadDependencies, { SingleDependency } from '../utils/load-dependencies';
 import { resolvePackageDeps } from '../utils/resolve-deps';
 import type { VersionInfo } from '../../../utils/request/request-npm';
 import { createLockData, LockData, useLockFileData, writeLockFile } from '../utils/lock';
@@ -33,7 +30,7 @@ const installAll = async (
   scopes: string[]
 ): Promise<ExitCode> => {
   const tasks = TaskManagerFactory<{
-    dependencies: Dependency[];
+    dependencies: SingleDependency[];
     resolvedDeps: VersionInfo[];
     diff: VersionInfo[];
     lockData: LockData;

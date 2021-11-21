@@ -16,7 +16,10 @@
     "url": "https://github.com/AntoineYANG/espoir/issues"
   },
   "main": "./bin/index.js",
-  "files": ["/bin", "/lib"],
+  "files": [
+    "/bin",
+    "/lib"
+  ],
   "bin": {
     "espoir": "./bin/index.js"
   },
@@ -29,7 +32,15 @@
   "peerDependencies": {},
   "peerDependenciesMeta": {},
   "browserslist": {
-    "production": [">0.2%", "not dead", "not op_mini all"],
-    "development": ["last 1 chrome version", "last 1 firefox version", "last 1 safari version"]
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }

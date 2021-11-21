@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-13 23:44:59 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-20 00:09:42
+ * @Last Modified time: 2021-11-22 00:00:01
  */
 
 import Logger from '../../../utils/ui/logger';
@@ -81,7 +81,7 @@ export const getAllDependencies = (pkgJSON: PackageJSON, keys: DependencyTag[]):
 /**
  * Loads all the explicit dependencies from all `package.json`.
  */
-const loadDependencies = (scopes: string[], isProd: boolean): Dependency[] => {
+const loadDependencies = (scopes: string[], isProd: boolean): SingleDependency[] => {
   const packages: PackageJSON[] = [];
 
   if (scopes.includes('root')) {
@@ -102,10 +102,25 @@ const loadDependencies = (scopes: string[], isProd: boolean): Dependency[] => {
   ].filter(Boolean) as DependencyTag[];
 
   const dependencies = packages.reduce<Dependency[]>((list, pkgJSON) => {
-    return list.concat(getAllDependencies(pkgJSON, keys));
+    const data = getAllDependencies(pkgJSON, keys);
+
+    return list.concat(data);
   }, []);
 
-  return dependencies;
+  return dependencies.map(d => {
+    if (d.versions.length !== 1) {
+      throw new Error(
+        `Incompatible required versions found for "${d.name}": [${
+          d.versions.map(v => `'${v}'`).join(', ')
+        }]. `
+      );
+    }
+
+    return {
+      name: d.name,
+      version: d.versions[0] as string
+    };
+  });;
 };
 
 export default loadDependencies;

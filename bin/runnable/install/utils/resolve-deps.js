@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-14 17:53:51
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-21 01:49:36
+ * @Last Modified time: 2021-11-22 00:01:54
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.resolvePackageDeps = void 0;
@@ -221,23 +221,13 @@ const resolveDependencies = async (dependencies, lockData, memoized = [], onProg
 /**
  * Resolves all the dependencies given in package.json.
  *
- * @param {Dependency[]} dependencies
+ * @param {SingleDependency[]} dependencies
  * @param {Readonly<LockData>} lockData
  * @param {(resolved: number, unresolved: number) => void} [onProgress]
  * @returns {Promise<VersionInfo[]>}
  */
 const resolvePackageDeps = async (dependencies, lockData, onProgress) => {
-    const items = [];
-    for (const d of dependencies) {
-        const list = (await getMinIncompatibleSet(d, lockData)).filter(res => {
-            if (res.reason ?? !res.value) {
-                throw res.reason ?? new Error(`No version of "${d.name}" satisfies "${res.version}". `);
-            }
-            return true;
-        });
-        items.push(...list.map(res => res.value));
-    }
-    const resolved = await resolveDependencies(items, lockData, [], onProgress);
+    const resolved = await resolveDependencies(dependencies, lockData, [], onProgress);
     return resolved;
 };
 exports.resolvePackageDeps = resolvePackageDeps;

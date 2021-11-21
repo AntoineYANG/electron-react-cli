@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-16 00:03:04
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-21 02:40:44
+ * @Last Modified time: 2021-11-21 23:01:58
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.readDirAll = void 0;
@@ -115,19 +115,32 @@ const batchDownload = (modules, onProgress, onEnd) => {
                 const [unPackErr] = await new Promise(resolve => {
                     try {
                         const files = (0, exports.readDirAll)(pp);
-                        files.forEach(_fn => {
-                            const _rp = path.relative(pp, _fn);
-                            const _to = path.join(dir, _rp);
-                            const _td = path.resolve(_to, '..');
-                            if (!fs.existsSync(_td)) {
-                                (0, mkdirp_1.sync)(_td);
+                        const unpack = async () => {
+                            const total = files.length;
+                            let succeeded = 0;
+                            for (const _fn of files) {
+                                const _rp = path.relative(pp, _fn);
+                                const _to = path.join(dir, _rp);
+                                const _td = path.resolve(_to, '..');
+                                const err = await new Promise(_res => {
+                                    if (!fs.existsSync(_td)) {
+                                        (0, mkdirp_1.sync)(_td);
+                                    }
+                                    fs.rename(_fn, _to, _res);
+                                });
+                                if (err) {
+                                    throw err;
+                                }
+                                succeeded += 1;
+                                updateLog(task, progress_1.ProgressTag.unpack, succeeded / total);
                             }
-                            fs.renameSync(_fn, _to);
+                            fs.rmdirSync(pp, {
+                                recursive: true
+                            });
+                        };
+                        return unpack().then(() => {
+                            resolve([null, null]);
                         });
-                        fs.rmdirSync(pp, {
-                            recursive: true
-                        });
-                        return resolve([null, null]);
                     }
                     catch (error) {
                         return resolve([error, null]);

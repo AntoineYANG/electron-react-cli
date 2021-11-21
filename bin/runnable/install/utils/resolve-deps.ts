@@ -2,14 +2,14 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 17:53:51 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-21 01:49:36
+ * @Last Modified time: 2021-11-22 00:01:54
  */
 
 import * as semver from 'semver';
 
 import { VersionInfo } from '../../../utils/request/request-npm';
 import request from '../../../utils/request';
-import { Dependency, FailedDependency, MinIncompatibleSet, SingleDependency } from './load-dependencies';
+import { Dependency, SingleDependency } from './load-dependencies';
 import { coalesceVersions } from './extra-semver';
 import { LockData } from './lock';
 
@@ -320,37 +320,18 @@ const resolveDependencies = async (
 /**
  * Resolves all the dependencies given in package.json.
  *
- * @param {Dependency[]} dependencies
+ * @param {SingleDependency[]} dependencies
  * @param {Readonly<LockData>} lockData
  * @param {(resolved: number, unresolved: number) => void} [onProgress]
  * @returns {Promise<VersionInfo[]>}
  */
 export const resolvePackageDeps = async (
-  dependencies: Dependency[],
+  dependencies: SingleDependency[],
   lockData: Readonly<LockData>,
   onProgress?: (resolved: number, unresolved: number) => void
 ): Promise<VersionInfo[]> => {
-  const items: MinIncompatibleSet = [];
-
-  for (const d of dependencies) {
-    const list = (await getMinIncompatibleSet(d, lockData)).filter(res => {
-      if (res.reason ?? !res.value) {
-        throw res.reason ?? new Error(
-          `No version of "${d.name}" satisfies "${res.version}". `
-        );
-      }
-
-      return true;
-    }) as {
-      version: string;
-      value: VersionInfo;
-    }[];
-    
-    items.push(...list.map(res => res.value));
-  }
-
   const resolved = await resolveDependencies(
-    items,
+    dependencies,
     lockData,
     [],
     onProgress

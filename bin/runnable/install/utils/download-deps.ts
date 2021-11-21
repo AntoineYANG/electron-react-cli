@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-16 00:03:04 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-21 02:40:44
+ * @Last Modified time: 2021-11-21 23:01:58
  */
 
 import { ListrRenderer, ListrTask } from 'listr2';
@@ -178,24 +178,44 @@ const batchDownload = (
           try {
             const files = readDirAll(pp);
 
-            files.forEach(_fn => {
-              const _rp = path.relative(pp, _fn);
-              const _to = path.join(dir, _rp);
+            const unpack = async (): Promise<void> => {
+              const total = files.length;
+              let succeeded = 0;
 
-              const _td = path.resolve(_to, '..');
+              for (const _fn of files) {
+                const _rp = path.relative(pp, _fn);
+                const _to = path.join(dir, _rp);
+    
+                const _td = path.resolve(_to, '..');
 
-              if (!fs.existsSync(_td)) {
-                mkdirp(_td);
+                const err = await new Promise<Error|null>(_res => {
+                  if (!fs.existsSync(_td)) {
+                    mkdirp(_td);
+                  }
+
+                  fs.rename(
+                    _fn,
+                    _to,
+                    _res
+                  );
+                });
+
+                if (err) {
+                  throw err;
+                }
+
+                succeeded += 1;
+                updateLog(task, ProgressTag.unpack, succeeded / total);
               }
+  
+              fs.rmdirSync(pp, {
+                recursive: true
+              });
+            };
 
-              fs.renameSync(_fn, _to);
+            return unpack().then(() => {
+              resolve([null, null]);
             });
-
-            fs.rmdirSync(pp, {
-              recursive: true
-            });
-            
-            return resolve([null, null]);
           } catch (error) {
             return resolve([error, null]);
           }

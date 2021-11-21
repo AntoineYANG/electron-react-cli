@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-13 23:44:59
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-20 00:09:42
+ * @Last Modified time: 2021-11-22 00:00:01
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAllDependencies = void 0;
@@ -66,8 +66,18 @@ const loadDependencies = (scopes, isProd) => {
         isProd ? null : 'devDependencies'
     ].filter(Boolean);
     const dependencies = packages.reduce((list, pkgJSON) => {
-        return list.concat((0, exports.getAllDependencies)(pkgJSON, keys));
+        const data = (0, exports.getAllDependencies)(pkgJSON, keys);
+        return list.concat(data);
     }, []);
-    return dependencies;
+    return dependencies.map(d => {
+        if (d.versions.length !== 1) {
+            throw new Error(`Incompatible required versions found for "${d.name}": [${d.versions.map(v => `'${v}'`).join(', ')}]. `);
+        }
+        return {
+            name: d.name,
+            version: d.versions[0]
+        };
+    });
+    ;
 };
 exports.default = loadDependencies;
