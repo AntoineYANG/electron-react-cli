@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-14 18:34:47
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-23 19:56:22
+ * @Last Modified time: 2021-11-24 01:42:54
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -13,7 +13,7 @@ exports.find = exports.view = void 0;
 
 const _env_1 = require("../env");
 
-const _1 = require("../..");
+const index_1 = require("./index");
 /**
  * Gets information of the package from npm registry.
  *
@@ -24,7 +24,7 @@ const _1 = require("../..");
 
 
 const view = async (name, options) => {
-  const [err, data] = await _1.default.get(`${_env_1.default.runtime.npm.registry}${name}`, {
+  const [err, data] = await index_1.default.get(`${_env_1.default.runtime.npm.registry}${name}`, {
     expiresSpan: 1_000 * 60 * 60 * 24 * 15,
     ...options,
     memo: false,
@@ -69,7 +69,7 @@ exports.view = view;
  */
 
 const find = (name, version, options) => {
-  return _1.default.get(`${_env_1.default.runtime.npm.registry}${name}/${version}`, {
+  return index_1.default.get(`${_env_1.default.runtime.npm.registry}${name}/${version}`, {
     expiresSpan: 1_000 * 60 * 60 * 24 * 15,
     ...options,
     memo: false,

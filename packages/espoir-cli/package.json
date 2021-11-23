@@ -1,6 +1,6 @@
 {
   "name": "espoir-cli",
-  "version": "0.0.0-alpha-1.4.0",
+  "version": "0.0.0-alpha-1.7.0",
   "description": "Front-end scripts.",
   "repository": {
     "type": "git",
@@ -20,11 +20,14 @@
     "/bin",
     "/lib"
   ],
+  "preferGlobal": true,
   "bin": {
     "espoir": "./bin/index.js"
   },
   "types": "./lib/index.d.ts",
-  "dependencies": {},
+  "dependencies": {
+    "commander": "^8.3.0"
+  },
   "devDependencies": {},
   "peerDependenciesMeta": {},
   "scripts": {

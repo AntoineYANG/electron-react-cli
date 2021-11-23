@@ -1,5 +1,5 @@
 import { PackageAuthor, PackageJSON } from '@env';
-import { RequestOptions } from '.';
+import { RequestOptions } from './index';
 import { LockInfo } from '@@install/utils/lock';
 export declare type VersionInfo = PackageJSON & {
     name: string;

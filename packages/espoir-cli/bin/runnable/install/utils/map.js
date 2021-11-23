@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-16 20:00:09
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-24 01:23:24
+ * @Last Modified time: 2021-11-24 01:27:09
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -180,7 +180,7 @@ const map = async (explicit, lockData, installResults, logProgress) => {
     logProgress?.(logMappingProgress(Steps.RESOLVING_PACKAGES, countResolving.finished, countResolving.total));
   }
 
-  const modulesDir = _env_1.default.resolvePath('node_modules_');
+  const modulesDir = _env_1.default.resolvePath('node_modules');
 
   if (!fs.existsSync(modulesDir)) {
     (0, mkdirp_1.sync)(modulesDir);

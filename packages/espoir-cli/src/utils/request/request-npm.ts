@@ -2,11 +2,11 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 18:34:47 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-23 19:56:22
+ * @Last Modified time: 2021-11-24 01:42:54
  */
 
 import env, { PackageAuthor, PackageJSON } from '@env';
-import request, { RequestOptions } from '.';
+import request, { RequestOptions } from './index';
 import { LockInfo } from '@@install/utils/lock';
 
 

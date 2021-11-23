@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-23 21:50:19 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-24 01:23:59
+ * @Last Modified time: 2021-11-24 01:43:55
  */
 
 const fs = require('fs');
@@ -68,7 +68,7 @@ const resolveTSAliases = async () => {
 
 const main = async () => {
   try {
-    await tscBuild();
+    // await tscBuild();
     await resolveTSAliases();
   } catch (error) {
     console.error(error);
