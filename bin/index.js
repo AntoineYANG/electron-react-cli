@@ -1,84 +1,49 @@
-"use strict";
 /*
- * @Author: Kanata You
- * @Date: 2021-11-12 15:19:20
+ * @Author: Kanata You 
+ * @Date: 2021-11-12 15:19:20 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-21 00:45:24
+ * @Last Modified time: 2021-11-13 02:03:06
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ExitCode = void 0;
-const commander_1 = require("commander");
-const install_1 = require("./runnable/install");
-const logger_1 = require("./utils/ui/logger");
-var ExitCode;
-(function (ExitCode) {
-    ExitCode[ExitCode["OK"] = 0] = "OK";
-    ExitCode[ExitCode["OPERATION_FAILED"] = 1] = "OPERATION_FAILED";
-    ExitCode[ExitCode["UNDEFINED_BEHAVIOR"] = 2] = "UNDEFINED_BEHAVIOR";
-    ExitCode[ExitCode["UNCAUGHT_EXCEPTION"] = 3] = "UNCAUGHT_EXCEPTION";
-})(ExitCode = exports.ExitCode || (exports.ExitCode = {}));
-;
-const supportedScripts = [
-    install_1.default
-];
-const program = new commander_1.Command();
-// TODO: read from package.json
-program.name('espoir-cli').version('0.0.0');
-const cli = async (argv) => {
-    let resolve = () => { };
-    const run = new Promise(_resolve => {
-        resolve = _resolve;
-    });
-    // init all the commands
-    supportedScripts.forEach(script => {
-        let thisCommand = program.command(script.fullName).description(script.description).aliases(script.aliases).usage(script.usage);
-        script.args.forEach(arg => {
-            thisCommand = thisCommand.addArgument(arg);
-        });
-        script.options.forEach(opt => {
-            thisCommand = thisCommand.addOption(opt);
-        });
-        thisCommand.action(async (...args) => {
-            const rCode = await script.exec(...args);
-            return resolve(rCode);
-        });
-    });
-    let sw = null;
-    // hooks
-    let finalize = () => { };
-    const waitForLifeCycle = new Promise(_resolve => {
-        finalize = _resolve;
-    });
-    const originTitle = process.title;
-    program.hook('preAction', (thisCommand, actionCommand) => {
-        const title = `${thisCommand.name()}/${actionCommand.name()}`;
-        process.title = title;
-        sw = logger_1.default.startStopWatch(title);
-        process.once('uncaughtException', err => {
-            logger_1.default.logError(err);
-            if (sw) {
-                logger_1.default.stopStopWatch(sw);
-            }
-            process.title = originTitle;
-            resolve(ExitCode.UNCAUGHT_EXCEPTION);
-            return finalize();
-        });
-    });
-    program.hook('postAction', (thisCommand, actionCommand) => {
-        if (sw) {
-            logger_1.default.stopStopWatch(sw);
-        }
-        process.title = originTitle;
-        return finalize();
-    });
-    program.showHelpAfterError('(add --help for additional information)');
-    program.showSuggestionAfterError(true);
-    program.parse(argv); // implicitly use process.argv and auto-detect node vs electron conventions
-    const rCode = await run;
-    await waitForLifeCycle;
-    return rCode;
+
+const fs = require('fs');
+
+const env = require('./utils/env.js');
+const install = require('./scripts/install.js');
+
+
+const CODE_UNKNOWN_COMMAND = -2;
+
+const main = async () => {
+  let code = CODE_UNKNOWN_COMMAND;
+
+  switch (process.argv[2] || '') {
+    case 'install': {
+      code = await install();
+
+      break;
+    }
+
+    default: {
+      console.error(`Unknown command: ${process.argv[2]}`);
+      
+      break;
+    }
+  }
+
+  return code;
 };
-if (require.main === module) {
-    cli().then(process.exit);
-}
-exports.default = cli;
+
+
+main().then(returnCode => {
+  // clear output
+  if (fs.existsSync(env.resolvePath('.espoir'))) {
+    // fs.rmdirSync(
+    //   env.resolvePath('.espoir'),
+    //   {
+    //     recursive: true
+    //   }
+    // );
+  }
+
+  return returnCode;
+}).then(process.exit);

@@ -16,7 +16,7 @@ const installModule = require('../utils/install-module.js');
 
 const argv = process.argv.slice(3);
 
-/** @type {import('./node-package.d').InstallOptions} */
+/** @type {import('./node-package').InstallOptions} */
 const options = {
   isProd: argv.includes('--production'),
   where:  env.resolvePath(

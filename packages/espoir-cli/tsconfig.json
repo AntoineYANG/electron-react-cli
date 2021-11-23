@@ -1,12 +1,48 @@
 {
   "extends": "../../tsconfig.base.json",
-  "include": ["src/**/*"],
-  "exclude": [
-    "test", "node_modules", "**/node_modules/*"
-  ],
+  "include": ["./src/**/*"],
+  "exclude": [],
   "compilerOptions": {
+    "baseUrl": "src",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "paths": {
+      "@src/*": ["*"],
+      "@runnable": ["runnable"],
+      "@@install": ["runnable/install"],
+      "@@install/*": ["runnable/install/*"],
+      "@request": ["utils/request"],
+      "@request/*": ["utils/request/*"],
+      "@ui/*": ["utils/ui/*"],
+      "@env": ["utils/env"]
+    },
+    "declaration": true,
+    "preserveConstEnums": true,
+    "removeComments": false,
+    "sourceMap": false,
+    "allowJs": false,
+    "resolveJsonModule": true,
+    "target": "ESNext",
+    "isolatedModules": true,
+    "allowUnusedLabels": false,
+    "alwaysStrict": true,
+    "exactOptionalPropertyTypes": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": true,
+    "strict": true,
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
+    "strictNullChecks": true,
+    "strictPropertyInitialization": true,
+    "useUnknownInCatchVariables": false,
+    "outDir": "bin",
     "rootDirs": [
-      "src/", "../../"
+      "src/", "../../node_modules/"
     ],
     "typeRoots": ["../../node_modules/@types/"],
     "declarationDir": "lib"

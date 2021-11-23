@@ -1,5 +1,5 @@
 {
-  "name": "espoir",
+  "name": "espoir-cli",
   "version": "0.0.0-alpha-1.4.0",
   "description": "Front-end scripts.",
   "repository": {
@@ -25,12 +25,11 @@
   },
   "types": "./lib/index.d.ts",
   "dependencies": {},
-  "devDependencies": {
-    "clean-webpack-plugin": "^4.0.0"
-  },
-  "optionalDependencies": {},
-  "peerDependencies": {},
+  "devDependencies": {},
   "peerDependenciesMeta": {},
+  "scripts": {
+    "build": "node ./scripts/build.js"
+  },
   "browserslist": {
     "production": [
       ">0.2%",

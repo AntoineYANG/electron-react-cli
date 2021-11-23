@@ -1,6 +1,46 @@
 {
   "dependencies": {},
   "devDependencies": {
+    "@babel/preset-env": [
+      {
+        "from": [
+          {
+            "name": "root"
+          }
+        ],
+        "to": "^7.16.4"
+      }
+    ],
+    "@babel/preset-typescript": [
+      {
+        "from": [
+          {
+            "name": "root"
+          }
+        ],
+        "to": "^7.16.0"
+      }
+    ],
+    "@types/mkdirp": [
+      {
+        "from": [
+          {
+            "name": "root"
+          }
+        ],
+        "to": "^1.0.2"
+      }
+    ],
+    "@types/needle": [
+      {
+        "from": [
+          {
+            "name": "root"
+          }
+        ],
+        "to": "^2.5.2"
+      }
+    ],
     "@types/node": [
       {
         "from": [
@@ -11,6 +51,16 @@
         "to": "^16.11.7"
       }
     ],
+    "@types/semver": [
+      {
+        "from": [
+          {
+            "name": "root"
+          }
+        ],
+        "to": "^7.3.9"
+      }
+    ],
     "@typescript-eslint/eslint-plugin": [
       {
         "from": [
@@ -18,7 +68,7 @@
             "name": "root"
           }
         ],
-        "to": "^5.3.1"
+        "to": "^5.4.0"
       }
     ],
     "@typescript-eslint/parser": [
@@ -28,7 +78,7 @@
             "name": "root"
           }
         ],
-        "to": "^5.3.1"
+        "to": "^5.4.0"
       }
     ],
     "chalk": [
@@ -39,6 +89,16 @@
           }
         ],
         "to": "^4.1.2"
+      }
+    ],
+    "commander": [
+      {
+        "from": [
+          {
+            "name": "root"
+          }
+        ],
+        "to": "^8.3.0"
       }
     ],
     "compressing": [
@@ -68,10 +128,20 @@
             "name": "root"
           }
         ],
-        "to": "4.3.8"
+        "to": "^7.0.4"
       }
     ],
     "jest": [
+      {
+        "from": [
+          {
+            "name": "root"
+          }
+        ],
+        "to": "^27.3.1"
+      }
+    ],
+    "jest-config": [
       {
         "from": [
           {
@@ -88,7 +158,17 @@
             "name": "root"
           }
         ],
-        "to": "^11.2.6"
+        "to": "^12.0.2"
+      }
+    ],
+    "listr2": [
+      {
+        "from": [
+          {
+            "name": "root"
+          }
+        ],
+        "to": "^3.13.4"
       }
     ],
     "mkdirp": [
@@ -111,6 +191,16 @@
         "to": "^3.0.0"
       }
     ],
+    "nodemon": [
+      {
+        "from": [
+          {
+            "name": "root"
+          }
+        ],
+        "to": "^2.0.15"
+      }
+    ],
     "semver": [
       {
         "from": [
@@ -119,6 +209,16 @@
           }
         ],
         "to": "^7.3.5"
+      }
+    ],
+    "ts-jest": [
+      {
+        "from": [
+          {
+            "name": "root"
+          }
+        ],
+        "to": "^27.0.7"
       }
     ],
     "ts-loader": [
@@ -138,7 +238,7 @@
             "name": "root"
           }
         ],
-        "to": "^4.4.4"
+        "to": "^4.5.2"
       }
     ],
     "webpack": [
@@ -148,7 +248,7 @@
             "name": "root"
           }
         ],
-        "to": "^5.63.0"
+        "to": "^5.64.1"
       }
     ],
     "webpack-cli": [
@@ -165,7 +265,7 @@
       {
         "from": [
           {
-            "name": "espoir-cli"
+            "name": "espoir-cli copy"
           }
         ],
         "to": "^4.0.0"
