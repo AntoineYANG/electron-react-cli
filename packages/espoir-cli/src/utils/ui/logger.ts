@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 02:35:46 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-23 19:56:06
+ * @Last Modified time: 2021-11-24 16:01:56
  */
 
 import * as fs from 'fs';
@@ -167,7 +167,7 @@ abstract class Logger {
       );
     }
 
-    this.saveLog('preference', `"${label}" begins. `);
+    this.saveLog('performance', `"${label}" begins. `);
 
     return new StopWatch(label);
   }
@@ -186,7 +186,7 @@ abstract class Logger {
       );
     }
 
-    this.saveLog('preference', `"${sw.label}" finished. (total cost: ${time})`);
+    this.saveLog('performance', `"${sw.label}" finished. (total cost: ${time})`);
 
     return finalCost;
   }

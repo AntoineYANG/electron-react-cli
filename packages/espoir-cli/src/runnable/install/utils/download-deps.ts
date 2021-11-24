@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-16 00:03:04 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-23 20:01:31
+ * @Last Modified time: 2021-11-24 15:35:28
  */
 
 import { ListrRenderer, ListrTask } from 'listr2';
@@ -123,6 +123,15 @@ const batchDownload = (
       
       // download the .tgz file
 
+      if (fs.existsSync(dir)) {
+        fs.rmSync(dir, {
+          force: true,
+          recursive: true
+        });
+      }
+
+      mkdirp(dir);
+
       const [downloadErr, size] = await request.download(
         url,
         p,
@@ -167,11 +176,9 @@ const batchDownload = (
 
       // unpack ths downloaded package
 
-      const pp = path.join(dir, 'package');
+      const pp = path.join(dir, fs.readdirSync(dir)?.[0] as string);
       
       if (fs.existsSync(pp)) {
-        // some packages such as type declarations do not have a `/package` directory
-
         updateLog(task, ProgressTag.unpack, 0);
 
         const [unPackErr] = await new Promise<[Error, null] | [null, null]>(resolve => {

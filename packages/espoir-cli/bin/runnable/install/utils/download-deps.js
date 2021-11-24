@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-16 00:03:04
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-23 20:01:31
+ * @Last Modified time: 2021-11-24 15:35:28
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -101,6 +101,14 @@ const batchDownload = (modules, onProgress, onEnd) => {
 
       updateLog(task, progress_1.ProgressTag.prepare); // download the .tgz file
 
+      if (fs.existsSync(dir)) {
+        fs.rmSync(dir, {
+          force: true,
+          recursive: true
+        });
+      }
+
+      (0, mkdirp_1.sync)(dir);
       const [downloadErr, size] = await _request_1.default.download(url, p, {}, (done, total) => {
         updateLog(task, progress_1.ProgressTag.download, total ? done / total : 0);
       });
@@ -136,10 +144,9 @@ const batchDownload = (modules, onProgress, onEnd) => {
       } // unpack ths downloaded package
 
 
-      const pp = path.join(dir, 'package');
+      const pp = path.join(dir, fs.readdirSync(dir)?.[0]);
 
       if (fs.existsSync(pp)) {
-        // some packages such as type declarations do not have a `/package` directory
         updateLog(task, progress_1.ProgressTag.unpack, 0);
         const [unPackErr] = await new Promise(resolve => {
           try {

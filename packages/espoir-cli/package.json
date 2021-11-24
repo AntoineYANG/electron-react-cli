@@ -1,6 +1,6 @@
 {
   "name": "espoir-cli",
-  "version": "0.0.0-alpha-1.7.0",
+  "version": "0.0.0-alpha-1.8.0",
   "description": "Front-end scripts.",
   "repository": {
     "type": "git",
@@ -26,9 +26,25 @@
   },
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "commander": "^8.3.0"
+    "chalk": "^4.1.2",
+    "commander": "^8.3.0",
+    "compressing": "^1.5.1",
+    "listr2": "^3.13.5",
+    "log-update": "^4.0.0",
+    "mkdirp": "^1.0.4",
+    "needle": "^3.0.0",
+    "semver": "^7.3.5"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@babel/core": "^7.16.0",
+    "@types/mkdirp": "^1.0.2",
+    "@types/needle": "^2.5.2",
+    "@types/node": "^16.11.10",
+    "@types/semver": "^7.3.9",
+    "babel-plugin-module-resolver": "^4.1.0",
+    "jest": "^27.3.1",
+    "typescript": "^4.5.2"
+  },
   "peerDependenciesMeta": {},
   "scripts": {
     "build": "node ./scripts/build.js"
