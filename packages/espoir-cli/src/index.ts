@@ -2,13 +2,15 @@
  * @Author: Kanata You 
  * @Date: 2021-11-12 15:19:20 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-23 19:08:09
+ * @Last Modified time: 2021-11-30 18:46:34
  */
 
 import { Command } from 'commander';
 
 import RunnableScript from '@runnable';
 import Install from '@@install';
+import RunScript from '@@run';
+import env from '@env';
 import Logger, { StopWatch } from '@ui/logger';
 
 
@@ -20,16 +22,16 @@ export enum ExitCode {
 };
 
 const supportedScripts: Array<RunnableScript> = [
-  Install
+  Install,
+  RunScript
 ];
 
 const program = new Command();
 
-// TODO: read from package.json
 program.name(
-  'espoir-cli'
+  env.runtime.espoir.name
 ).version(
-  '0.0.0'
+  env.runtime.espoir.version
 );
 
 const cli = async (argv?: string[]) => {

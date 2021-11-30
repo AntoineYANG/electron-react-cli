@@ -26,7 +26,7 @@ export type FailedDependency = SingleDependency & {
 export type MinIncompatibleSet = SingleDependency[];
 
 export type DependencyTag = (
-  'dependencies' | 'devDependencies'
+  'dependencies' | 'devDependencies' | 'peerDependencies'
 );
 
 export type DependencySet = {

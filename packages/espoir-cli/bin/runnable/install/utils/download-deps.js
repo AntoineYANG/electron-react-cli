@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-16 00:03:04
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-24 15:35:28
+ * @Last Modified time: 2021-11-30 21:30:17
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -81,8 +81,21 @@ const batchDownload = (modules, onProgress, onEnd) => {
     const url = mod.dist.tarball;
     const fn = url.split(/\/+/).reverse()[0];
     const p = path.join(dir, fn);
+    const refreshLog = {
+      current: () => {},
+      timer: null
+    };
+    refreshLog.timer = setInterval(() => {
+      refreshLog.current();
+    }, 100);
 
     const updateLog = (task, tag, value) => {
+      if ([progress_1.ProgressTag.done, progress_1.ProgressTag.failed].includes(tag)) {
+        if (refreshLog.timer) {
+          clearInterval(refreshLog.timer);
+        }
+      }
+
       state[i] = tag;
       progress_1.default.set(name, tag, value ?? -1);
 
@@ -91,6 +104,8 @@ const batchDownload = (modules, onProgress, onEnd) => {
       } else {
         task.title = undefined;
       }
+
+      refreshLog.current = () => updateLog(task, tag, value);
     };
 
     const run = async (_ctx, task) => {

@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-20 22:17:42 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-23 20:20:00
+ * @Last Modified time: 2021-11-30 20:44:41
  */
 
 import { ExitCode } from '@src/index';
@@ -11,6 +11,7 @@ import { TaskManagerFactory } from '@runnable';
 import type { SingleDependency } from '@@install/utils/load-dependencies';
 import type { LockData } from '@@install/utils/lock';
 import type { InstallResult } from '@@install/utils/download-deps';
+import { CliLink } from '@@install/utils/link-cli';
 
 import viewDepsFromArgs from './tasks/view-deps-from-args';
 import diffLocalFiles from './tasks/diff-local-files';
@@ -19,6 +20,7 @@ import createLinks from './tasks/create-links';
 import saveLockFile from './tasks/save-lock-file';
 import saveFailMsg from './tasks/save-fail-msg';
 import savePackageJSON from './tasks/save-package-json';
+import linkExecutable from './tasks/link-executable';
 
 
 interface Context {
@@ -27,6 +29,7 @@ interface Context {
   diff: VersionInfo[];
   lockData: LockData;
   installResults: InstallResult[];
+  bin: CliLink[];
 };
 
 /**
@@ -49,6 +52,7 @@ const installAndSave = async (
     diffLocalFiles<Context>(),
     installResolvedDeps<Context>(),
     createLinks<Context>(),
+    linkExecutable<Context>(),
     saveLockFile<Context>(),
     saveFailMsg<Context>(),
     savePackageJSON<Context>(scopes, tag)

@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-12 15:31:24 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-24 01:08:18
+ * @Last Modified time: 2021-11-30 21:09:45
  */
 
 import * as path from 'path';
@@ -19,16 +19,32 @@ export type PackageAuthor = string | Partial<{
 }>;
 
 export type PackageJSON = Partial<{
+  name: string;
+  version: string;
   private: boolean;
   workspaces: string[];
   author: PackageAuthor;
   contributors: PackageAuthor[];
+  bin: string | {
+    [name: string]: string;
+  };
   scripts: {
     [script: string]: string;
   };
   license: string;
+  peerDependenciesMeta: Record<string, { optional: boolean }>;
   [otherConfig: string]: any;
 } & Record<DependencyTag, DependencySet>>;
+
+
+// ************************************ //
+//                 THIS                 //
+// ************************************ //
+
+const thisPkg = require('espoir-cli/package.json') as {
+  name: string;
+  version: string;
+};
 
 // ************************************ //
 //                CONFIGS               //
@@ -146,6 +162,10 @@ const env = {
   resolvePathInPackage,
   runtime: {
     shell:   process.platform === 'win32' ? (process.env['ComSpec'] || 'cmd') : (process.env['SHELL'] || 'sh'),
+    espoir: {
+      name: thisPkg.name,
+      version: thisPkg.version
+    },
     npm: {
       registry: (() => {
         try {

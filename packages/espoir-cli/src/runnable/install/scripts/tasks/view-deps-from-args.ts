@@ -16,6 +16,14 @@ import type { SingleDependency } from '@@install/utils/load-dependencies';
 import type { VersionInfo } from '@request/request-npm';
 
 
+/**
+ * This action will parse an array of strings as dependencies and resolve their dependencies.
+ * `Context.dependencies`, `Context.lockData` and `Context.resolvedDeps` will be assigned.
+ *
+ * @template T context type
+ * @param {string[]} modules
+ * @returns {ListrTask<T, typeof DefaultRenderer>}
+ */
 const viewDepsFromArgs = <T extends {
   dependencies: SingleDependency[];
   resolvedDeps: VersionInfo[];

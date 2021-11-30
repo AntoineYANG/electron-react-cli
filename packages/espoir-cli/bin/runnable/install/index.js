@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-14 02:00:17
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-23 20:00:35
+ * @Last Modified time: 2021-11-30 18:53:59
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -25,7 +25,7 @@ const Install = {
   fullName: 'install',
   displayName: 'install',
   aliases: ['i', 'ins'],
-  description: 'install modules',
+  description: 'Install modules',
   usage: '[option] [module-names...] [workspace]',
   args: [new commander_1.Argument('[module-names...]', 'NPM package(s) to install')],
   options: [new commander_1.Option('-S, --save', 'install and save as package dependencies').default(true), new commander_1.Option('-D, --save-dev', 'install and save as package devDependencies').default(false), new commander_1.Option('--production').default(false), new commander_1.Option('-w, --workspace <workspace...>', 'included packages in the current workspace').choices(installTarget).default(installTarget, 'all packages')],

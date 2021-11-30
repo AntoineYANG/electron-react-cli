@@ -27,7 +27,7 @@
     "commander": "^8.3.0",
     "compressing": "^1.5.1",
     "eslint": "^8.2.0",
-    "espoir-cli": "^0.0.0-alpha-1.7.0",
+    "espoir-cli": "0.0.0-alpha-1.8.0",
     "husky": "^7.0.4",
     "jest": "^27.3.1",
     "jest-config": "^27.3.1",
@@ -48,8 +48,5 @@
       "pre-commit": "node ./hooks/pre-commit.js --color",
       "commit-msg": "node ./hooks/commit-msg.js $HUSKY_GIT_PARAMS"
     }
-  },
-  "dependencies": {
-    "babel-plugin-module-resolver": "^4.1.0"
   }
 }

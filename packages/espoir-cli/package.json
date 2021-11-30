@@ -29,6 +29,7 @@
     "chalk": "^4.1.2",
     "commander": "^8.3.0",
     "compressing": "^1.5.1",
+    "enquirer": "^2.3.6",
     "listr2": "^3.13.5",
     "log-update": "^4.0.0",
     "mkdirp": "^1.0.4",
@@ -37,17 +38,21 @@
   },
   "devDependencies": {
     "@babel/core": "^7.16.0",
+    "@jest/globals": "^27.3.1",
     "@types/mkdirp": "^1.0.2",
     "@types/needle": "^2.5.2",
     "@types/node": "^16.11.10",
     "@types/semver": "^7.3.9",
     "babel-plugin-module-resolver": "^4.1.0",
     "jest": "^27.3.1",
+    "nodemon": "^2.0.15",
     "typescript": "^4.5.2"
   },
+  "peerDependencies": {},
   "peerDependenciesMeta": {},
   "scripts": {
-    "build": "node ./scripts/build.js"
+    "build": "node ./scripts/build.js && node ./scripts/resolve.js",
+    "dev": "nodemon -w ./src/**/*.ts -e ts --exec \"npm run build\""
   },
   "browserslist": {
     "production": [

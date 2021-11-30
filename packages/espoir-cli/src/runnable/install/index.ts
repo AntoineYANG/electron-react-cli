@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 02:00:17 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-23 20:00:35
+ * @Last Modified time: 2021-11-30 18:53:59
  */
 
 import { Argument, Option } from 'commander';
@@ -17,13 +17,13 @@ import installAndSave from '@@install/scripts/install-and-save';
 const installTarget = [
   ...env.packages,
   'root'
-]
+];
 
 const Install: RunnableScript = {
   fullName: 'install',
   displayName: 'install',
   aliases: ['i', 'ins'],
-  description: 'install modules',
+  description: 'Install modules',
   usage: '[option] [module-names...] [workspace]',
   args: [
     new Argument(

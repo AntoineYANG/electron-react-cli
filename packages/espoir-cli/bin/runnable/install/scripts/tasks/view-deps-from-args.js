@@ -17,6 +17,15 @@ const parse_dependencies_1 = require("../../utils/parse-dependencies");
 const lock_1 = require("../../utils/lock");
 
 const resolve_deps_1 = require("../../utils/resolve-deps");
+/**
+ * This action will parse an array of strings as dependencies and resolve their dependencies.
+ * `Context.dependencies`, `Context.lockData` and `Context.resolvedDeps` will be assigned.
+ *
+ * @template T context type
+ * @param {string[]} modules
+ * @returns {ListrTask<T, typeof DefaultRenderer>}
+ */
+
 
 const viewDepsFromArgs = modules => ({
   title: 'Viewing dependencies.',

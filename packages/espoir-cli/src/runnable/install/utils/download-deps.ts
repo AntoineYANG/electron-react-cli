@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-16 00:03:04 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-24 15:35:28
+ * @Last Modified time: 2021-11-30 21:30:17
  */
 
 import { ListrRenderer, ListrTask } from 'listr2';
@@ -94,12 +94,27 @@ const batchDownload = (
     const url = mod.dist.tarball;
     const fn = url.split(/\/+/).reverse()[0] as string;
     const p = path.join(dir, fn);
+
+    const refreshLog = {
+      current: () => {},
+      timer: null as NodeJS.Timer | null
+    };
+
+    refreshLog.timer = setInterval(() => {
+      refreshLog.current();
+    }, 100);
     
     const updateLog = (
       task: TaskWrapper<unknown, typeof ListrRenderer>,
       tag: ProgressTag,
       value?: number
     ): void => {
+      if ([ProgressTag.done, ProgressTag.failed].includes(tag)) {
+        if (refreshLog.timer) {
+          clearInterval(refreshLog.timer);
+        }
+      }
+      
       state[i] = tag;
       progress.set(name, tag, value ?? -1);
       
@@ -108,6 +123,8 @@ const batchDownload = (
       } else {
         task.title = undefined as unknown as string;
       }
+
+      refreshLog.current = () => updateLog(task, tag, value);
     };
     
     const run = async (

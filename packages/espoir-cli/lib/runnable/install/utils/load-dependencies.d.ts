@@ -11,7 +11,7 @@ export declare type FailedDependency = SingleDependency & {
     reasons: Error[];
 };
 export declare type MinIncompatibleSet = SingleDependency[];
-export declare type DependencyTag = ('dependencies' | 'devDependencies');
+export declare type DependencyTag = ('dependencies' | 'devDependencies' | 'peerDependencies');
 export declare type DependencySet = {
     [name: string]: string;
 };

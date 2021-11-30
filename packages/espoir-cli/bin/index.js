@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-12 15:19:20
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-23 19:08:09
+ * @Last Modified time: 2021-11-30 18:46:34
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -14,6 +14,10 @@ exports.ExitCode = void 0;
 const commander_1 = require("commander");
 
 const __install_1 = require("./runnable/install");
+
+const __run_1 = require("./runnable/run-script");
+
+const _env_1 = require("./utils/env");
 
 const logger_1 = require("./utils/ui/logger");
 
@@ -27,10 +31,9 @@ var ExitCode;
 })(ExitCode = exports.ExitCode || (exports.ExitCode = {}));
 
 ;
-const supportedScripts = [__install_1.default];
-const program = new commander_1.Command(); // TODO: read from package.json
-
-program.name('espoir-cli').version('0.0.0');
+const supportedScripts = [__install_1.default, __run_1.default];
+const program = new commander_1.Command();
+program.name(_env_1.default.runtime.espoir.name).version(_env_1.default.runtime.espoir.version);
 
 const cli = async argv => {
   let resolve = () => {};

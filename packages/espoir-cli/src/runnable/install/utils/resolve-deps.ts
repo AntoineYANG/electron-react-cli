@@ -2,14 +2,14 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 17:53:51 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-23 20:14:52
+ * @Last Modified time: 2021-11-30 18:20:04
  */
 
 import * as semver from 'semver';
 
 import { VersionInfo } from '@request/request-npm';
 import request from '@request';
-import { Dependency, SingleDependency } from './load-dependencies';
+import { Dependency, DependencySet, SingleDependency } from './load-dependencies';
 import { coalesceVersions } from './extra-semver';
 import { LockData } from './lock';
 
@@ -257,7 +257,23 @@ const resolveDependencies = async (
   
     // collect the dependencies of the entered items
     entering.forEach(item => {
-      Object.entries(item.dependencies ?? {}).forEach(([name, range]) => {
+      const deps: DependencySet = {
+        ...item.dependencies
+      };
+
+      Object.entries(item.peerDependencies ?? {}).forEach(([name, range]) => {
+        if (deps[name]) {
+          return;
+        }
+
+        const required = item.peerDependenciesMeta?.[name]?.optional ?? true;
+
+        if (required) {
+          deps[name] = range;
+        }
+      });
+
+      Object.entries(deps).forEach(([name, range]) => {
         const satisfied = data.find(
           d => d.name === name && semver.satisfies(d.version, range)
         );

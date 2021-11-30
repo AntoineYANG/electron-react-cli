@@ -11,6 +11,8 @@
       "@runnable": ["runnable"],
       "@@install": ["runnable/install"],
       "@@install/*": ["runnable/install/*"],
+      "@@run": ["runnable/run-script"],
+      "@@run/*": ["runnable/run-script/*"],
       "@request": ["utils/request"],
       "@request/*": ["utils/request/*"],
       "@ui/*": ["utils/ui/*"],
