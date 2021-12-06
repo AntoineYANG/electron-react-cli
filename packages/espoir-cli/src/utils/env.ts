@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-12 15:31:24 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-30 21:09:45
+ * @Last Modified time: 2021-12-06 19:18:38
  */
 
 import * as path from 'path';
@@ -44,18 +44,6 @@ export type PackageJSON = Partial<{
 const thisPkg = require('espoir-cli/package.json') as {
   name: string;
   version: string;
-};
-
-// ************************************ //
-//                CONFIGS               //
-// ************************************ //
-
-export type EnvConfigs = {
-  cacheDir: string;
-};
-
-const configs: EnvConfigs = {
-  cacheDir: path.resolve(__filename, '..', '..', '..'), // FIXME:
 };
 
 // ************************************ //
@@ -152,6 +140,70 @@ const resolvePathInPackage = (
 ): string => path.resolve(rootDir, 'packages', packageName, ...pathSegments);
 
 
+// ************************************ //
+//                CONFIGS               //
+// ************************************ //
+
+export type EspoirCommitConfigs = {
+  /** Types allowed to use */
+  types: string[];
+  /** Whether this commit can be run without changelog or not */
+  optional: boolean;
+  /** Valid format of commit message */
+  format: string;
+  /** Scopes allowed to use */
+  scopes?: string[];
+  /** Configurations of commit message subject */
+  subject: {
+    /** Minimum string length */
+    min: number;
+    /** Maximum string length */
+    max: number;
+    /** Valid pattern */
+    pattern: RegExp;
+  };
+};
+
+export type EspoirConfigs = {
+  cacheDir: string;
+  /** Configuration of espoir contribute feature */
+  commit: EspoirCommitConfigs;
+};
+
+const configFile = [
+  'espoir.config.js',
+  'espoir.config.json'
+].map(fn => path.join(rootDir, fn)).find(fs.existsSync);
+
+const configFileData: Partial<EspoirConfigs> = configFile ? require(configFile) : {};
+
+const configs: EspoirConfigs = {
+  cacheDir: path.resolve(__filename, '..', '..', '..'), // FIXME:
+  commit: {
+    types: configFileData.commit?.types ?? [
+      'feature',
+      'bugfix',
+      'refactor',
+      'performance',
+      'chore'
+    ],
+    optional: configFileData.commit?.optional ?? false,
+    format: configFileData.commit?.format ?? '<type>(<scope?>): <subject>',
+    subject: {
+      min: configFileData.commit?.subject?.min ?? 4,
+      max: configFileData.commit?.subject?.max ?? 40,
+      pattern: configFileData.commit?.subject?.pattern ? (
+        typeof (configFileData.commit.subject.pattern as string | RegExp) === 'string' ? (
+          new RegExp(configFileData.commit.subject.pattern)
+        ) : (
+          configFileData.commit.subject.pattern
+        )
+      ) : /^.*$/
+    }
+  }
+};
+
+
 const env = {
   rootDir,
   rootPkg,
@@ -179,7 +231,7 @@ const env = {
       version: process.version
     }
   },
-  configs: configs as Readonly<EnvConfigs>
+  configs: configs as Readonly<EspoirConfigs>
 };
 
 

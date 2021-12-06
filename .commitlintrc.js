@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-11 16:15:45 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-11 16:33:47
+ * @Last Modified time: 2021-12-02 21:27:45
  */
 
 const Configuration = {
@@ -47,8 +47,7 @@ const Configuration = {
   /*
    * Custom URL to show upon failure
    */
-  helpUrl:
-    'https://github.com/conventional-changelog/commitlint/#what-is-commitlint'
+  helpUrl: 'https://github.com/conventional-changelog/commitlint/#what-is-commitlint'
 };
 
 

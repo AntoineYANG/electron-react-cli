@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-12 15:31:24
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-30 21:09:45
+ * @Last Modified time: 2021-12-06 19:09:34
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -19,14 +19,10 @@ const child_process_1 = require("child_process"); // ***************************
 // ************************************ //
 
 
-const thisPkg = require('espoir-cli/package.json');
-
-const configs = {
-  cacheDir: path.resolve(__filename, '..', '..', '..') // FIXME:
-
-}; // ************************************ //
+const thisPkg = require('espoir-cli/package.json'); // ************************************ //
 //                 ROOT                 //
 // ************************************ //
+
 
 const locateRoot = (dir = process.cwd()) => {
   const pkgJSON = path.join(dir, 'package.json');
@@ -109,6 +105,21 @@ const resolvePath = (...pathSegments) => path.resolve(rootDir, ...pathSegments);
 
 const resolvePathInPackage = (packageName, ...pathSegments) => path.resolve(rootDir, 'packages', packageName, ...pathSegments);
 
+const configFile = ['espoir.config.js', 'espoir.config.json'].map(fn => path.join(rootDir, fn)).find(fs.existsSync);
+const configFileData = configFile ? require(configFile) : {};
+const configs = {
+  cacheDir: path.resolve(__filename, '..', '..', '..'),
+  commit: {
+    types: configFileData.commit?.types ?? ['feature', 'bugfix', 'refactor', 'performance', 'chore'],
+    optional: configFileData.commit?.optional ?? false,
+    format: configFileData.commit?.format ?? '<type>(<scope>)?: <subject>',
+    subject: {
+      min: configFileData.commit?.subject?.min ?? 4,
+      max: configFileData.commit?.subject?.max ?? 40,
+      pattern: configFileData.commit?.subject?.pattern ? typeof configFileData.commit.subject.pattern === 'string' ? new RegExp(configFileData.commit.subject.pattern) : configFileData.commit.subject.pattern : /^.*$/
+    }
+  }
+};
 const env = {
   rootDir,
   rootPkg,

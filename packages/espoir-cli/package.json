@@ -1,7 +1,8 @@
 {
   "name": "espoir-cli",
-  "version": "0.0.0-alpha-1.8.0",
+  "version": "0.0.0-alpha-1.9.0",
   "description": "Front-end scripts.",
+  "keywords": [],
   "repository": {
     "type": "git",
     "url": "https://github.com/AntoineYANG/espoir.git",
@@ -10,15 +11,18 @@
   "author": "kanatayou",
   "license": "MIT",
   "engines": {
-    "node": ">=15.5.1"
+    "node": ">=12.0.0"
   },
   "bugs": {
     "url": "https://github.com/AntoineYANG/espoir/issues"
   },
   "main": "./bin/index.js",
   "files": [
-    "/bin",
-    "/lib"
+    "LICENSE",
+    "README.md",
+    "CHANGELOG-*.md",
+    "/bin/",
+    "lib"
   ],
   "preferGlobal": true,
   "bin": {
@@ -30,6 +34,7 @@
     "commander": "^8.3.0",
     "compressing": "^1.5.1",
     "enquirer": "^2.3.6",
+    "inquirer": "^8.2.0",
     "listr2": "^3.13.5",
     "log-update": "^4.0.0",
     "mkdirp": "^1.0.4",
@@ -39,6 +44,7 @@
   "devDependencies": {
     "@babel/core": "^7.16.0",
     "@jest/globals": "^27.3.1",
+    "@types/inquirer": "^8.1.3",
     "@types/mkdirp": "^1.0.2",
     "@types/needle": "^2.5.2",
     "@types/node": "^16.11.10",

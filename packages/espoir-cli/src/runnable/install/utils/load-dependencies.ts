@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-13 23:44:59 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-23 20:14:05
+ * @Last Modified time: 2021-12-02 17:58:02
  */
 
 import Logger from '@ui/logger';
@@ -98,6 +98,7 @@ const loadDependencies = (scopes: string[], isProd: boolean): SingleDependency[]
 
   const keys = [
     'dependencies',
+    'peerDependencies',
     isProd ? null : 'devDependencies'
   ].filter(Boolean) as DependencyTag[];
 

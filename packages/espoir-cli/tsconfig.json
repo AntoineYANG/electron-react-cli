@@ -13,6 +13,8 @@
       "@@install/*": ["runnable/install/*"],
       "@@run": ["runnable/run-script"],
       "@@run/*": ["runnable/run-script/*"],
+      "@@contribute": ["runnable/contribute"],
+      "@@contribute/*": ["runnable/contribute/*"],
       "@request": ["utils/request"],
       "@request/*": ["utils/request/*"],
       "@ui/*": ["utils/ui/*"],

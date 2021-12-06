@@ -23,8 +23,29 @@ export declare type PackageJSON = Partial<{
     }>;
     [otherConfig: string]: any;
 } & Record<DependencyTag, DependencySet>>;
-export declare type EnvConfigs = {
+export declare type EspoirCommitConfigs = {
+    /** Types allowed to use */
+    types: string[];
+    /** Whether this commit can be run without changelog or not */
+    optional: boolean;
+    /** Valid format of commit message */
+    format: string;
+    /** Scopes allowed to use */
+    scopes?: string[];
+    /** Configurations of commit message subject */
+    subject: {
+        /** Minimum string length */
+        min: number;
+        /** Maximum string length */
+        max: number;
+        /** Valid pattern */
+        pattern: RegExp;
+    };
+};
+export declare type EspoirConfigs = {
     cacheDir: string;
+    /** Configuration of espoir contribute feature */
+    commit: EspoirCommitConfigs;
 };
 declare const env: {
     rootDir: string;
@@ -85,6 +106,6 @@ declare const env: {
             version: string;
         };
     };
-    configs: Readonly<EnvConfigs>;
+    configs: Readonly<EspoirConfigs>;
 };
 export default env;

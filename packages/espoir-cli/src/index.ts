@@ -2,16 +2,18 @@
  * @Author: Kanata You 
  * @Date: 2021-11-12 15:19:20 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-30 18:46:34
+ * @Last Modified time: 2021-12-02 18:52:45
  */
 
 import { Command } from 'commander';
 
 import RunnableScript from '@runnable';
-import Install from '@@install';
-import RunScript from '@@run';
 import env from '@env';
 import Logger, { StopWatch } from '@ui/logger';
+
+import Install from '@@install';
+import RunScript from '@@run';
+import Contribute from '@@contribute';
 
 
 export enum ExitCode {
@@ -23,7 +25,8 @@ export enum ExitCode {
 
 const supportedScripts: Array<RunnableScript> = [
   Install,
-  RunScript
+  RunScript,
+  Contribute
 ];
 
 const program = new Command();
@@ -31,7 +34,8 @@ const program = new Command();
 program.name(
   env.runtime.espoir.name
 ).version(
-  env.runtime.espoir.version
+  env.runtime.espoir.version,
+  '-V, --version, -v, --v'
 );
 
 const cli = async (argv?: string[]) => {

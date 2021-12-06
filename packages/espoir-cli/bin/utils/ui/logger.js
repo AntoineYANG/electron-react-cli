@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-14 02:35:46
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-24 16:01:56
+ * @Last Modified time: 2021-12-06 18:20:22
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -134,11 +134,14 @@ class Logger {
   }
 
   static logError(err) {
+    const line = fs.readFileSync(this.path, {
+      encoding: 'utf-8'
+    }).split('\n').length + 1;
     this.saveLog('error', err.message + '\n' + err.stack ?? '');
 
     if (this.level.includes('error')) {
       console.error(chalk`{redBright {bold \u2716 }${err.name}: ${err.message} }`);
-      console.info(chalk`{blue 🗊 See ${logFile} for more details.}`);
+      console.info(chalk`{blue 🗊 See ${logFile}:${line}:1 for more details.}`);
       return true;
     }
 

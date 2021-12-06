@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-13 23:44:59
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-23 20:14:05
+ * @Last Modified time: 2021-12-02 17:58:02
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -72,7 +72,7 @@ const loadDependencies = (scopes, isProd) => {
     }
   });
 
-  const keys = ['dependencies', isProd ? null : 'devDependencies'].filter(Boolean);
+  const keys = ['dependencies', 'peerDependencies', isProd ? null : 'devDependencies'].filter(Boolean);
   const dependencies = packages.reduce((list, pkgJSON) => {
     const data = (0, exports.getAllDependencies)(pkgJSON, keys);
     return list.concat(data);
