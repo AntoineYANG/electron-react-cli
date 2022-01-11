@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-12 15:31:24
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-12-06 19:09:34
+ * @Last Modified time: 2021-12-06 19:18:38
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -112,7 +112,7 @@ const configs = {
   commit: {
     types: configFileData.commit?.types ?? ['feature', 'bugfix', 'refactor', 'performance', 'chore'],
     optional: configFileData.commit?.optional ?? false,
-    format: configFileData.commit?.format ?? '<type>(<scope>)?: <subject>',
+    format: configFileData.commit?.format ?? '<type>(<scope?>): <subject>',
     subject: {
       min: configFileData.commit?.subject?.min ?? 4,
       max: configFileData.commit?.subject?.max ?? 40,

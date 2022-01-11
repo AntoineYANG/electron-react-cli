@@ -3,12 +3,14 @@
  * @Author: Kanata You
  * @Date: 2021-12-02 18:21:07
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-12-06 19:17:04
+ * @Last Modified time: 2022-01-11 19:27:56
  */
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+const child_process_1 = require("child_process");
 
 const index_1 = require("../../../..");
 
@@ -17,6 +19,8 @@ const logger_1 = require("../../../utils/ui/logger");
 const git_preset_1 = require("./tasks/git-preset");
 
 const changlog_1 = require("./tasks/changlog");
+
+const push_remote_1 = require("./tasks/push-remote");
 /**
  * Modify the changes and commit them.
  *
@@ -34,8 +38,10 @@ const commit = async () => {
   }
 
   const log = await (0, changlog_1.default)(gitState);
-  console.log(log);
-  process.exit(-1);
+  const res = (0, child_process_1.execSync)(`git commit -m "${log.replace('"', '\"')}"`);
+  logger_1.default.info(res);
+  const resPush = await (0, push_remote_1.default)(gitState);
+  logger_1.default.info(resPush);
   return index_1.ExitCode.OK;
 };
 

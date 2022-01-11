@@ -7,7 +7,7 @@ export declare type CommitMsg = {
 /**
  * Initialize context with git info.
  *
- * @returns {Promise<string>}
+ * @returns {Promise<string>} commit message
  */
 declare const changelog: (state: GitStatus) => Promise<string>;
 export default changelog;

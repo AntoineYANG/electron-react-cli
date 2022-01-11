@@ -1,6 +1,6 @@
-# espoir-cli v0.x
+# root v1.x
 
-## 0.0.0 (2022/1/11)
+## 1.0.0 (2022/1/11)
 
 _\<version description\>_
 

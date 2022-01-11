@@ -33,7 +33,6 @@
     "chalk": "^4.1.2",
     "commander": "^8.3.0",
     "compressing": "^1.5.1",
-    "enquirer": "^2.3.6",
     "inquirer": "^8.2.0",
     "listr2": "^3.13.5",
     "log-update": "^4.0.0",
@@ -57,7 +56,8 @@
   "peerDependencies": {},
   "peerDependenciesMeta": {},
   "scripts": {
-    "build": "node ./scripts/build.js && node ./scripts/resolve.js",
+    "build": "node ./scripts/build.js",
+    "resolve": "node ./scripts/resolve.js",
     "dev": "nodemon -w ./src/**/*.ts -e ts --exec \"npm run build\""
   },
   "browserslist": {

@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-12-02 18:43:33 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-12-06 18:32:55
+ * @Last Modified time: 2022-01-11 17:22:41
  */
 
 import * as fs from 'fs';
@@ -31,13 +31,15 @@ export type GitChangeInfo = {
   notStaged: GitFileData[];
 };
 
+type AutoFix = {
+  title: string;
+  cmd: string;
+  };
+
 export type GitWarning = {
   files: string[];
   reason: string;
-  autoFix?: {
-    title: string;
-    cmd: string;
-  }[];
+  autoFix?: AutoFix[];
 };
 
 export type GitStatus = {
@@ -79,10 +81,23 @@ ${wrn.files.slice(0, 8).map(f => chalk.blue`    ${f}`).join('\n')}${
     name: 'default',
     message: autoFix.length ? 'Problems can be auto-fixed' : undefined,
     choices: [
-      ...autoFix.map(af => ({
-        name: `🛠  ${af.title} `,
-        value: af.cmd
-      })),
+      ...autoFix.reduce((list, af) => {
+        if (!list.find(e => e.value === af.cmd)) {
+          list.push({
+            name: `🛠  ${af.title} `,
+            value: af.cmd
+          });
+        }
+        
+        return list;
+      }, [] as {
+        name: string;
+        value: string;
+      }[]),
+      ...(autoFix.length ? [{
+        name: '\u2b6f  Rerun',
+        value: 1
+      }] : []),
       {
         name: chalk`\u2a2f  {red Abort }`,
         value: false
@@ -93,6 +108,10 @@ ${wrn.files.slice(0, 8).map(f => chalk.blue`    ${f}`).join('\n')}${
       }
     ]
   }]);
+
+  if (ans === 1) {
+    return 'retry';
+  }
 
   if (typeof ans === 'boolean') {
     return ans ? 'continue' : 'abort';
@@ -134,6 +153,8 @@ const getGitPreset = async (): Promise<GitStatus> => {
     ).replace(/\n$/, '')
   };
 
+  const modifiedAfterStaged: GitFileData[] = [];
+
   const changes = execSync(
     'git status --porcelain=1', {
       cwd: env.rootDir,
@@ -165,6 +186,33 @@ const getGitPreset = async (): Promise<GitStatus> => {
       ctx.notStaged.push({
         name,
         type: GitChangeState.U
+      });
+    } else if (/^[AMD]{2}$/.test(typeRaw.slice(0, 2))) {
+      // added but remodified
+      const type1 = {
+        U: GitChangeState.U,
+        A: GitChangeState.A,
+        M: GitChangeState.M,
+        D: GitChangeState.D
+      }[typeRaw.slice(0, 1)] as GitChangeState;
+      const type2 = {
+        U: GitChangeState.U,
+        A: GitChangeState.A,
+        M: GitChangeState.M,
+        D: GitChangeState.D
+      }[typeRaw.slice(1, 2)] as GitChangeState;
+
+      ctx.staged.push({
+        name,
+        type: type1
+      });
+      ctx.notStaged.push({
+        name,
+        type: type2
+      });
+      modifiedAfterStaged.push({
+        name,
+        type: type2
       });
     } else if (typeRaw.startsWith(' ')) {
       // tracked but not staged
@@ -243,34 +291,28 @@ const getGitPreset = async (): Promise<GitStatus> => {
   const warnings: GitWarning[] = [];
 
   if (changes.notStaged.length > 0) {
-    const modifiedAfterStaged = changes.staged.filter(d => {
-      const mayModified = changes.notStaged.find(e => e.name === d.name);
-      
-      return Boolean(mayModified);
-    });
+    const commonResolvable: AutoFix[] = [{
+      title: 'Include all unstaged files',
+      cmd: 'git add .'
+    }];
 
     if (modifiedAfterStaged.length > 0) {
       warnings.push({
         files: changes.notStaged.map(d => d.name),
         reason: 'These files are modified after being staged',
         autoFix: [{
-          title: 'Include these files',
+          title: 'Include remodified files',
           cmd: `git add ${changes.notStaged.map(d => (
             d.name.includes(' ') ? `"${d.name}"` : d.name
           )).join(' ')}`
-        }, {
-          title: 'Include all files',
-          cmd: `git add .`
-        }]
+        }, ...commonResolvable]
       });
-    } else {
+    }
+    if (modifiedAfterStaged.length < changes.notStaged.length) {
       warnings.push({
         files: changes.notStaged.map(d => d.name),
         reason: 'These changes are not staged for commit',
-        autoFix: [{
-          title: 'Include all files',
-          cmd: 'git add .'
-        }]
+        autoFix: commonResolvable
       });
     }
   }

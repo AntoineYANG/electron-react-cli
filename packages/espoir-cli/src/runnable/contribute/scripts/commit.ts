@@ -2,8 +2,10 @@
  * @Author: Kanata You 
  * @Date: 2021-12-02 18:21:07 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-12-06 19:22:26
+ * @Last Modified time: 2022-01-11 19:27:56
  */
+
+import { execSync } from 'child_process';
 
 import { ExitCode } from '@src/index';
 
@@ -12,6 +14,7 @@ import Logger from '@ui/logger';
 
 import gitPreset from './tasks/git-preset';
 import changelog from './tasks/changlog';
+import pushRemote from './tasks/push-remote';
 
 
 interface Context {
@@ -37,8 +40,14 @@ const commit = async (): Promise<ExitCode> => {
   
   const log: Context['log'] = await changelog(gitState);
 
-  console.log(log);
-  process.exit(-1);
+  const res = execSync(`git commit -m "${log.replace('"', '\"')}"`);
+
+  Logger.info(res);
+
+  const resPush = await pushRemote(gitState);
+
+  Logger.info(resPush);
+
 
   return ExitCode.OK;
 };

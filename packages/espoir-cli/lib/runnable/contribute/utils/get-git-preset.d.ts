@@ -12,13 +12,14 @@ export declare type GitChangeInfo = {
     staged: GitFileData[];
     notStaged: GitFileData[];
 };
+declare type AutoFix = {
+    title: string;
+    cmd: string;
+};
 export declare type GitWarning = {
     files: string[];
     reason: string;
-    autoFix?: {
-        title: string;
-        cmd: string;
-    }[];
+    autoFix?: AutoFix[];
 };
 export declare type GitStatus = {
     curBranch: string;
