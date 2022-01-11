@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-12-02 18:21:07 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-11 19:27:56
+ * @Last Modified time: 2022-01-11 19:34:13
  */
 
 import { execSync } from 'child_process';
@@ -40,7 +40,11 @@ const commit = async (): Promise<ExitCode> => {
   
   const log: Context['log'] = await changelog(gitState);
 
-  const res = execSync(`git commit -m "${log.replace('"', '\"')}"`);
+  const res = execSync(
+    `git commit -m "${log.replace('"', '\"')}"`, {
+      encoding: 'utf-8'
+    }
+  );
 
   Logger.info(res);
 

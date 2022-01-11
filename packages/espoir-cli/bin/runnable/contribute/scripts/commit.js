@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-12-02 18:21:07
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-11 19:27:56
+ * @Last Modified time: 2022-01-11 19:34:13
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -38,7 +38,9 @@ const commit = async () => {
   }
 
   const log = await (0, changlog_1.default)(gitState);
-  const res = (0, child_process_1.execSync)(`git commit -m "${log.replace('"', '\"')}"`);
+  const res = (0, child_process_1.execSync)(`git commit -m "${log.replace('"', '\"')}"`, {
+    encoding: 'utf-8'
+  });
   logger_1.default.info(res);
   const resPush = await (0, push_remote_1.default)(gitState);
   logger_1.default.info(resPush);
