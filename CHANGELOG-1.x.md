@@ -1,6 +1,6 @@
 # root v1.x
 
-## 1.0.0 (2022/1/11)
+## 1.0.0 (2022/1/13)
 
 _\<version description\>_
 
@@ -8,8 +8,8 @@ _\<version description\>_
 
 - **AntoineYANG** (814602569@qq.com)
 
-### contribute
+### other
 
-+ 🌱 **New supported command: espoir contribute.** - AntoineYANG(814602569@qq.com) 2022/1/11, on _feat-1112-espoir_install-yo_
++ 🧰 **Release espoir-cli@0.2.0** - AntoineYANG(814602569@qq.com) 2022/1/13, on _feat-1112-espoir_install-yo_
 
 
