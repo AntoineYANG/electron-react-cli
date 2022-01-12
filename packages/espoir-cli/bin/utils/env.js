@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-12 15:31:24
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-12-06 19:18:38
+ * @Last Modified time: 2022-01-12 23:29:48
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -19,7 +19,7 @@ const child_process_1 = require("child_process"); // ***************************
 // ************************************ //
 
 
-const thisPkg = require('espoir-cli/package.json'); // ************************************ //
+const thisPkg = require("../../package.json"); // ************************************ //
 //                 ROOT                 //
 // ************************************ //
 

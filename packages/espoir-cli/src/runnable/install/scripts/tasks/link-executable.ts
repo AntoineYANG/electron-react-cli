@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-22 00:27:09 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-30 20:43:27
+ * @Last Modified time: 2022-01-12 21:29:43
  */
 
 import type { ListrTask } from 'listr2';
@@ -12,10 +12,12 @@ import { SingleDependency } from '@@install/utils/load-dependencies';
 import linkCLI, { CliLink, writeLinks } from '@@install/utils/link-cli';
 
 
-const linkExecutable = <T extends {
+interface Context {
   dependencies: SingleDependency[];
   bin: CliLink[];
-}>(): ListrTask<T, typeof DefaultRenderer> => ({
+}
+
+const linkExecutable = <T extends Context>(): ListrTask<T, typeof DefaultRenderer> => ({
   title: 'Creating links for CLI dependencies.',
   task: (ctx, task) => {
     task.output = 'Creating links';

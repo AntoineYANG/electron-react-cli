@@ -3,6 +3,11 @@ import type { DefaultRenderer } from 'listr2/dist/renderer/default.renderer';
 import { SingleDependency } from '@@install/utils/load-dependencies';
 import { LockData } from '@@install/utils/lock';
 import { VersionInfo } from '@request/request-npm';
+interface Context {
+    dependencies: SingleDependency[];
+    lockData: LockData;
+    resolvedDeps: VersionInfo[];
+}
 /**
  * Initialize `ctx.dependencies` by resolving dependencies in required packages.
  *
@@ -11,9 +16,5 @@ import { VersionInfo } from '@request/request-npm';
  * @param {boolean} isProd
  * @returns {ListrTask<T, typeof DefaultRenderer>}
  */
-declare const usePackageDeps: <T extends {
-    dependencies: SingleDependency[];
-    lockData: LockData;
-    resolvedDeps: VersionInfo[];
-}>(scopes: string[], isProd: boolean) => ListrTask<T, typeof DefaultRenderer>;
+declare const usePackageDeps: <T extends Context>(scopes: string[], isProd: boolean) => ListrTask<T, typeof DefaultRenderer>;
 export default usePackageDeps;

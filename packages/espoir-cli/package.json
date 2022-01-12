@@ -1,6 +1,6 @@
 {
   "name": "espoir-cli",
-  "version": "0.0.0-alpha-1.10.0",
+  "version": "0.1.4",
   "description": "Front-end scripts.",
   "keywords": [],
   "repository": {
@@ -20,6 +20,7 @@
   "files": [
     "LICENSE",
     "README.md",
+    "README-*.md",
     "CHANGELOG-*.md",
     "/bin/",
     "lib"
@@ -56,9 +57,10 @@
   "peerDependencies": {},
   "peerDependenciesMeta": {},
   "scripts": {
-    "build": "node ./scripts/build.js",
+    "build": "node ./scripts/build.js && npm run resolve",
     "resolve": "node ./scripts/resolve.js",
-    "dev": "nodemon -w ./src/**/*.ts -e ts --exec \"npm run build\""
+    "dev": "nodemon -w ./src/**/*.ts -e ts --exec \"npm run build\"",
+    "publish": "npm publish --registry https://registry.npmjs.org"
   },
   "browserslist": {
     "production": [

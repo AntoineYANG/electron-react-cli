@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 20:49:31 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-23 20:14:14
+ * @Last Modified time: 2022-01-12 23:33:30
  */
 
 import * as fs from 'fs';
@@ -106,8 +106,12 @@ const fn = env.resolvePath('.espoir', 'espoir-lock.json');
  * @param {LockData} data
  */
 export const writeLockFile = (data: LockData): void => {
-  if (!validateLockData(data)) {
-    return;
+  try {
+    if (!validateLockData(data)) {
+      return;
+    }
+  } catch (error) {
+    throw error;
   }
 
   if (!fs.existsSync(dir)) {

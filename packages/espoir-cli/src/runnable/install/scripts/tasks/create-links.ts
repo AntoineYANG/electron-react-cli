@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-22 00:23:22 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-23 20:16:21
+ * @Last Modified time: 2022-01-12 21:28:37
  */
 
 import type { ListrTask } from 'listr2';
@@ -14,11 +14,13 @@ import type { SingleDependency } from '@@install/utils/load-dependencies';
 import type { LockData } from '@@install/utils/lock';
 
 
-const createLinks = <T extends {
+interface Context {
   dependencies: SingleDependency[];
   lockData: LockData;
   installResults: InstallResult[];
-}>(): ListrTask<T, typeof DefaultRenderer> => ({
+}
+
+const createLinks = <T extends Context>(): ListrTask<T, typeof DefaultRenderer> => ({
   title: 'Linking.',
   task: async (ctx, task) => {
     task.output = 'Linking /node_modules/';

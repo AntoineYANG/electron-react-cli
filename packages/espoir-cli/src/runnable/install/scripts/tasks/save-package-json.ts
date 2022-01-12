@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-22 00:51:29 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-23 20:18:05
+ * @Last Modified time: 2022-01-12 21:30:34
  */
 
 import * as semver from 'semver';
@@ -14,10 +14,12 @@ import type { SingleDependency } from '@@install/utils/load-dependencies';
 import savePackageDeps from '@@install/utils/save-package-deps';
 
 
-const savePackageJSON = <T extends {
+interface Context {
   dependencies: SingleDependency[];
   lockData: LockData;
-}>(
+}
+
+const savePackageJSON = <T extends Context>(
   scopes: string[],
   tag: 'dependencies' | 'devDependencies'
 ): ListrTask<T, typeof DefaultRenderer> => ({

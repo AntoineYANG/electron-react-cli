@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-22 00:07:04 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-23 20:17:34
+ * @Last Modified time: 2022-01-12 21:29:25
  */
 
 import type { ListrTask } from 'listr2';
@@ -14,10 +14,12 @@ import type { InstallResult } from '@@install/utils/download-deps';
 import batchDownload from '@@install/utils/download-deps';
 
 
-const installResolvedDeps = <T extends {
+interface Context {
   diff: VersionInfo[];
   installResults: InstallResult[];
-}>(): ListrTask<T, typeof DefaultRenderer> => ({
+}
+
+const installResolvedDeps = <T extends Context>(): ListrTask<T, typeof DefaultRenderer> => ({
   title: 'Installing resolved modules.',
   task: (ctx, task) => {
     task.output = chalk`🧱 {yellow.bold ${ctx.diff.length} }modules will be installed `;

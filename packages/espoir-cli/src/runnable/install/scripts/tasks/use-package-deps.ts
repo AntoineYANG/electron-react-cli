@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-12-02 17:50:59 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-12-06 16:50:21
+ * @Last Modified time: 2022-01-12 21:30:57
  */
 
 import type { ListrTask } from 'listr2';
@@ -14,6 +14,11 @@ import { LockData, useLockFileData } from '@@install/utils/lock';
 import { VersionInfo } from '@request/request-npm';
 import { resolvePackageDeps } from '@@install/utils/resolve-deps';
 
+interface Context {
+  dependencies: SingleDependency[];
+  lockData: LockData;
+  resolvedDeps: VersionInfo[];
+}
 
 /**
  * Initialize `ctx.dependencies` by resolving dependencies in required packages.
@@ -23,11 +28,7 @@ import { resolvePackageDeps } from '@@install/utils/resolve-deps';
  * @param {boolean} isProd
  * @returns {ListrTask<T, typeof DefaultRenderer>}
  */
-const usePackageDeps = <T extends {
-  dependencies: SingleDependency[];
-  lockData: LockData;
-  resolvedDeps: VersionInfo[];
-}>(
+const usePackageDeps = <T extends Context>(
   scopes: string[],
   isProd: boolean
 ): ListrTask<T, typeof DefaultRenderer> => ({

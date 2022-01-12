@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-22 00:07:04 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-23 20:18:25
+ * @Last Modified time: 2022-01-12 21:31:18
  */
 
 import type { ListrTask } from 'listr2';
@@ -16,6 +16,13 @@ import type { SingleDependency } from '@@install/utils/load-dependencies';
 import type { VersionInfo } from '@request/request-npm';
 
 
+interface Context {
+  dependencies: SingleDependency[];
+  resolvedDeps: VersionInfo[];
+  diff: VersionInfo[];
+  lockData: LockData;
+}
+
 /**
  * This action will parse an array of strings as dependencies and resolve their dependencies.
  * `Context.dependencies`, `Context.lockData` and `Context.resolvedDeps` will be assigned.
@@ -24,12 +31,7 @@ import type { VersionInfo } from '@request/request-npm';
  * @param {string[]} modules
  * @returns {ListrTask<T, typeof DefaultRenderer>}
  */
-const viewDepsFromArgs = <T extends {
-  dependencies: SingleDependency[];
-  resolvedDeps: VersionInfo[];
-  diff: VersionInfo[];
-  lockData: LockData;
-}>(modules: string[]): ListrTask<T, typeof DefaultRenderer> => ({
+const viewDepsFromArgs = <T extends Context>(modules: string[]): ListrTask<T, typeof DefaultRenderer> => ({
   title: 'Viewing dependencies.',
   task: async (ctx, task) => {
     // parse

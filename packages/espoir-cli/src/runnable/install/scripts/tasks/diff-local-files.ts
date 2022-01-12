@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-22 00:15:40 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-23 20:16:54
+ * @Last Modified time: 2022-01-12 21:29:06
  */
 
 import type { ListrTask } from 'listr2';
@@ -13,11 +13,13 @@ import type { VersionInfo } from '@request/request-npm';
 import diffLocal from '@@install/utils/diff-local';
 
 
-const diffLocalFiles = <T extends {
+interface Context {
   resolvedDeps: VersionInfo[];
   diff: VersionInfo[];
   lockData: LockData;
-}>(): ListrTask<T, typeof DefaultRenderer> => ({
+}
+
+const diffLocalFiles = <T extends Context>(): ListrTask<T, typeof DefaultRenderer> => ({
   title: 'Diffing local files.',
   task: async (ctx, task) => {
     task.output = 'Checking installed modules';

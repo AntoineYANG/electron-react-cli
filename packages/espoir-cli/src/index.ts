@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-12 15:19:20 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-12-02 18:52:45
+ * @Last Modified time: 2022-01-12 21:18:33
  */
 
 import { Command } from 'commander';
@@ -12,6 +12,7 @@ import env from '@env';
 import Logger, { StopWatch } from '@ui/logger';
 
 import Install from '@@install';
+import Uninstall from '@@uninstall';
 import RunScript from '@@run';
 import Contribute from '@@contribute';
 
@@ -25,6 +26,7 @@ export enum ExitCode {
 
 const supportedScripts: Array<RunnableScript> = [
   Install,
+  Uninstall,
   RunScript,
   Contribute
 ];

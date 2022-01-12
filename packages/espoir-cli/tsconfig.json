@@ -11,6 +11,8 @@
       "@runnable": ["runnable"],
       "@@install": ["runnable/install"],
       "@@install/*": ["runnable/install/*"],
+      "@@uninstall": ["runnable/uninstall"],
+      "@@uninstall/*": ["runnable/uninstall/*"],
       "@@run": ["runnable/run-script"],
       "@@run/*": ["runnable/run-script/*"],
       "@@contribute": ["runnable/contribute"],
