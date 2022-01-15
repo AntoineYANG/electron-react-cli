@@ -1,6 +1,20 @@
 # espoir-cli v0.x
 
-## 0.2.0 (2022/1/13)
+## 0.2.1 (2022/1/15)
+
+_\<version description\>_
+
+**Contributors**
+
+- **AntoineYANG** (814602569@qq.com)
+
+### other
+
++ 🧰 **Release espoir-cli@0.2.1: Appended README of the package.** - AntoineYANG(814602569@qq.com) 2022/1/15, on _main_
+
+
+## 0.2.0 (undefined)
+
 
 _\<version description\>_
 
@@ -39,5 +53,13 @@ _\<version description\>_
 + 🧰 **Release espoir-cli@0.0.0-alpha-1.10.0.** - AntoineYANG(814602569@qq.com) 2022/1/11, on _feat-1112-espoir_install-yo_
 
 + 🌱 **New supported command: espoir contribute.** - AntoineYANG(814602569@qq.com) 2022/1/11, on _feat-1112-espoir_install-yo_
+
+
+
+
+
+**Contributors**
+
+
 
 

@@ -1,6 +1,6 @@
 {
   "name": "espoir-cli",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Front-end scripts.",
   "keywords": [],
   "repository": {
@@ -16,6 +16,7 @@
   "bugs": {
     "url": "https://github.com/AntoineYANG/espoir/issues"
   },
+  "homepage": "https://github.com/AntoineYANG/espoir/blob/main/packages/espoir-cli/README.md",
   "main": "./bin/index.js",
   "files": [
     "LICENSE",
