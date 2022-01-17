@@ -44,18 +44,13 @@ const Uninstall: RunnableScript = {
     new Option(
       '-w, --workspace <workspace...>',
       'included packages in the current workspace'
-    ).choices(installTarget).default(false),
-    new Option(
-      '--update',
-      'update lock file after uninstalling'
-    ).default(false)
+    ).choices(installTarget).default(false)
   ],
   exec: async (
     moduleNames: string[],
     options: {
       here: boolean;
       workspace: false | string[];
-      update: boolean;
     }
   ) => {
     if (moduleNames.length === 0) {
@@ -74,7 +69,7 @@ const Uninstall: RunnableScript = {
       return uninstallDeps(
         moduleNames,
         [target],
-        options.update
+        true
       );
     } else if (options.workspace && options.workspace.length) {
       const packages = options.workspace.reduce<string[]>((list, ws) => {
@@ -94,7 +89,7 @@ const Uninstall: RunnableScript = {
       return uninstallDeps(
         moduleNames,
         packages,
-        options.update
+        true
       );
     }
 

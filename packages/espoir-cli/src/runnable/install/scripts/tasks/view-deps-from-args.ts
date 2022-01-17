@@ -2,11 +2,10 @@
  * @Author: Kanata You 
  * @Date: 2021-11-22 00:07:04 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-12 21:31:18
+ * @Last Modified time: 2022-01-17 22:58:50
  */
 
-import type { ListrTask } from 'listr2';
-import type { DefaultRenderer } from 'listr2/dist/renderer/default.renderer';
+import type { ListrTask, ListrRendererFactory } from 'listr2';
 import * as chalk from 'chalk';
 
 import parseDependencies from '@@install/utils/parse-dependencies'
@@ -29,9 +28,9 @@ interface Context {
  *
  * @template T context type
  * @param {string[]} modules
- * @returns {ListrTask<T, typeof DefaultRenderer>}
+ * @returns {ListrTask<T, ListrRendererFactory>}
  */
-const viewDepsFromArgs = <T extends Context>(modules: string[]): ListrTask<T, typeof DefaultRenderer> => ({
+const viewDepsFromArgs = <T extends Context>(modules: string[]): ListrTask<T, ListrRendererFactory> => ({
   title: 'Viewing dependencies.',
   task: async (ctx, task) => {
     // parse

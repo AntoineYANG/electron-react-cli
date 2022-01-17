@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-30 19:14:41
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-30 19:39:25
+ * @Last Modified time: 2022-01-17 22:59:09
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -39,7 +39,7 @@ const listAll = async scope => {
   const res = (0, get_runnable_scripts_1.default)(scope);
   logger_1.default.info(chalk`Found {greenBright ${res.length} }scripts${scope ? chalk` in {blue ${scope} }` : ''}`);
   res.forEach(n => {
-    logger_1.default.info(chalk`  * {blue ${n} }${shortHand(n) ?? ''}`);
+    logger_1.default.info(chalk`  * {blue ${n} }${shortHand(n.name) ?? ''}`);
   });
   return index_1.ExitCode.OK;
 };

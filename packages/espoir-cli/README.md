@@ -10,7 +10,7 @@
 ## Commands
 
 
-### espoir {install, i}
+### espoir {install, i, ins}
 
 Add new dependency (dependencies) to the given (or all) package, or install the defined dependencies.
 
@@ -84,7 +84,7 @@ Show help info.
 
 ---
 
-### espoir {run-script, run}
+### espoir {run-script, run, r}
 
 Execute a defined script in `package.json`.
 
@@ -140,7 +140,7 @@ Show help info.
 
 ---
 
-### espoir {contribute, c}
+### espoir {contribute, contr, cont, c, commit}
 
 Commit the changes.
 
@@ -162,5 +162,61 @@ It contains these steps:
 4. Do git push if necessary.
 
 
+* `espoir contribute -h`
+
+Show help info.
+
+
+---
+
+
+### espoir {uninstall, uni, u, del, remove}
+
+
+Remove dependencies from the package(s).
+
+If one dependency does not actually exist, it will be skipped.
+
+While uninstalling, modules which is not depended on (by other packages or modules) any more will be cleaned.
+
+If one dependency depended on by other packages or modules is to be uninstalled from one package, it will be removed only from the configuration of the package, but not physically removed.
+
+
+#### 参数
+
+##### module-names
+
+Names of the modules that is to uninstalled.
+
+#### 设置项
+
+##### --here (default: `false`)
+
+Set the package from which should the dependencies be removed to the current working package.
+
+Use `--here` flag only when you're sure about your current working directory, and do not use `--workspace` at the same time.
+
+
+##### {--workspace, -w} <...workspace>
+
+Set the packages from which should the dependencies be removed.
+
+Unable to use when `--here` flag is enabled. Otherwise, this option is necessary.
+
+
+
+#### Examples
+
+* `espoir uninstall axios jquery -w foo`
+
+Uninstall dependencies `axios` and `jquery` from package `foo`.
+
+* `(/packages/foo/src/utils/) espoir del axios --here`
+
+Uninstall dependency `axios` from package `foo`.
+
+* `espoir uni -h`
+
+Show help info.
 
 

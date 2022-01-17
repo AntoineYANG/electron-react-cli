@@ -1,5 +1,4 @@
-import type { ListrTask } from 'listr2';
-import type { DefaultRenderer } from 'listr2/dist/renderer/default.renderer';
+import type { ListrTask, ListrRendererFactory } from 'listr2';
 import { SingleDependency } from '@@install/utils/load-dependencies';
 import { LockData } from '@@install/utils/lock';
 import { VersionInfo } from '@request/request-npm';
@@ -14,7 +13,7 @@ interface Context {
  * @template T
  * @param {string[]} scopes
  * @param {boolean} isProd
- * @returns {ListrTask<T, typeof DefaultRenderer>}
+ * @returns {ListrTask<T, ListrRendererFactory>}
  */
-declare const usePackageDeps: <T extends Context>(scopes: string[], isProd: boolean) => ListrTask<T, typeof DefaultRenderer>;
+declare const usePackageDeps: <T extends Context>(scopes: string[], isProd: boolean) => ListrTask<T, typeof import("listr2").ListrRenderer>;
 export default usePackageDeps;

@@ -2,18 +2,16 @@
  * @Author: Kanata You 
  * @Date: 2022-01-12 21:27:16 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-12 22:57:57
+ * @Last Modified time: 2022-01-17 23:43:04
  */
 
-import type { ListrTask } from 'listr2';
-import type { DefaultRenderer } from 'listr2/dist/renderer/default.renderer';
+import type { ListrTask, ListrRendererFactory } from 'listr2';
 
 import type { SingleDependency } from '@@install/utils/load-dependencies';
 import { LockData, useLockFileData } from '@@install/utils/lock';
 import type { Requirement } from '@@uninstall/scripts/utils/analyse-requirements';
 import analyseRequirements from '@@uninstall/scripts/utils/analyse-requirements';
 import rmModules from '@@uninstall/scripts/utils/rm-module';
-
 
 
 interface Context {
@@ -25,7 +23,7 @@ interface Context {
 const removeModules = <T extends Context>(
   modules: string[],
   packages: string[]
-): ListrTask<T, typeof DefaultRenderer> => ({
+): ListrTask<T, ListrRendererFactory> => ({
   title: 'Removing modules.',
   task: (ctx, task) => {
     ctx.lockData = useLockFileData();

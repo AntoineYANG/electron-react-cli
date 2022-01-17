@@ -6,7 +6,7 @@
 ## 命令
 
 
-### espoir {install, i}
+### espoir {install, i, ins}
 
 为指定（或所有）子仓库安装新增的依赖，或为指定（或所有）子仓库安装已定义的依赖。
 
@@ -81,7 +81,7 @@ _当根目录被指定时，`--save` 选项将产生一个错误。这是因为�
 
 ---
 
-### espoir {run-script, run}
+### espoir {run-script, run, r}
 
 运行一条 `package.json` 中的预定义脚本。
 
@@ -137,7 +137,7 @@ _当根目录被指定时，`--save` 选项将产生一个错误。这是因为�
 
 ---
 
-### espoir {contribute, c}
+### espoir {contribute, contr, cont, c, commit}
 
 提交代码版本。
 
@@ -160,5 +160,58 @@ _当根目录被指定时，`--save` 选项将产生一个错误。这是因为�
 4. 如果需要，则提交到远程分支。
 
 
+* `espoir contribute -h`
+
+运行这条命令将获取帮助信息。
+
+
+---
+
+
+### espoir {uninstall, uni, u, del, remove}
+
+为指定子仓库移除依赖。
+
+若指定了某个并不存在的依赖，则该依赖会被跳过。
+
+卸载时，会检查不再被（任意子仓库或其他包）依赖的依赖进行清理。
+
+若指定的某个依赖同时被其他（任意子仓库或其他包）依赖，则该依赖只将被从指定仓库的依赖项中移除，而不会被物理删除。
+
+
+#### 参数
+
+##### module-names
+
+将要移除的依赖名，支持多个，且至少提供一个。
+
+#### 设置项
+
+##### --here (default: `false`)
+
+指定当前目录所在子仓库执行操作。
+
+当你确定你的当前工作目录正确时，使用 `--here` 选项以省略 `--workspace` 指定。
+
+
+##### {--workspace, -w} <...workspace>
+
+指定执行卸载操作的目标仓库。当 `--here` 有效时不需要提供，否则必须提供。
+
+
+
+#### 用例
+
+* `espoir uninstall axios jquery -w foo`
+
+运行这条命令将为子仓库 `foo` 卸载依赖 `axios`、`jquery`。
+
+* `(/packages/foo/src/utils/) espoir del axios --here`
+
+运行这条命令将为子仓库 `foo` 卸载依赖 `axios`。
+
+* `espoir uni -h`
+
+运行这条命令将获取帮助信息。
 
 

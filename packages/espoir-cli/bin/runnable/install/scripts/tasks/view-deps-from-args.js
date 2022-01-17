@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-22 00:07:04
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-12 21:31:18
+ * @Last Modified time: 2022-01-17 22:58:50
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -23,7 +23,7 @@ const resolve_deps_1 = require("../../utils/resolve-deps");
  *
  * @template T context type
  * @param {string[]} modules
- * @returns {ListrTask<T, typeof DefaultRenderer>}
+ * @returns {ListrTask<T, ListrRendererFactory>}
  */
 
 

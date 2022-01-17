@@ -2,11 +2,10 @@
  * @Author: Kanata You 
  * @Date: 2021-11-16 00:03:04 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-30 21:30:17
+ * @Last Modified time: 2022-01-17 23:02:24
  */
 
-import { ListrRenderer, ListrTask } from 'listr2';
-import { TaskWrapper } from 'listr2/dist/lib/task-wrapper';
+import { ListrRenderer, ListrTask, ListrTaskWrapper as TaskWrapper } from 'listr2';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as semver from 'semver';

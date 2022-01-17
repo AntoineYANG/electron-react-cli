@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-01-12 21:38:47 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-12 22:52:19
+ * @Last Modified time: 2022-01-18 00:52:04
  */
 
 import * as fs from 'fs';
@@ -11,12 +11,17 @@ import type { LockData } from '@@install/utils/lock';
 import type { SingleDependency } from '@@install/utils/load-dependencies';
 import type { Requirement } from './analyse-requirements';
 
+// import Logger from '@ui/logger';
+const TEST = Boolean(require.main?.filename.match(/^.+\.test\.[jt]s$/));
+const Logger = TEST ? { log: (...a: any[]) => {} } : require('@ui/logger');
+
 
 const rmModules = (
   lockData: LockData,
   requirements: Requirement[],
   from: string | null,
-  modules: SingleDependency[]
+  modules: SingleDependency[],
+  debugOnly: boolean = false
 ): {
   lockData: LockData;
   requirements: Requirement[];
@@ -24,6 +29,14 @@ const rmModules = (
 } => {
   let deleted: string[] = [];
   let nextLockData = { ...lockData };
+
+  const debug = debugOnly ? (msg: string) => console.log(msg) : Logger.log;
+  const del = debugOnly ? (fn: string) => console.log(`> rm "${fn}"`) : (fn: string) => fs.rmSync(
+    fn, {
+      recursive: true,
+      force: true
+    }
+  );
 
   if (from) {
     // remove the requirements of package
@@ -33,6 +46,7 @@ const rmModules = (
       );
       
       if (which) {
+        debug(`Remove "${req.module.name}@${req.module.version}" from [${from}]`);
         req.packages = req.packages.filter(p => p !== from);
       }
     });
@@ -46,15 +60,14 @@ const rmModules = (
     if (req.packages.length === 0 && req.required.length === 0) {
       // ok to delete
 
+      debug(`Delete "${req.module.name}@${req.module.version}"`);
+
       // remove files and link
 
-      fs.rmSync(req.location, {
-        force: true,
-        recursive: true
-      });
+      del(req.location);
 
       if (req.link) {
-        fs.rmSync(req.link);
+        del(req.link);
       }
 
       // remove item in lock data
@@ -109,7 +122,8 @@ const rmModules = (
       nextLockData,
       nextReq,
       null,
-      []
+      [],
+      debugOnly
     );
 
     return {

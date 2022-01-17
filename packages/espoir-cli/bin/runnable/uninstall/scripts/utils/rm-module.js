@@ -3,19 +3,30 @@
  * @Author: Kanata You
  * @Date: 2022-01-12 21:38:47
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-12 22:52:19
+ * @Last Modified time: 2022-01-18 00:52:04
  */
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-const fs = require("fs");
+const fs = require("fs"); // import Logger from '@ui/logger';
 
-const rmModules = (lockData, requirements, from, modules) => {
+
+const TEST = Boolean(require.main?.filename.match(/^.+\.test\.[jt]s$/));
+const Logger = TEST ? {
+  log: (...a) => {}
+} : require("../../../../utils/ui/logger");
+
+const rmModules = (lockData, requirements, from, modules, debugOnly = false) => {
   let deleted = [];
   let nextLockData = { ...lockData
   };
+  const debug = debugOnly ? msg => console.log(msg) : Logger.log;
+  const del = debugOnly ? fn => console.log(`> rm "${fn}"`) : fn => fs.rmSync(fn, {
+    recursive: true,
+    force: true
+  });
 
   if (from) {
     // remove the requirements of package
@@ -23,6 +34,7 @@ const rmModules = (lockData, requirements, from, modules) => {
       const which = modules.find(mod => mod.name === req.module.name && req.packages.includes(from));
 
       if (which) {
+        debug(`Remove "${req.module.name}@${req.module.version}" from [${from}]`);
         req.packages = req.packages.filter(p => p !== from);
       }
     });
@@ -33,14 +45,12 @@ const rmModules = (lockData, requirements, from, modules) => {
   const nextReq = requirements.filter(req => {
     if (req.packages.length === 0 && req.required.length === 0) {
       // ok to delete
-      // remove files and link
-      fs.rmSync(req.location, {
-        force: true,
-        recursive: true
-      });
+      debug(`Delete "${req.module.name}@${req.module.version}"`); // remove files and link
+
+      del(req.location);
 
       if (req.link) {
-        fs.rmSync(req.link);
+        del(req.link);
       } // remove item in lock data
 
 
@@ -85,7 +95,7 @@ const rmModules = (lockData, requirements, from, modules) => {
   });
 
   if (recursive) {
-    const res = rmModules(nextLockData, nextReq, null, []);
+    const res = rmModules(nextLockData, nextReq, null, [], debugOnly);
     return { ...res,
       deleted: [...deleted, ...res.deleted]
     };

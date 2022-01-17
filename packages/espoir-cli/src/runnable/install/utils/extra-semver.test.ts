@@ -2,14 +2,14 @@
  * @Author: Kanata You 
  * @Date: 2021-11-18 21:54:08 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-19 00:47:26
+ * @Last Modified time: 2022-01-18 00:08:28
  */
 
 import { describe, test, expect } from '@jest/globals';
 import { coalesceVersions } from './extra-semver';
 
 
-describe('bin/runnable/install/utils/extra-semver', () => {
+describe('install/utils/extra-semver', () => {
 
   test('coalesceVersions', () => {
     expect(

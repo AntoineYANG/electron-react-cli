@@ -2,11 +2,10 @@
  * @Author: Kanata You 
  * @Date: 2022-01-12 23:00:21 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-12 23:20:43
+ * @Last Modified time: 2022-01-17 22:55:23
  */
 
-import type { ListrTask } from 'listr2';
-import type { DefaultRenderer } from 'listr2/dist/renderer/default.renderer';
+import type { ListrTask, ListrRendererFactory } from 'listr2';
 
 import delDep from '@@uninstall/scripts/utils/del-dep';
 import { LockData, writeLockFile } from '@@install/utils/lock';
@@ -20,7 +19,7 @@ const updatePackage = <T extends Context>(
   modules: string[],
   packages: string[],
   updateLock: boolean
-): ListrTask<T, typeof DefaultRenderer> => ({
+): ListrTask<T, ListrRendererFactory> => ({
   title: `Updating package.json${updateLock ? ' and lock file' : ''}.`,
   task: (ctx, task) => {
     task.output = 'Updating package.json';

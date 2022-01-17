@@ -2,16 +2,15 @@
  * @Author: Kanata You 
  * @Date: 2021-11-30 19:14:41 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-30 21:09:31
+ * @Last Modified time: 2022-01-17 22:59:16
  */
 
 import * as chalk from 'chalk';
-import * as path from 'path';
 import { spawn } from 'child_process';
 
 import { ExitCode } from '@src/index';
 import Logger from '@ui/logger';
-import env, { PackageJSON } from '@env';
+import env from '@env';
 
 
 /**
@@ -25,26 +24,16 @@ import env, { PackageJSON } from '@env';
 const runScript = async (
   scope: string,
   command: string,
+  cmd: string,
+  cwd: string,
   args: string[]
 ): Promise<ExitCode> => {
-  const cmd = `${
-    (
-      scope === 'root' ? env.rootPkg : env.packageMap[scope] as PackageJSON
-    ).scripts?.[command] as string
-  }${
-    args.map(a => ` ${a}`).join('')
-  }`;
-
   Logger.info(
     `\n${
       chalk`|> Run {blue ${command} }in {blue ${scope} }`
     }\n${
       `|> ${cmd}`
     }\n`
-  );
-
-  const dir = path.resolve(
-    scope === 'root' ? env.rootDir : env.resolvePathInPackage(scope, '.')
   );
 
   let resolve = (val: ExitCode): void => {};
@@ -57,14 +46,19 @@ const runScript = async (
     env.resolvePath('.espoir', '.bin')
   };`;
 
-  const cp = spawn(cmd, {
-    cwd: dir,
-    shell: true,
-    env: {
-      ...process.env,
-      PATH: paths
+  const cp = spawn(
+    `${cmd}${
+      args.map(s => ` ${s}`).join('')
+    }`,
+    {
+      cwd,
+      shell: true,
+      env: {
+        ...process.env,
+        PATH: paths
+      }
     }
-  });
+  );
 
   cp.stdout.on('data', data => {
     Logger.info(data.toString('utf-8'));

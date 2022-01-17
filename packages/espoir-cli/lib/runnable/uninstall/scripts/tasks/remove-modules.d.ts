@@ -1,5 +1,4 @@
-import type { ListrTask } from 'listr2';
-import type { DefaultRenderer } from 'listr2/dist/renderer/default.renderer';
+import type { ListrTask, ListrRendererFactory } from 'listr2';
 import { LockData } from '@@install/utils/lock';
 import type { Requirement } from '@@uninstall/scripts/utils/analyse-requirements';
 interface Context {
@@ -7,5 +6,5 @@ interface Context {
     requirements: Requirement[];
     removed: string[];
 }
-declare const removeModules: <T extends Context>(modules: string[], packages: string[]) => ListrTask<T, typeof DefaultRenderer>;
+declare const removeModules: <T extends Context>(modules: string[], packages: string[]) => ListrTask<T, typeof import("listr2").ListrRenderer>;
 export default removeModules;

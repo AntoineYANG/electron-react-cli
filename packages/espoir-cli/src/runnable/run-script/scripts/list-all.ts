@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-30 19:14:41 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-30 19:39:25
+ * @Last Modified time: 2022-01-17 22:59:09
  */
 
 import * as chalk from 'chalk';
@@ -43,7 +43,7 @@ const listAll = async (
   res.forEach(n => {
     Logger.info(
       chalk`  * {blue ${n} }${
-        shortHand(n) ?? ''
+        shortHand(n.name) ?? ''
       }`
     );
   });

@@ -2,7 +2,8 @@ export declare enum GitChangeState {
     A = "added",
     M = "modified",
     U = "untracked",
-    D = "deleted"
+    D = "deleted",
+    R = "renamed"
 }
 export declare type GitFileData = {
     name: string;

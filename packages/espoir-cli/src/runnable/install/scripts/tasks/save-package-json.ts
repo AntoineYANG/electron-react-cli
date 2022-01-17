@@ -2,13 +2,12 @@
  * @Author: Kanata You 
  * @Date: 2021-11-22 00:51:29 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-12 21:30:34
+ * @Last Modified time: 2022-01-17 22:54:15
  */
 
 import * as semver from 'semver';
 
-import type { ListrTask } from 'listr2';
-import type { DefaultRenderer } from 'listr2/dist/renderer/default.renderer';
+import type { ListrTask, ListrRendererFactory } from 'listr2';
 import type { LockData } from '@@install/utils/lock';
 import type { SingleDependency } from '@@install/utils/load-dependencies';
 import savePackageDeps from '@@install/utils/save-package-deps';
@@ -22,7 +21,7 @@ interface Context {
 const savePackageJSON = <T extends Context>(
   scopes: string[],
   tag: 'dependencies' | 'devDependencies'
-): ListrTask<T, typeof DefaultRenderer> => ({
+): ListrTask<T, ListrRendererFactory> => ({
   title: 'Saving package dependencies.',
   task: (ctx, task) => {
     task.output = 'Saving package.json';

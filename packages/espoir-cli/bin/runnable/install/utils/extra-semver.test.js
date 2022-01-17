@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-18 21:54:08
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-19 00:47:26
+ * @Last Modified time: 2022-01-18 00:08:28
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -14,7 +14,7 @@ const globals_1 = require("@jest/globals");
 
 const extra_semver_1 = require("./extra-semver");
 
-(0, globals_1.describe)('bin/runnable/install/utils/extra-semver', () => {
+(0, globals_1.describe)('install/utils/extra-semver', () => {
   (0, globals_1.test)('coalesceVersions', () => {
     (0, globals_1.expect)((0, extra_semver_1.coalesceVersions)([])).toEqual([]);
     (0, globals_1.expect)((0, extra_semver_1.coalesceVersions)(['*'])).toEqual(['*']);

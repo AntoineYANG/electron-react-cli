@@ -29,7 +29,7 @@ const Uninstall = {
   description: 'Uninstall modules',
   usage: '[option] [module-names...] [workspace]',
   args: [new commander_1.Argument('[module-names...]', 'NPM package(s) to uninstall')],
-  options: [new commander_1.Option('--here', `do uninstalling in the current package (${defaultPackage})`).default(false), new commander_1.Option('-w, --workspace <workspace...>', 'included packages in the current workspace').choices(installTarget).default(false), new commander_1.Option('--update', 'update lock file after uninstalling').default(false)],
+  options: [new commander_1.Option('--here', `do uninstalling in the current package (${defaultPackage})`).default(false), new commander_1.Option('-w, --workspace <workspace...>', 'included packages in the current workspace').choices(installTarget).default(false)],
   exec: async (moduleNames, options) => {
     if (moduleNames.length === 0) {
       const msg = `You must give at least one module.`;
@@ -40,7 +40,7 @@ const Uninstall = {
     } else if (options.here) {
       const target = defaultPackage;
       logger_1.default.info(`Execute uninstalling in "${target}"`);
-      return (0, uninstall_1.default)(moduleNames, [target], options.update);
+      return (0, uninstall_1.default)(moduleNames, [target], true);
     } else if (options.workspace && options.workspace.length) {
       const packages = options.workspace.reduce((list, ws) => {
         if (ws !== 'root' && !_env_1.default.packages.includes(ws)) {
@@ -54,7 +54,7 @@ const Uninstall = {
 
         return [...list, ws];
       }, []);
-      return (0, uninstall_1.default)(moduleNames, packages, options.update);
+      return (0, uninstall_1.default)(moduleNames, packages, true);
     }
 
     logger_1.default.error(`When calling uninstall, you must give the workspace(s). ${''}If you want to do uninstalling in the current package (${defaultPackage}), use \`--here\` flag.`);

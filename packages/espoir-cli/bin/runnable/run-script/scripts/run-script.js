@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-30 19:14:41
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-30 21:09:31
+ * @Last Modified time: 2022-01-17 22:59:16
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -11,8 +11,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 const chalk = require("chalk");
-
-const path = require("path");
 
 const child_process_1 = require("child_process");
 
@@ -31,10 +29,8 @@ const _env_1 = require("../../../utils/env");
  */
 
 
-const runScript = async (scope, command, args) => {
-  const cmd = `${(scope === 'root' ? _env_1.default.rootPkg : _env_1.default.packageMap[scope]).scripts?.[command]}${args.map(a => ` ${a}`).join('')}`;
+const runScript = async (scope, command, cmd, cwd, args) => {
   logger_1.default.info(`\n${chalk`|> Run {blue ${command} }in {blue ${scope} }`}\n${`|> ${cmd}`}\n`);
-  const dir = path.resolve(scope === 'root' ? _env_1.default.rootDir : _env_1.default.resolvePathInPackage(scope, '.'));
 
   let resolve = val => {};
 
@@ -42,8 +38,8 @@ const runScript = async (scope, command, args) => {
     resolve = res;
   });
   const paths = `${process.env['PATH'] ?? ''}${_env_1.default.resolvePath('.espoir', '.bin')};`;
-  const cp = (0, child_process_1.spawn)(cmd, {
-    cwd: dir,
+  const cp = (0, child_process_1.spawn)(`${cmd}${args.map(s => ` ${s}`).join('')}`, {
+    cwd,
     shell: true,
     env: { ...process.env,
       PATH: paths

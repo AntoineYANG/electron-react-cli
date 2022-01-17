@@ -2,11 +2,10 @@
  * @Author: Kanata You 
  * @Date: 2021-11-22 00:27:09 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-12 23:41:43
+ * @Last Modified time: 2022-01-17 22:53:53
  */
 
-import { ListrTask } from 'listr2';
-import type { DefaultRenderer } from 'listr2/dist/renderer/default.renderer';
+import type { ListrTask, ListrRendererFactory } from 'listr2';
 
 import { LockData, writeLockFile } from '@@install/utils/lock';
 import Logger from '@ui/logger';
@@ -17,7 +16,7 @@ interface Context {
   lockData: LockData;
 }
 
-const saveLockFile = <T extends Context>(): ListrTask<T, typeof DefaultRenderer> => ({
+const saveLockFile = <T extends Context>(): ListrTask<T, ListrRendererFactory> => ({
   title: 'Saving lock file.',
   task: (ctx, task) => {
     task.output = 'Saving espoir lock file';

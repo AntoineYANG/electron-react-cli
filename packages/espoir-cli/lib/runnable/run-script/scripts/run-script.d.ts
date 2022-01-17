@@ -7,5 +7,5 @@ import { ExitCode } from '@src/index';
  * @param {string[]} args
  * @returns {Promise<ExitCode>}
  */
-declare const runScript: (scope: string, command: string, args: string[]) => Promise<ExitCode>;
+declare const runScript: (scope: string, command: string, cmd: string, cwd: string, args: string[]) => Promise<ExitCode>;
 export default runScript;

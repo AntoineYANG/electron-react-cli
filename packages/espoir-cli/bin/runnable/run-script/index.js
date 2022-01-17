@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-30 18:27:09
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-30 21:25:19
+ * @Last Modified time: 2022-01-16 17:19:50
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -56,13 +56,13 @@ const RunScript = {
     }
 
     const allScripts = (0, get_runnable_scripts_1.default)(workspace);
-    const script = allScripts.find(d => d === `${workspace}.${command}`);
+    const script = allScripts.find(d => d.name === `${workspace}.${command}`);
 
     if (!script) {
       throw new Error(`Workspace "${workspace}" has no script named "${command}".`);
     }
 
-    return (0, run_script_1.default)(workspace, command, args);
+    return (0, run_script_1.default)(workspace, command, script.cmd, script.cwd, args);
   }
 };
 exports.default = RunScript;

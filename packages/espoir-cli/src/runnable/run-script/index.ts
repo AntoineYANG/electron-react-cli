@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-30 18:27:09 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-30 21:25:19
+ * @Last Modified time: 2022-01-16 17:19:50
  */
 
 import { Argument, Option } from 'commander';
@@ -84,13 +84,13 @@ const RunScript: RunnableScript = {
 
     const allScripts = getRunnableScripts(workspace);
 
-    const script = allScripts.find(d => d === `${workspace}.${command}`);
+    const script = allScripts.find(d => d.name === `${workspace}.${command}`);
 
     if (!script) {
       throw new Error(`Workspace "${workspace}" has no script named "${command}".`);
     }
 
-    return runScript(workspace, command, args);
+    return runScript(workspace, command, script.cmd, script.cwd, args);
   }
 };
 

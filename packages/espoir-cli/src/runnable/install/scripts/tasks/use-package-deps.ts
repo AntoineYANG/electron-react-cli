@@ -2,11 +2,10 @@
  * @Author: Kanata You 
  * @Date: 2021-12-02 17:50:59 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-12 21:30:57
+ * @Last Modified time: 2022-01-17 22:58:43
  */
 
-import type { ListrTask } from 'listr2';
-import type { DefaultRenderer } from 'listr2/dist/renderer/default.renderer';
+import type { ListrTask, ListrRendererFactory } from 'listr2';
 import * as chalk from 'chalk';
 
 import loadDependencies, { SingleDependency } from '@@install/utils/load-dependencies';
@@ -26,12 +25,12 @@ interface Context {
  * @template T
  * @param {string[]} scopes
  * @param {boolean} isProd
- * @returns {ListrTask<T, typeof DefaultRenderer>}
+ * @returns {ListrTask<T, ListrRendererFactory>}
  */
 const usePackageDeps = <T extends Context>(
   scopes: string[],
   isProd: boolean
-): ListrTask<T, typeof DefaultRenderer> => ({
+): ListrTask<T, ListrRendererFactory> => ({
   title: 'Loading all the explicit dependencies from all `package.json`.',
   task: async (ctx, task) => {
     // parse

@@ -2,28 +2,105 @@
  * @Author: Kanata You 
  * @Date: 2021-11-30 19:15:56 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-30 19:32:42
+ * @Last Modified time: 2022-01-16 17:34:41
  */
+
+import * as fs from 'fs';
+import * as path from 'path';
 
 import env, { PackageJSON } from '@env';
 
+
+export interface LocalScript {
+  name: string;
+  cmd: string;
+  cwd: string;
+}
+
+
+const physicalScriptDirs: readonly string[] = [
+  'scripts',
+  'tasks'
+];
+
+const physicalScriptLoader: Readonly<{
+  [type: string]: (name: string) => string
+}> = {
+  js: name => `node ${name}.js`,
+  bat: name => `${name}.bat`,
+  sh: name => `${name}.sh`,
+  exe: name => `${name}.exe`,
+  '': name => name
+};
+
+const getPhysicalScripts = (scope: string, defined: string[]): LocalScript[] => {
+  const res: LocalScript[] = [];
+
+  const dir = scope === 'root' ? env.rootDir : env.resolvePathInPackage(scope);
+  
+  physicalScriptDirs.forEach(d => {
+    const __dir = path.join(dir, d);
+
+    if (fs.existsSync(__dir) && fs.statSync(__dir).isDirectory()) {
+      fs.readdirSync(__dir).forEach(f => {
+        const fn = path.join(__dir, f);
+
+        if (fs.statSync(fn).isFile()) {
+          const tmp = fn.split('.');
+          const name = tmp.slice(0, tmp.length - 1).join('.');
+          const scriptName = `${scope}.${name}`;
+
+          if (defined.includes(scriptName)) {
+            return;
+          }
+          
+          const type = tmp.length > 1 ? tmp[tmp.length - 1] as string : '';
+          const loaded = physicalScriptLoader[type];
+
+          if (loaded) {
+            res.push({
+              name: scriptName,
+              cmd: loaded(name),
+              cwd: __dir
+            });
+            defined.push(scriptName);
+          }
+        }
+      });
+    }
+  });
+
+  return [];
+};
 
 /**
  * Gets all runnable scripts.
  *
  * @param {string} [scope]
- * @returns {string[]}
+ * @returns {RunnableScript[]}
  */
-const getRunnableScripts = (scope?: string): string[] => {
+const getRunnableScripts = (scope?: string): LocalScript[] => {
   if (scope) {
-    const res = scope === 'root' ? (
-      Object.keys(env.rootPkg.scripts ?? {}).map(n => `root.${n}`)
+    const res: LocalScript[] = scope === 'root' ? (
+      Object.entries(env.rootPkg.scripts ?? {}).map(([n, cmd]) => ({
+        name: `root.${n}`,
+        cmd,
+        cwd: env.rootDir
+      }))
     ) : (
-      Object.keys((env.packageMap[scope] as PackageJSON).scripts ?? {}).map(n => `${scope}.${n}`)
+      Object.entries((env.packageMap[scope] as PackageJSON).scripts ?? {}).map(([n, cmd]) => ({
+        name: `${scope}.${n}`,
+        cmd,
+        cwd: env.resolvePathInPackage(scope)
+      }))
+    );
+
+    res.push(
+      ...getPhysicalScripts(scope, res.map(d => d.name))
     );
 
     return res.sort(
-      (a, b) => {
+      ({ name: a }, { name: b }) => {
         for (let i = 0; i < a.length && i < b.length; i += 1) {
           if (a.charCodeAt(i) !== b.charCodeAt(i)) {
             return a.charCodeAt(i) - b.charCodeAt(i);
@@ -35,20 +112,36 @@ const getRunnableScripts = (scope?: string): string[] => {
     );
   }
 
-  const allScripts: string[] = [];
+  const allScripts: LocalScript[] = [];
 
   allScripts.push(
-    ...Object.keys(env.rootPkg.scripts ?? {}).map(n => `root.${n}`)
+    ...Object.entries(env.rootPkg.scripts ?? {}).map(([n, cmd]) => ({
+      name: `root.${n}`,
+      cmd,
+      cwd: env.rootDir
+    }))
+  );
+
+  allScripts.push(
+    ...getPhysicalScripts('root', allScripts.map(d => d.name))
   );
 
   env.packages.forEach(p => {
     allScripts.push(
-      ...Object.keys((env.packageMap[p] as PackageJSON).scripts ?? {}).map(n => `${p}.${n}`)
+      ...Object.entries((env.packageMap[p] as PackageJSON).scripts ?? {}).map(([n, cmd]) => ({
+        name: `${p}.${n}`,
+        cmd,
+        cwd: env.resolvePathInPackage(p)
+      }))
+    );
+
+    allScripts.push(
+      ...getPhysicalScripts(p, allScripts.map(d => d.name))
     );
   });
 
   return allScripts.sort(
-    (a, b) => {
+    ({ name: a }, { name: b }) => {
       for (let i = 0; i < a.length && i < b.length; i += 1) {
         if (a.charCodeAt(i) !== b.charCodeAt(i)) {
           return a.charCodeAt(i) - b.charCodeAt(i);

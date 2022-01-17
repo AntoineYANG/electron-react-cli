@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-12-02 18:43:33
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-11 17:22:41
+ * @Last Modified time: 2022-01-18 01:16:36
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -30,6 +30,7 @@ var GitChangeState;
   GitChangeState["M"] = "modified";
   GitChangeState["U"] = "untracked";
   GitChangeState["D"] = "deleted";
+  GitChangeState["R"] = "renamed";
 })(GitChangeState = exports.GitChangeState || (exports.GitChangeState = {}));
 
 const gitDir = _env_1.default.resolvePath('.git');
@@ -119,9 +120,10 @@ const getGitPreset = async () => {
     const {
       typeRaw,
       name1,
-      name2
-    } = /^(?<typeRaw>[ AMD?]{2}) ("(?<name1>.+)"|(?<name2>[^\s]+))$/.exec(str)?.groups;
-    const name = name1 ?? name2;
+      name2,
+      curName
+    } = /^(?<typeRaw>[ AMDR?]{2}) ("(?<name1>.+)"|(?<name2>[^\s]+)|(?<preName>.+) -> (?<curName>.+))$/.exec(str)?.groups;
+    const name = typeRaw.includes('R') ? curName : name1 ?? name2;
 
     if (name.endsWith('/')) {
       return ctx;
@@ -133,19 +135,21 @@ const getGitPreset = async () => {
         name,
         type: GitChangeState.U
       });
-    } else if (/^[AMD]{2}$/.test(typeRaw.slice(0, 2))) {
+    } else if (/^[AMDR]{2}$/.test(typeRaw.slice(0, 2))) {
       // added but remodified
       const type1 = {
         U: GitChangeState.U,
         A: GitChangeState.A,
         M: GitChangeState.M,
-        D: GitChangeState.D
+        D: GitChangeState.D,
+        R: GitChangeState.R
       }[typeRaw.slice(0, 1)];
       const type2 = {
         U: GitChangeState.U,
         A: GitChangeState.A,
         M: GitChangeState.M,
-        D: GitChangeState.D
+        D: GitChangeState.D,
+        R: GitChangeState.R
       }[typeRaw.slice(1, 2)];
       ctx.staged.push({
         name,
@@ -189,6 +193,15 @@ const getGitPreset = async () => {
             break;
           }
 
+        case 'R':
+          {
+            ctx.notStaged.push({
+              name,
+              type: GitChangeState.R
+            });
+            break;
+          }
+
         default:
           {
             throw new Error(`Git status info "${str}" is not readable.`);
@@ -220,6 +233,15 @@ const getGitPreset = async () => {
             ctx.staged.push({
               name,
               type: GitChangeState.D
+            });
+            break;
+          }
+
+        case 'R':
+          {
+            ctx.staged.push({
+              name,
+              type: GitChangeState.R
             });
             break;
           }

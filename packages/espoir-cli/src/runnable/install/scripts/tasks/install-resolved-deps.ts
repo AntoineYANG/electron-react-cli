@@ -2,11 +2,10 @@
  * @Author: Kanata You 
  * @Date: 2021-11-22 00:07:04 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-12 21:29:25
+ * @Last Modified time: 2022-01-17 22:58:36
  */
 
-import type { ListrTask } from 'listr2';
-import type { DefaultRenderer } from 'listr2/dist/renderer/default.renderer';
+import type { ListrTask, ListrRendererFactory } from 'listr2';
 import * as chalk from 'chalk';
 
 import type { VersionInfo } from '@request/request-npm';
@@ -19,7 +18,7 @@ interface Context {
   installResults: InstallResult[];
 }
 
-const installResolvedDeps = <T extends Context>(): ListrTask<T, typeof DefaultRenderer> => ({
+const installResolvedDeps = <T extends Context>(): ListrTask<T, ListrRendererFactory> => ({
   title: 'Installing resolved modules.',
   task: (ctx, task) => {
     task.output = chalk`🧱 {yellow.bold ${ctx.diff.length} }modules will be installed `;
