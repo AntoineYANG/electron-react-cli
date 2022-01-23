@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-30 20:32:10 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-30 21:11:22
+ * @Last Modified time: 2022-01-23 18:37:08
  */
 
 import * as path from 'path';
@@ -73,7 +73,7 @@ const linkCLI = (dependencies: SingleDependency[]): CliLink[] => {
   return res;
 };
 
-const dir = env.resolvePath('.espoir', '.bin');
+const dir = env.rootDir ? env.resolvePath('.espoir', '.bin') : '.bin';
 
 const writeBin = (name: string, target: string): void => {
   const fn = path.join(dir, name);

@@ -86,7 +86,16 @@ Show help info.
 
 ### espoir {run-script, run, r}
 
-Execute a defined script in `package.json`.
+Execute a defined script.
+
+For each package, executable scripts includes
+
+* `scripts` defined in `package.json`.
+
+* JS file in the `scripts/` directory.
+
+* JS file in the `tasks/` directory.
+
 
 
 #### Arguments

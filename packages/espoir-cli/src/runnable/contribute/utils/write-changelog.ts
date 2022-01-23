@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-01-11 15:21:52 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-11 19:11:20
+ * @Last Modified time: 2022-01-23 18:15:10
  */
 
 import * as fs from 'fs';
@@ -66,6 +66,12 @@ export type ChangeLogData = {
  * @returns {string}
  */
 const requirePackageVersion = (_package: string): string => {
+  if (!env.rootDir || !env.packageMap || !env.rootPkg) {
+    throw new Error(
+      `You're outside a espoir workspace.`
+    );
+  }
+
   if (_package === 'root') {
     const version = env.rootPkg.version;
 
@@ -271,6 +277,12 @@ const writeChangelog = (state: GitStatus, scopes: string[], msg: string, type: s
     package: string;
     version: string;
   }[]>((list, { name }) => {
+    if (!env.packages) {
+      throw new Error(
+        `You're outside a espoir workspace.`
+      );
+    }
+    
     if (name.match(/^packages\//)) {
       const scope = (/^packages\/(?<w>[^/]+)/.exec(name)?.groups as {
         w: string;

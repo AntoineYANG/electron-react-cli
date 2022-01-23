@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-01-12 23:02:33 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-12 23:26:22
+ * @Last Modified time: 2022-01-23 18:16:51
  */
 
 import * as fs from 'fs';
@@ -12,8 +12,14 @@ import type { DependencyTag } from '@@install/utils/load-dependencies';
 
 
 const delDep = (from: string, name: string): void => {
+  if (!env.packageMap) {
+    throw new Error(
+      `You're outside a espoir workspace.`
+    );
+  }
+
   const fn = from === 'root' ? env.resolvePath('package.json') : env.resolvePathInPackage(from, 'package.json');
-  const data = from === 'root' ? env.rootPkg : env.packageMap[from] as PackageJSON;
+  const data = (from === 'root' ? env.rootPkg : env.packageMap[from]) as PackageJSON;
 
   let write = false;
 

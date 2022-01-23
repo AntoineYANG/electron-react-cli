@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-30 19:15:56 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-16 17:34:41
+ * @Last Modified time: 2022-01-23 18:22:44
  */
 
 import * as fs from 'fs';
@@ -36,7 +36,7 @@ const physicalScriptLoader: Readonly<{
 const getPhysicalScripts = (scope: string, defined: string[]): LocalScript[] => {
   const res: LocalScript[] = [];
 
-  const dir = scope === 'root' ? env.rootDir : env.resolvePathInPackage(scope);
+  const dir = scope === 'root' ? env.rootDir as string : env.resolvePathInPackage(scope);
   
   physicalScriptDirs.forEach(d => {
     const __dir = path.join(dir, d);
@@ -46,7 +46,7 @@ const getPhysicalScripts = (scope: string, defined: string[]): LocalScript[] => 
         const fn = path.join(__dir, f);
 
         if (fs.statSync(fn).isFile()) {
-          const tmp = fn.split('.');
+          const tmp = f.split('.');
           const name = tmp.slice(0, tmp.length - 1).join('.');
           const scriptName = `${scope}.${name}`;
 
@@ -70,7 +70,7 @@ const getPhysicalScripts = (scope: string, defined: string[]): LocalScript[] => 
     }
   });
 
-  return [];
+  return res;
 };
 
 /**
@@ -82,13 +82,13 @@ const getPhysicalScripts = (scope: string, defined: string[]): LocalScript[] => 
 const getRunnableScripts = (scope?: string): LocalScript[] => {
   if (scope) {
     const res: LocalScript[] = scope === 'root' ? (
-      Object.entries(env.rootPkg.scripts ?? {}).map(([n, cmd]) => ({
+      Object.entries(env.rootPkg?.scripts ?? {}).map(([n, cmd]) => ({
         name: `root.${n}`,
         cmd,
-        cwd: env.rootDir
+        cwd: env.rootDir as string
       }))
     ) : (
-      Object.entries((env.packageMap[scope] as PackageJSON).scripts ?? {}).map(([n, cmd]) => ({
+      Object.entries((env.packageMap?.[scope] as PackageJSON).scripts ?? {}).map(([n, cmd]) => ({
         name: `${scope}.${n}`,
         cmd,
         cwd: env.resolvePathInPackage(scope)
@@ -115,10 +115,10 @@ const getRunnableScripts = (scope?: string): LocalScript[] => {
   const allScripts: LocalScript[] = [];
 
   allScripts.push(
-    ...Object.entries(env.rootPkg.scripts ?? {}).map(([n, cmd]) => ({
+    ...Object.entries(env.rootPkg?.scripts ?? {}).map(([n, cmd]) => ({
       name: `root.${n}`,
       cmd,
-      cwd: env.rootDir
+      cwd: env.rootDir as string
     }))
   );
 
@@ -126,9 +126,9 @@ const getRunnableScripts = (scope?: string): LocalScript[] => {
     ...getPhysicalScripts('root', allScripts.map(d => d.name))
   );
 
-  env.packages.forEach(p => {
+  env.packages?.forEach(p => {
     allScripts.push(
-      ...Object.entries((env.packageMap[p] as PackageJSON).scripts ?? {}).map(([n, cmd]) => ({
+      ...Object.entries((env.packageMap?.[p] as PackageJSON).scripts ?? {}).map(([n, cmd]) => ({
         name: `${p}.${n}`,
         cmd,
         cwd: env.resolvePathInPackage(p)

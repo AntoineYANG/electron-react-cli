@@ -1,6 +1,6 @@
 # root v1.x
 
-## 1.0.0 (2022/1/18)
+## 1.0.0 (2022/1/18 - 2022/1/23)
 
 
 _\<version description\>_
@@ -15,8 +15,6 @@ _\<version description\>_
 
 
 
-
-
 **Contributors**
 
 - **AntoineYANG** (814602569@qq.com)
@@ -24,5 +22,10 @@ _\<version description\>_
 ### contribute
 
 + 🐞 **Add renaming to git status checking.** - AntoineYANG(814602569@qq.com) 2022/1/18, on _main_
+
+
+### create
+
++ 🌱 **Support 'create' command.** - AntoineYANG(814602569@qq.com) 2022/1/23, on _main_
 
 

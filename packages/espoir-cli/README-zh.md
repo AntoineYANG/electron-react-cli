@@ -83,7 +83,16 @@ _当根目录被指定时，`--save` 选项将产生一个错误。这是因为�
 
 ### espoir {run-script, run, r}
 
-运行一条 `package.json` 中的预定义脚本。
+运行一条预定义脚本。
+
+对于每一个子仓库而言，它将包括：
+
+* `package.json` 中的 `scripts` 对象.
+
+* `scripts` 目录下的 JS 脚本.
+
+* `tasks` 目录下的 JS 脚本.
+
 
 
 #### 参数

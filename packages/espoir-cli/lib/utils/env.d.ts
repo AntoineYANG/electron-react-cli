@@ -11,6 +11,15 @@ export declare type PackageJSON = Partial<{
     workspaces: string[];
     author: PackageAuthor;
     contributors: PackageAuthor[];
+    repository: {
+        type: 'git';
+        url: string;
+        directory: string;
+    };
+    bugs: {
+        url: string;
+    };
+    homepage: string;
     bin: string | {
         [name: string]: string;
     };
@@ -48,7 +57,8 @@ export declare type EspoirConfigs = {
     commit: EspoirCommitConfigs;
 };
 declare const env: {
-    rootDir: string;
+    version: number;
+    rootDir: string | null;
     rootPkg: Partial<{
         [otherConfig: string]: any;
         name: string;
@@ -57,6 +67,15 @@ declare const env: {
         workspaces: string[];
         author: PackageAuthor;
         contributors: PackageAuthor[];
+        repository: {
+            type: 'git';
+            url: string;
+            directory: string;
+        };
+        bugs: {
+            url: string;
+        };
+        homepage: string;
         bin: string | {
             [name: string]: string;
         };
@@ -67,8 +86,8 @@ declare const env: {
         peerDependenciesMeta: Record<string, {
             optional: boolean;
         }>;
-    } & Record<DependencyTag, DependencySet>>;
-    packages: string[];
+    } & Record<DependencyTag, DependencySet>> | null;
+    packages: string[] | null;
     packageMap: {
         [k: string]: Partial<{
             [otherConfig: string]: any;
@@ -78,6 +97,15 @@ declare const env: {
             workspaces: string[];
             author: PackageAuthor;
             contributors: PackageAuthor[];
+            repository: {
+                type: 'git';
+                url: string;
+                directory: string;
+            };
+            bugs: {
+                url: string;
+            };
+            homepage: string;
             bin: string | {
                 [name: string]: string;
             };
@@ -89,7 +117,7 @@ declare const env: {
                 optional: boolean;
             }>;
         } & Record<DependencyTag, DependencySet>>;
-    };
+    } | null;
     currentPackage: string | undefined;
     resolvePath: (...pathSegments: string[]) => string;
     resolvePathInPackage: (packageName: string, ...pathSegments: string[]) => string;

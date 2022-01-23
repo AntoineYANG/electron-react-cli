@@ -1,5 +1,18 @@
 # espoir-cli v0.x
 
+## 0.3.0 (2022/1/23)
+
+_\<version description\>_
+
+**Contributors**
+
+- **AntoineYANG** (814602569@qq.com)
+
+### create
+
++ 🌱 **Support 'create' command.** - AntoineYANG(814602569@qq.com) 2022/1/23, on _main_
+
+
 ## 0.2.4 (2022/1/18)
 
 _\<version description\>_
@@ -79,8 +92,6 @@ _\<version description\>_
 ### document
 
 + 🧰 **Fixed errors in changelog** - AntoineYANG(814602569@qq.com) 2022/1/16, on _main_
-
-
 
 
 

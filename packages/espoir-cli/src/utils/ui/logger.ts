@@ -2,10 +2,11 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 02:35:46 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-18 00:59:27
+ * @Last Modified time: 2022-01-23 18:29:58
  */
 
 import * as fs from 'fs';
+import * as path from 'path';
 import { sync as mkdirp } from 'mkdirp';
 import * as chalk from 'chalk';
 import * as logUpdate from 'log-update';
@@ -71,16 +72,12 @@ export class StopWatch {
 
 }
 
-const logDir = env.resolvePath(
+const logDir = env.rootDir ? env.resolvePath(
   '.espoir',
   'logs'
-);
+) : 'logs';
 const today = new Date();
-const logFile = env.resolvePath(
-  '.espoir',
-  'logs',
-  `${today.toISOString().split('T')[0]}.log`
-);
+const logFile = path.join(logDir, `${today.toISOString().split('T')[0]}.log`);
 
 /**
  * Logging methods.
@@ -97,6 +94,10 @@ abstract class Logger {
   }
 
   private static saveLog(tag: string, msg: string): void {
+    if (!env.rootDir) {
+      return;
+    }
+    
     if (!fs.existsSync(logDir)) {
       mkdirp(logDir);
     }

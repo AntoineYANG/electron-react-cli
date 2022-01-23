@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-30 20:32:10
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-30 21:11:22
+ * @Last Modified time: 2022-01-23 18:37:08
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -66,7 +66,7 @@ const linkCLI = dependencies => {
   return res;
 };
 
-const dir = _env_1.default.resolvePath('.espoir', '.bin');
+const dir = _env_1.default.rootDir ? _env_1.default.resolvePath('.espoir', '.bin') : '.bin';
 
 const writeBin = (name, target) => {
   const fn = path.join(dir, name); // shell

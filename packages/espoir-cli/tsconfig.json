@@ -17,6 +17,8 @@
       "@@run/*": ["runnable/run-script/*"],
       "@@contribute": ["runnable/contribute"],
       "@@contribute/*": ["runnable/contribute/*"],
+      "@@create": ["runnable/create"],
+      "@@create/*": ["runnable/create/*"],
       "@request": ["utils/request"],
       "@request/*": ["utils/request/*"],
       "@ui/*": ["utils/ui/*"],

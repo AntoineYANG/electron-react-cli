@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-30 19:15:56
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-16 17:34:41
+ * @Last Modified time: 2022-01-23 18:22:44
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -36,7 +36,7 @@ const getPhysicalScripts = (scope, defined) => {
         const fn = path.join(__dir, f);
 
         if (fs.statSync(fn).isFile()) {
-          const tmp = fn.split('.');
+          const tmp = f.split('.');
           const name = tmp.slice(0, tmp.length - 1).join('.');
           const scriptName = `${scope}.${name}`;
 
@@ -59,7 +59,7 @@ const getPhysicalScripts = (scope, defined) => {
       });
     }
   });
-  return [];
+  return res;
 };
 /**
  * Gets all runnable scripts.
@@ -71,11 +71,11 @@ const getPhysicalScripts = (scope, defined) => {
 
 const getRunnableScripts = scope => {
   if (scope) {
-    const res = scope === 'root' ? Object.entries(_env_1.default.rootPkg.scripts ?? {}).map(([n, cmd]) => ({
+    const res = scope === 'root' ? Object.entries(_env_1.default.rootPkg?.scripts ?? {}).map(([n, cmd]) => ({
       name: `root.${n}`,
       cmd,
       cwd: _env_1.default.rootDir
-    })) : Object.entries(_env_1.default.packageMap[scope].scripts ?? {}).map(([n, cmd]) => ({
+    })) : Object.entries(_env_1.default.packageMap?.[scope].scripts ?? {}).map(([n, cmd]) => ({
       name: `${scope}.${n}`,
       cmd,
       cwd: _env_1.default.resolvePathInPackage(scope)
@@ -97,22 +97,20 @@ const getRunnableScripts = scope => {
   }
 
   const allScripts = [];
-  allScripts.push(...Object.entries(_env_1.default.rootPkg.scripts ?? {}).map(([n, cmd]) => ({
+  allScripts.push(...Object.entries(_env_1.default.rootPkg?.scripts ?? {}).map(([n, cmd]) => ({
     name: `root.${n}`,
     cmd,
     cwd: _env_1.default.rootDir
   })));
   allScripts.push(...getPhysicalScripts('root', allScripts.map(d => d.name)));
-
-  _env_1.default.packages.forEach(p => {
-    allScripts.push(...Object.entries(_env_1.default.packageMap[p].scripts ?? {}).map(([n, cmd]) => ({
+  _env_1.default.packages?.forEach(p => {
+    allScripts.push(...Object.entries(_env_1.default.packageMap?.[p].scripts ?? {}).map(([n, cmd]) => ({
       name: `${p}.${n}`,
       cmd,
       cwd: _env_1.default.resolvePathInPackage(p)
     })));
     allScripts.push(...getPhysicalScripts(p, allScripts.map(d => d.name)));
   });
-
   return allScripts.sort(({
     name: a
   }, {

@@ -2,18 +2,19 @@
  * @Author: Kanata You 
  * @Date: 2021-11-22 00:39:25 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-23 20:15:00
+ * @Last Modified time: 2022-01-23 18:35:54
  */
 
 import * as fs from 'fs';
+import * as path from 'path';
 import { sync as mkdirp } from 'mkdirp';
 
 import env from '@env';
 import { InstallResult } from './download-deps';
 
 
-const dir = env.resolvePath('.espoir');
-const fn = env.resolvePath('.espoir', 'failed-to-install.json');
+const dir = env.rootDir ? env.resolvePath('.espoir') : '.espoir';
+const fn = path.join(dir, 'failed-to-install.json');
 
 if (!fs.existsSync(dir)) {
   mkdirp(dir);

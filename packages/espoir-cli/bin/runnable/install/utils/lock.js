@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-14 20:49:31
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-12 23:33:30
+ * @Last Modified time: 2022-01-23 18:32:51
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -76,15 +76,13 @@ const validateLockData = data => {
   return true;
 };
 
-const dir = _env_1.default.resolvePath('.espoir');
-
-const fn = _env_1.default.resolvePath('.espoir', 'espoir-lock.json');
+const dir = _env_1.default.rootDir ? _env_1.default.resolvePath('.espoir') : '';
+const fn = _env_1.default.rootDir ? _env_1.default.resolvePath('.espoir', 'espoir-lock.json') : '';
 /**
  * Writes `.espoir/espoir-lock.json`.
  *
  * @param {LockData} data
  */
-
 
 const writeLockFile = data => {
   try {

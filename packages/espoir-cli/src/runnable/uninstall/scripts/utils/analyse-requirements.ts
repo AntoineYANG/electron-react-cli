@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-01-12 21:49:46 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-12 23:54:41
+ * @Last Modified time: 2022-01-23 18:18:26
  */
 
 import * as semver from 'semver';
@@ -24,6 +24,12 @@ export interface Requirement {
 }
 
 const analyseRequirements = (lockData: LockData): Requirement[] => {
+  if (!env.packages || !env.packageMap) {
+    throw new Error(
+      `You're outside a espoir workspace.`
+    );
+  }
+  
   const res: Requirement[] = [];
   
   Object.entries(lockData).forEach(([name, item]) => {
@@ -56,8 +62,8 @@ const analyseRequirements = (lockData: LockData): Requirement[] => {
   });
 
   // record dependence between modules and local packages
-  env.packages.map(pn => env.packageMap[pn] as PackageJSON).forEach((pkg, i) => {
-    const name = pkg.name ?? env.packages[i] as string;
+  env.packages.map(pn => env.packageMap?.[pn] as PackageJSON).forEach((pkg, i) => {
+    const name = pkg.name ?? env.packages?.[i] as string;
 
     ['dependencies', 'devDependencies', 'peerDependencies'].forEach(k => {
       const deps = pkg[k as DependencyTag] ?? {};

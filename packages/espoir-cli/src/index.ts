@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-12 15:19:20 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-12 21:18:33
+ * @Last Modified time: 2022-01-23 19:42:06
  */
 
 import { Command } from 'commander';
@@ -11,10 +11,11 @@ import RunnableScript from '@runnable';
 import env from '@env';
 import Logger, { StopWatch } from '@ui/logger';
 
-import Install from '@@install';
-import Uninstall from '@@uninstall';
-import RunScript from '@@run';
-import Contribute from '@@contribute';
+const Install = env.rootDir ? require('@@install').default as RunnableScript : 0;
+const Uninstall = env.rootDir ? require('@@uninstall').default as RunnableScript : 0;
+const RunScript = env.rootDir ? require('@@run').default as RunnableScript : 0;
+const Contribute = env.rootDir ? require('@@contribute').default as RunnableScript : 0;
+const Create = require('@@create').default as RunnableScript;
 
 
 export enum ExitCode {
@@ -24,12 +25,13 @@ export enum ExitCode {
   UNCAUGHT_EXCEPTION = 3,
 };
 
-const supportedScripts: Array<RunnableScript> = [
+const supportedScripts = [
   Install,
   Uninstall,
   RunScript,
-  Contribute
-];
+  Contribute,
+  Create
+].filter(Boolean) as Array<RunnableScript>;
 
 const program = new Command();
 
@@ -37,7 +39,7 @@ program.name(
   env.runtime.espoir.name
 ).version(
   env.runtime.espoir.version,
-  '-V, --version, -v, --v'
+  '-V, --version'
 );
 
 const cli = async (argv?: string[]) => {

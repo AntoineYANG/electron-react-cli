@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-12 15:31:24 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-12 23:29:48
+ * @Last Modified time: 2022-01-23 20:33:55
  */
 
 import * as path from 'path';
@@ -25,6 +25,15 @@ export type PackageJSON = Partial<{
   workspaces: string[];
   author: PackageAuthor;
   contributors: PackageAuthor[];
+  repository: {
+    type: 'git';
+    url: string;
+    directory: string;
+  };
+  bugs: {
+    url: string;
+  };
+  homepage: string;
   bin: string | {
     [name: string]: string;
   };
@@ -50,7 +59,7 @@ const thisPkg = require('../../package.json') as {
 //                 ROOT                 //
 // ************************************ //
 
-const locateRoot = (dir: string = process.cwd()): string => {
+const locateRoot = (dir: string = process.cwd()): string | null => {
   const pkgJSON = path.join(dir, 'package.json');
   
   if (fs.existsSync(pkgJSON)) {
@@ -65,10 +74,8 @@ const locateRoot = (dir: string = process.cwd()): string => {
   const upper = path.resolve(dir, '..');
 
   if (upper === dir) {
-    // cannot go up
-    throw new Error(
-      `Cannot find root package. `
-    );
+    // cannot find root package
+    return null;
   }
 
   return locateRoot(upper);
@@ -78,7 +85,7 @@ const locateRoot = (dir: string = process.cwd()): string => {
 const rootDir = locateRoot();
 
 /** Package.json config of the repo root. */
-const rootPkg = require(path.resolve(rootDir, 'package.json')) as PackageJSON;
+const rootPkg = rootDir ? require(path.resolve(rootDir, 'package.json')) as PackageJSON : null;
 
 
 // ************************************ //
@@ -86,17 +93,17 @@ const rootPkg = require(path.resolve(rootDir, 'package.json')) as PackageJSON;
 // ************************************ //
 
 /** Names of all packages. */
-const packages = fs.readdirSync(path.resolve(rootDir, 'packages'));
+const packages = rootDir ? fs.readdirSync(path.resolve(rootDir, 'packages')) : null;
 
 /** Package.json mappings for each package. */
-const packageMap = Object.fromEntries(
+const packageMap = rootDir && packages ? Object.fromEntries(
   packages.map(p => [
     p, require(path.resolve(rootDir, 'packages', p, 'package.json')) as PackageJSON
   ])
-);
+) : null;
 
 const locatePackage = (dir: string = process.cwd()): string | undefined => {
-  if (dir === rootDir) {
+  if (dir === rootDir || !rootDir) {
     // root directory reached
     return undefined;
   }
@@ -126,7 +133,15 @@ const currentPackage = locatePackage();
  * @param {string[]} pathSegments
  * @returns {string}
  */
-const resolvePath = (...pathSegments: string[]): string => path.resolve(rootDir, ...pathSegments);
+const resolvePath = (...pathSegments: string[]): string => {
+  if (rootDir) {
+    return path.resolve(rootDir, ...pathSegments);
+  }
+
+  throw new Error(
+    `You're outside a espoir workspace.`
+  );
+};
 
 /**
  * Returns the absolute path relative to the dir of the given package.
@@ -137,7 +152,15 @@ const resolvePath = (...pathSegments: string[]): string => path.resolve(rootDir,
  */
 const resolvePathInPackage = (
   packageName: string, ...pathSegments: string[]
-): string => path.resolve(rootDir, 'packages', packageName, ...pathSegments);
+): string => {
+  if (rootDir) {
+    return path.resolve(rootDir, 'packages', packageName, ...pathSegments);
+  }
+
+  throw new Error(
+    `You're outside a espoir workspace.`
+  );
+};
 
 
 // ************************************ //
@@ -170,10 +193,10 @@ export type EspoirConfigs = {
   commit: EspoirCommitConfigs;
 };
 
-const configFile = [
+const configFile = rootDir ? [
   'espoir.config.js',
   'espoir.config.json'
-].map(fn => path.join(rootDir, fn)).find(fs.existsSync);
+].map(fn => path.join(rootDir, fn)).find(fs.existsSync) : undefined;
 
 const configFileData: Partial<EspoirConfigs> = configFile ? require(configFile) : {};
 
@@ -205,6 +228,7 @@ const configs: EspoirConfigs = {
 
 
 const env = {
+  version: parseInt(thisPkg.version.split('.')[0] as string),
   rootDir,
   rootPkg,
   packages,

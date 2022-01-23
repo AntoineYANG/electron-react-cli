@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2022-01-12 23:02:33
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-12 23:26:22
+ * @Last Modified time: 2022-01-23 18:16:51
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -15,6 +15,10 @@ const fs = require("fs");
 const _env_1 = require("../../../../utils/env");
 
 const delDep = (from, name) => {
+  if (!_env_1.default.packageMap) {
+    throw new Error(`You're outside a espoir workspace.`);
+  }
+
   const fn = from === 'root' ? _env_1.default.resolvePath('package.json') : _env_1.default.resolvePathInPackage(from, 'package.json');
   const data = from === 'root' ? _env_1.default.rootPkg : _env_1.default.packageMap[from];
   let write = false;

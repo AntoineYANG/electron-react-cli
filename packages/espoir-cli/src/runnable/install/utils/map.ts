@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-16 20:00:09 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-17 22:58:55
+ * @Last Modified time: 2022-01-23 17:15:24
  */
 
 import * as path from 'path';
@@ -46,6 +46,40 @@ const link = async (at: string, to: string): Promise<string> => {
 
       child_process.exec(
         `cmd /c mklink /j "${at}" "${to}"`,
+        err => {
+          if (err) {
+            return reject(err);
+          }
+
+          return resolve(at);
+        }
+      );
+    });
+  } else if (process.platform === 'linux') {
+    return new Promise<string>((resolve, reject) => {
+      if (!fs.existsSync(dir)) {
+        mkdirp(dir);
+      } else if (fs.existsSync(at)) {
+        fs.rmSync(
+          at, {
+            recursive: true,
+            force: true
+          }
+        );
+      }
+
+      try {
+        fs.readdirSync(to);
+      } catch (error) {
+        return reject(error);
+      }
+
+      if (fs.existsSync(at)) {
+        fs.rmSync(at);
+      }
+
+      child_process.exec(
+        `ln -sf "${to}" "${at}"`,
         err => {
           if (err) {
             return reject(err);

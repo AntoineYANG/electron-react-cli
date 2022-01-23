@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 02:00:17 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-30 18:53:59
+ * @Last Modified time: 2022-01-23 18:24:51
  */
 
 import { Argument, Option } from 'commander';
@@ -14,10 +14,10 @@ import installAll from '@@install/scripts/install-all';
 import installAndSave from '@@install/scripts/install-and-save';
 
 
-const installTarget = [
+const installTarget = env.packages ? [
   ...env.packages,
   'root'
-];
+] : [];
 
 const Install: RunnableScript = {
   fullName: 'install',

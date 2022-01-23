@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-12 15:31:24
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-12 23:29:48
+ * @Last Modified time: 2022-01-23 20:33:55
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -40,8 +40,8 @@ const locateRoot = (dir = process.cwd()) => {
   const upper = path.resolve(dir, '..');
 
   if (upper === dir) {
-    // cannot go up
-    throw new Error(`Cannot find root package. `);
+    // cannot find root package
+    return null;
   }
 
   return locateRoot(upper);
@@ -52,20 +52,19 @@ const locateRoot = (dir = process.cwd()) => {
 const rootDir = locateRoot();
 /** Package.json config of the repo root. */
 
-const rootPkg = require(path.resolve(rootDir, 'package.json')); // ************************************ //
+const rootPkg = rootDir ? require(path.resolve(rootDir, 'package.json')) : null; // ************************************ //
 //                PACKAGE               //
 // ************************************ //
 
 /** Names of all packages. */
 
-
-const packages = fs.readdirSync(path.resolve(rootDir, 'packages'));
+const packages = rootDir ? fs.readdirSync(path.resolve(rootDir, 'packages')) : null;
 /** Package.json mappings for each package. */
 
-const packageMap = Object.fromEntries(packages.map(p => [p, require(path.resolve(rootDir, 'packages', p, 'package.json'))]));
+const packageMap = rootDir && packages ? Object.fromEntries(packages.map(p => [p, require(path.resolve(rootDir, 'packages', p, 'package.json'))])) : null;
 
 const locatePackage = (dir = process.cwd()) => {
-  if (dir === rootDir) {
+  if (dir === rootDir || !rootDir) {
     // root directory reached
     return undefined;
   }
@@ -93,7 +92,13 @@ const currentPackage = locatePackage(); // ************************************ 
  * @returns {string}
  */
 
-const resolvePath = (...pathSegments) => path.resolve(rootDir, ...pathSegments);
+const resolvePath = (...pathSegments) => {
+  if (rootDir) {
+    return path.resolve(rootDir, ...pathSegments);
+  }
+
+  throw new Error(`You're outside a espoir workspace.`);
+};
 /**
  * Returns the absolute path relative to the dir of the given package.
  *
@@ -103,9 +108,15 @@ const resolvePath = (...pathSegments) => path.resolve(rootDir, ...pathSegments);
  */
 
 
-const resolvePathInPackage = (packageName, ...pathSegments) => path.resolve(rootDir, 'packages', packageName, ...pathSegments);
+const resolvePathInPackage = (packageName, ...pathSegments) => {
+  if (rootDir) {
+    return path.resolve(rootDir, 'packages', packageName, ...pathSegments);
+  }
 
-const configFile = ['espoir.config.js', 'espoir.config.json'].map(fn => path.join(rootDir, fn)).find(fs.existsSync);
+  throw new Error(`You're outside a espoir workspace.`);
+};
+
+const configFile = rootDir ? ['espoir.config.js', 'espoir.config.json'].map(fn => path.join(rootDir, fn)).find(fs.existsSync) : undefined;
 const configFileData = configFile ? require(configFile) : {};
 const configs = {
   cacheDir: path.resolve(__filename, '..', '..', '..'),
@@ -121,6 +132,7 @@ const configs = {
   }
 };
 const env = {
+  version: parseInt(thisPkg.version.split('.')[0]),
   rootDir,
   rootPkg,
   packages,

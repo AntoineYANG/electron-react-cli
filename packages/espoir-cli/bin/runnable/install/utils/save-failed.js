@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-22 00:39:25
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-23 20:15:00
+ * @Last Modified time: 2022-01-23 18:35:54
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -12,13 +12,14 @@ Object.defineProperty(exports, "__esModule", {
 
 const fs = require("fs");
 
+const path = require("path");
+
 const mkdirp_1 = require("mkdirp");
 
 const _env_1 = require("../../../utils/env");
 
-const dir = _env_1.default.resolvePath('.espoir');
-
-const fn = _env_1.default.resolvePath('.espoir', 'failed-to-install.json');
+const dir = _env_1.default.rootDir ? _env_1.default.resolvePath('.espoir') : '.espoir';
+const fn = path.join(dir, 'failed-to-install.json');
 
 if (!fs.existsSync(dir)) {
   (0, mkdirp_1.sync)(dir);

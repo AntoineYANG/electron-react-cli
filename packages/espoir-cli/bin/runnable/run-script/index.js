@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-30 18:27:09
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-16 17:19:50
+ * @Last Modified time: 2022-01-23 18:59:06
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -20,7 +20,11 @@ const list_all_1 = require("./scripts/list-all");
 
 const run_script_1 = require("./scripts/run-script");
 
-const workspaces = [..._env_1.default.packages, 'root'];
+const index_1 = require("../../..");
+
+const logger_1 = require("../../utils/ui/logger");
+
+const workspaces = _env_1.default.packages ? [..._env_1.default.packages, 'root'] : [];
 const RunScript = {
   fullName: 'run-script',
   displayName: 'run-script',
@@ -30,6 +34,11 @@ const RunScript = {
   args: [new commander_1.Argument('[command]', 'workspace and command, use like `<package-name>.<script-name>` or `<script-name>` with `workspace`' + ' implicitly set to the current package'), new commander_1.Argument('[args...]', 'script arguments')],
   options: [new commander_1.Option('--list', 'show all supported scripts').default(false)],
   exec: async (cmd, args, options) => {
+    if (!_env_1.default.rootDir) {
+      logger_1.default.error(`You're outside a espoir workspace.`);
+      return index_1.ExitCode.OPERATION_FAILED;
+    }
+
     if (!cmd) {
       if (options.list) {
         return await (0, list_all_1.default)();

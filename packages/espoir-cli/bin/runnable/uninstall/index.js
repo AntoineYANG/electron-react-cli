@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2022-01-12 21:02:24
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-12 23:22:12
+ * @Last Modified time: 2022-01-23 18:20:01
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -20,7 +20,7 @@ const logger_1 = require("../../utils/ui/logger");
 
 const uninstall_1 = require("./scripts/uninstall");
 
-const installTarget = [..._env_1.default.packages, 'root'];
+const installTarget = _env_1.default.packages ? [..._env_1.default.packages, 'root'] : [];
 const defaultPackage = _env_1.default.currentPackage ?? 'root';
 const Uninstall = {
   fullName: 'uninstall',
@@ -31,6 +31,11 @@ const Uninstall = {
   args: [new commander_1.Argument('[module-names...]', 'NPM package(s) to uninstall')],
   options: [new commander_1.Option('--here', `do uninstalling in the current package (${defaultPackage})`).default(false), new commander_1.Option('-w, --workspace <workspace...>', 'included packages in the current workspace').choices(installTarget).default(false)],
   exec: async (moduleNames, options) => {
+    if (!_env_1.default.packages) {
+      logger_1.default.error(`You're outside a espoir workspace.`);
+      return index_1.ExitCode.OPERATION_FAILED;
+    }
+
     if (moduleNames.length === 0) {
       const msg = `You must give at least one module.`;
       throw new Error(msg);

@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-13 23:44:59
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-12-02 17:58:02
+ * @Last Modified time: 2022-01-23 18:24:26
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -58,6 +58,10 @@ exports.getAllDependencies = getAllDependencies;
  */
 
 const loadDependencies = (scopes, isProd) => {
+  if (!_env_1.default.rootPkg || !_env_1.default.packages || !_env_1.default.packageMap) {
+    throw new Error(`You're outside a espoir workspace.`);
+  }
+
   const packages = [];
 
   if (scopes.includes('root')) {
@@ -65,7 +69,7 @@ const loadDependencies = (scopes, isProd) => {
   }
 
   _env_1.default.packages.forEach(p => {
-    const pkg = _env_1.default.packageMap[p];
+    const pkg = _env_1.default.packageMap?.[p];
 
     if (scopes.includes(p)) {
       packages.push(pkg);

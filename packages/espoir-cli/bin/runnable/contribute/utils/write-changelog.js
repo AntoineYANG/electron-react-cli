@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2022-01-11 15:21:52
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-11 19:11:20
+ * @Last Modified time: 2022-01-23 18:15:10
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -38,6 +38,10 @@ var ChangLogItemType;
 
 
 const requirePackageVersion = _package => {
+  if (!_env_1.default.rootDir || !_env_1.default.packageMap || !_env_1.default.rootPkg) {
+    throw new Error(`You're outside a espoir workspace.`);
+  }
+
   if (_package === 'root') {
     const version = _env_1.default.rootPkg.version;
 
@@ -190,6 +194,10 @@ const writeChangelog = (state, scopes, msg, type) => {
   const packages = state.changes.staged.reduce((list, {
     name
   }) => {
+    if (!_env_1.default.packages) {
+      throw new Error(`You're outside a espoir workspace.`);
+    }
+
     if (name.match(/^packages\//)) {
       const scope = /^packages\/(?<w>[^/]+)/.exec(name)?.groups.w;
 

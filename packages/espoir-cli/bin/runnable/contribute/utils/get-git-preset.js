@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-12-02 18:43:33
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-18 01:16:36
+ * @Last Modified time: 2022-01-23 18:36:41
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -33,7 +33,7 @@ var GitChangeState;
   GitChangeState["R"] = "renamed";
 })(GitChangeState = exports.GitChangeState || (exports.GitChangeState = {}));
 
-const gitDir = _env_1.default.resolvePath('.git');
+const gitDir = _env_1.default.rootDir ? _env_1.default.resolvePath('.git') : '.git';
 
 const printGitWarnings = async warnings => {
   if (warnings.length === 0) {
@@ -92,7 +92,7 @@ ${wrn.files.slice(0, 8).map(f => chalk.blue`    ${f}`).join('\n')}${wrn.files.le
 };
 
 const getGitPreset = async () => {
-  if (!fs.existsSync(gitDir)) {
+  if (!fs.existsSync(gitDir) || !_env_1.default.rootDir) {
     throw new Error('Cannot find `.git` directory in the workspace root. ');
   }
 

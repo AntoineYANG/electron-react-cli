@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-01-12 21:02:24 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-12 23:22:12
+ * @Last Modified time: 2022-01-23 18:20:01
  */
 
 import { Argument, Option } from 'commander';
@@ -15,10 +15,10 @@ import Logger from '@ui/logger';
 import uninstallDeps from '@@uninstall/scripts/uninstall';
 
 
-const installTarget = [
+const installTarget = env.packages ? [
   ...env.packages,
   'root'
-];
+] : [];
 
 const defaultPackage = env.currentPackage ?? 'root';
 
@@ -53,6 +53,14 @@ const Uninstall: RunnableScript = {
       workspace: false | string[];
     }
   ) => {
+    if (!env.packages) {
+      Logger.error(
+        `You're outside a espoir workspace.`
+      );
+
+      return ExitCode.OPERATION_FAILED;
+    }
+
     if (moduleNames.length === 0) {
       const msg = `You must give at least one module.`;
 
@@ -73,7 +81,7 @@ const Uninstall: RunnableScript = {
       );
     } else if (options.workspace && options.workspace.length) {
       const packages = options.workspace.reduce<string[]>((list, ws) => {
-        if (ws !== 'root' && !env.packages.includes(ws)) {
+        if (ws !== 'root' && !(env.packages as string[]).includes(ws)) {
           Logger.warn(`"${ws}" is not a package.`);
 
           return list;

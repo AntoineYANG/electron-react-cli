@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-13 23:44:59 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-12-02 17:58:02
+ * @Last Modified time: 2022-01-23 18:24:26
  */
 
 import Logger from '@ui/logger';
@@ -82,6 +82,12 @@ export const getAllDependencies = (pkgJSON: PackageJSON, keys: DependencyTag[]):
  * Loads all the explicit dependencies from all `package.json`.
  */
 const loadDependencies = (scopes: string[], isProd: boolean): SingleDependency[] => {
+  if (!env.rootPkg || !env.packages || !env.packageMap) {
+    throw new Error(
+      `You're outside a espoir workspace.`
+    );
+  }
+
   const packages: PackageJSON[] = [];
 
   if (scopes.includes('root')) {
@@ -89,7 +95,7 @@ const loadDependencies = (scopes: string[], isProd: boolean): SingleDependency[]
   }
 
   env.packages.forEach(p => {
-    const pkg = env.packageMap[p] as PackageJSON;
+    const pkg = env.packageMap?.[p] as PackageJSON;
 
     if (scopes.includes(p)) {
       packages.push(pkg);

@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 20:49:31 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-12 23:33:30
+ * @Last Modified time: 2022-01-23 18:32:51
  */
 
 import * as fs from 'fs';
@@ -97,8 +97,8 @@ const validateLockData = (data: LockData): boolean => {
   return true;
 };
 
-const dir = env.resolvePath('.espoir');
-const fn = env.resolvePath('.espoir', 'espoir-lock.json');
+const dir = env.rootDir ? env.resolvePath('.espoir') : '';
+const fn = env.rootDir ? env.resolvePath('.espoir', 'espoir-lock.json') : '';
 
 /**
  * Writes `.espoir/espoir-lock.json`.

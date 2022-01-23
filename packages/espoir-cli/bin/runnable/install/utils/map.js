@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-16 20:00:09
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-17 22:58:55
+ * @Last Modified time: 2022-01-23 17:15:24
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -49,6 +49,35 @@ const link = async (at, to) => {
       }
 
       child_process.exec(`cmd /c mklink /j "${at}" "${to}"`, err => {
+        if (err) {
+          return reject(err);
+        }
+
+        return resolve(at);
+      });
+    });
+  } else if (process.platform === 'linux') {
+    return new Promise((resolve, reject) => {
+      if (!fs.existsSync(dir)) {
+        (0, mkdirp_1.sync)(dir);
+      } else if (fs.existsSync(at)) {
+        fs.rmSync(at, {
+          recursive: true,
+          force: true
+        });
+      }
+
+      try {
+        fs.readdirSync(to);
+      } catch (error) {
+        return reject(error);
+      }
+
+      if (fs.existsSync(at)) {
+        fs.rmSync(at);
+      }
+
+      child_process.exec(`ln -sf "${to}" "${at}"`, err => {
         if (err) {
           return reject(err);
         }

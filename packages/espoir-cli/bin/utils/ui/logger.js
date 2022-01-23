@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-14 02:35:46
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-18 00:59:27
+ * @Last Modified time: 2022-01-23 18:29:58
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -12,6 +12,8 @@ Object.defineProperty(exports, "__esModule", {
 exports.StopWatch = exports.LogLevel = void 0;
 
 const fs = require("fs");
+
+const path = require("path");
 
 const mkdirp_1 = require("mkdirp");
 
@@ -72,19 +74,15 @@ class StopWatch {
 }
 
 exports.StopWatch = StopWatch;
-
-const logDir = _env_1.default.resolvePath('.espoir', 'logs');
-
+const logDir = _env_1.default.rootDir ? _env_1.default.resolvePath('.espoir', 'logs') : 'logs';
 const today = new Date();
-
-const logFile = _env_1.default.resolvePath('.espoir', 'logs', `${today.toISOString().split('T')[0]}.log`);
+const logFile = path.join(logDir, `${today.toISOString().split('T')[0]}.log`);
 /**
  * Logging methods.
  *
  * @abstract
  * @class Logger
  */
-
 
 class Logger {
   static level = LogLevel.ALL;
@@ -94,6 +92,10 @@ class Logger {
   }
 
   static saveLog(tag, msg) {
+    if (!_env_1.default.rootDir) {
+      return;
+    }
+
     if (!fs.existsSync(logDir)) {
       (0, mkdirp_1.sync)(logDir);
     }

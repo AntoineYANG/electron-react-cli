@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-12-02 18:43:33 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-18 01:16:36
+ * @Last Modified time: 2022-01-23 18:36:41
  */
 
 import * as fs from 'fs';
@@ -53,7 +53,7 @@ export type GitStatus = {
   warnings: GitWarning[];
 };
 
-const gitDir = env.resolvePath('.git');
+const gitDir = env.rootDir ? env.resolvePath('.git') : '.git';
 
 
 const printGitWarnings = async (warnings: GitWarning[]): Promise<'continue' | 'abort' | 'retry'> => {
@@ -120,7 +120,7 @@ ${wrn.files.slice(0, 8).map(f => chalk.blue`    ${f}`).join('\n')}${
 
   execSync(
     ans, {
-      cwd: env.rootDir
+      cwd: env.rootDir as string
     }
   );
 
@@ -128,7 +128,7 @@ ${wrn.files.slice(0, 8).map(f => chalk.blue`    ${f}`).join('\n')}${
 };
 
 const getGitPreset = async (): Promise<GitStatus> => {
-  if (!fs.existsSync(gitDir)) {
+  if (!fs.existsSync(gitDir) || !env.rootDir) {
     throw new Error(
       'Cannot find `.git` directory in the workspace root. '
     );
