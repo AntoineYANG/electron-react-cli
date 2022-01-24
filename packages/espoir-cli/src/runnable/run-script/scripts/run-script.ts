@@ -49,8 +49,9 @@ const runScript = async (
   const cp = spawn(
     `${cmd}${
       args.map(s => ` ${s}`).join('')
-    }`,
+    } --color`,
     {
+      stdio: 'pipe',
       cwd,
       shell: true,
       env: {

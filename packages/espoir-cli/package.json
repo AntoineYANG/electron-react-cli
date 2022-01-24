@@ -1,6 +1,6 @@
 {
   "name": "espoir-cli",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "front-end scripts.",
   "keywords": [
     "monorepo", "package manager", "install", "workspace"
@@ -41,7 +41,13 @@
       },
       "./bin/index.js"
     ],
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./env": [
+      {
+        "default": "./bin/utils/env.js"
+      },
+      "./bin/utils/env.js"
+    ]
   },
   "dependencies": {
     "chalk": "^4.1.2",
@@ -75,6 +81,7 @@
   "peerDependencies": {},
   "peerDependenciesMeta": {},
   "scripts": {
+    "build": "tsc",
     "test": "npx jest",
     "dev": "nodemon -w ./src/**/*.ts -e ts --exec \"espoir run espoir-cli.build\"",
     "publish": "npm publish --registry https://registry.npmjs.org"

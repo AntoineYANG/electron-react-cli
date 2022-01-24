@@ -1,6 +1,9 @@
-/* eslint-disable id-length */
-/* eslint-disable no-console */
-/* eslint-disable @typescript-eslint/no-var-requires */
+/*
+ * @Author: Kanata You 
+ * @Date: 2022-01-24 15:46:57 
+ * @Last Modified by: Kanata You
+ * @Last Modified time: 2022-01-24 23:17:21
+ */
 'use strict';
 
 // initialize
@@ -8,196 +11,106 @@ const init = require('./utils/init');
 init('prod');
 
 const path = require('path');
-const chalk = require('react-dev-utils/chalk');
 const fs = require('fs-extra');
-const bfj = require('bfj');
 const webpack = require('webpack');
-const configFactory = require('./utils/webpackConfigFactory');
-const paths = require('../configs/paths.json');
-const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
-const printHostingInstructions = require('react-dev-utils/printHostingInstructions');
-const FileSizeReporter = require('react-dev-utils/FileSizeReporter');
-const printBuildError = require('react-dev-utils/printBuildError');
-const pkgJson = require('../package.json');
-
 const {
   measureFileSizesBeforeBuild,
   printFileSizesAfterBuild
-} = FileSizeReporter;
+} = require('react-dev-utils/FileSizeReporter');
+const env = require('espoir-cli/env').default;
 
-// These sizes are pretty large. We'll warn for bundles exceeding them.
-/* eslint-disable no-magic-numbers */
+const copyPublicDir = require('./utils/copy-public-dir');
+const useWebpackConfig = require('./utils/use-webpack-config');
+const printWebpackErrors = require('./utils/print-webpack-errors');
+
 const WARN_AFTER_BUNDLE_GZIP_SIZE = 512 * 1024;
 const WARN_AFTER_CHUNK_GZIP_SIZE = 1024 * 1024;
-/* eslint-enable no-magic-numbers */
 
-const argv = process.argv.slice(2);
-const writeStatsJson = argv.indexOf('--stats') !== -1;
 
-// Generate configuration
-const config = configFactory('production');
-const {
-  rootDir,
-  output,
-  publicPath: publicUrl
-} = paths;
+const { name: appName } = require('../package.json');
+const paths = require('../configs/path.json');
 
-const outputPath = path.resolve(fs.realpathSync(process.cwd()), rootDir, output);
+const dir = env.resolvePathInPackage(appName, paths.rootDir);
+const outputPath = env.resolvePathInPackage(appName, paths.rootDir, paths.output);
 
-measureFileSizesBeforeBuild(outputPath).
-  then(previousFileSizes => {
-    // Remove all content but keep the directory so that
-    // if you're in it, you don't end up in Trash
-    fs.emptyDirSync(outputPath);
-    // Merge with the public folder
-    copyPublicFolder();
-    // Start the webpack build
-    return build(previousFileSizes);
-  }).
-  then(
-    ({ stats, previousFileSizes, warnings }) => {
-      if (warnings.length) {
-        console.log(chalk.yellow('Compiled with warnings.\n'));
-        console.log(warnings.join('\n\n'));
-        console.log(
-          `\nSearch for the ${ 
-            chalk.underline(chalk.yellow('keywords')) 
-          } to learn more about each warning.`
-        );
-        console.log(
-          `To ignore, add ${ 
-            chalk.cyan('// eslint-disable-next-line') 
-          } to the line before.\n`
-        );
+const prepareOutputDir = async () => {
+  // clear output directory
+  fs.emptyDirSync(outputPath);
+
+  const size = await measureFileSizesBeforeBuild(outputPath);
+
+  // merge public dir
+  const publicPath = path.resolve(dir, paths.publicPath);
+  copyPublicDir(publicPath, path.join(outputPath, paths.referencePath), path.join(dir, paths.template));
+
+  return size;
+};
+
+const runBuild = async prevSize => {
+  const config = useWebpackConfig('production');
+  
+  console.log('Start building...');
+
+  const compiler = webpack(config);
+
+  await new Promise((resolve, reject) => {
+    compiler.run(async (err, result) => {
+      if (err) {
+        return reject(err);
+      } else if (result.hasErrors()) {
+        await printWebpackErrors(result.compilation.errors);
+
+        return reject(new Error(
+          `${
+            result.compilation.errors.length
+          } error${
+            result.compilation.errors.length > 1 ? 's' : ''
+          } occurred when running compilation.`
+        ));
+      } else if (result.hasWarnings()) {
+        console.log('Completed with warnings.');
+
+        await printWebpackErrors(result.compilation.warnings, 'warning');
       } else {
-        console.log(chalk.green('Compiled successfully.\n'));
+        console.log('Completed.');
       }
 
-      console.log('File sizes after gzip:\n');
+      console.log(`\nTotal cost: ${(
+        (result.endTime - result.startTime) / 1000
+      ).toFixed(1)}s`);
+
+      console.log('\nFile sizes after gzip:');
+
       printFileSizesAfterBuild(
-        stats,
-        previousFileSizes,
+        result,
+        prevSize,
         outputPath,
         WARN_AFTER_BUNDLE_GZIP_SIZE,
         WARN_AFTER_CHUNK_GZIP_SIZE
       );
-      console.log();
 
-      const { publicPath } = config.output.path;
-      const buildFolder = path.relative(process.cwd(), outputPath);
-      printHostingInstructions(
-        pkgJson,
-        publicUrl,
-        publicPath,
-        buildFolder,
-        false
-      );
-    },
-    err => {
-      const tscCompileOnError = process.env.TSC_COMPILE_ON_ERROR === 'true';
+      console.log(`\nRun \`serve ${paths.output}\` to start server.`);
 
-      if (tscCompileOnError) {
-        console.log(
-          chalk.yellow(
-            'Compiled with the following type errors (you may want to check these before deploying your app):\n'
-          )
-        );
-        printBuildError(err);
-      } else {
-        console.log(chalk.red('Failed to compile.\n'));
-        printBuildError(err);
-        process.exit(1);
-      }
-    }
-  ).
-  catch(err => {
-    if (err && err.message) {
-      console.log(err.message);
-    }
-    process.exit(1);
-  });
-
-// Create the production build and print the deployment instructions.
-const build = previousFileSizes => {
-  console.log('Creating an optimized production build...');
-
-  const compiler = webpack(config);
-  return new Promise((resolve, reject) => {
-    compiler.run((err, stats) => {
-      let messages = null;
-
-      if (err) {
-        if (!err.message) {
-          return reject(err);
-        }
-
-        let errMessage = err.message;
-
-        // Add additional information for postcss errors
-        if (Reflect.apply(err, 'postcssNode')) {
-          errMessage += `\nCompileError: Begins at CSS selector ${ 
-            err.postcssNode.selector
-          }`;
-        }
-
-        messages = formatWebpackMessages({
-          errors:   [errMessage],
-          warnings: [],
-        });
-      } else {
-        messages = formatWebpackMessages(
-          stats.toJson({ all: false, warnings: true, errors: true })
-        );
-      }
-      if (messages.errors.length) {
-        // Only keep the first error. Others are often indicative
-        // of the same problem, but confuse the reader with noise.
-        if (messages.errors.length > 1) {
-          messages.errors.length = 1;
-        }
-        return reject(new Error(messages.errors.join('\n\n')));
-      }
-      if (
-        process.env.CI && (
-          typeof process.env.CI !== 'string'
-          || process.env.CI.toLowerCase() !== 'false'
-        ) && messages.warnings.length
-      ) {
-        console.log(
-          chalk.yellow(
-            '\nTreating warnings as errors because process.env.CI = true.\n'
-              + 'Most CI servers set it automatically.\n'
-          )
-        );
-        return reject(new Error(messages.warnings.join('\n\n')));
-      }
-
-      const resolveArgs = {
-        stats,
-        previousFileSizes,
-        warnings: messages.warnings,
-      };
-
-      if (writeStatsJson) {
-        return bfj.
-          write(`${outputPath}/bundle-stats.json`, stats.toJson()).
-          then(() => resolve(resolveArgs)).
-          catch(error => reject(new Error(error)));
-      }
-
-      return resolve(resolveArgs);
+      resolve();
     });
   });
+
+  console.log();
 };
 
-const copyPublicFolder = () => {
-  fs.copySync(
-    path.resolve(fs.realpathSync(process.cwd()), paths.rootDir, 'public'),
-    outputPath, {
-      dereference: true,
-      filter:      file => file !== path.resolve(
-        fs.realpathSync(process.cwd()), paths.rootDir, paths.template
-      ),
-    }
-  );
+
+const webpackBuild = async () => {
+  const prevSize = await prepareOutputDir();
+
+  await runBuild(prevSize);
+
+  return 0;
 };
+
+
+if (require.main === module) {
+  webpackBuild().then(process.exit);
+}
+
+
+module.exports = webpackBuild;

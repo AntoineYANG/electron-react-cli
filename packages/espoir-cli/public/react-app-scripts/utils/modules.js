@@ -9,7 +9,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const paths = require('../../configs/paths.json');
+const paths = require('../../configs/path.json');
 const chalk = require('react-dev-utils/chalk');
 const resolve = require('resolve');
 

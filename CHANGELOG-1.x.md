@@ -1,6 +1,6 @@
 # root v1.x
 
-## 1.0.0 (2022/1/18 - 2022/1/23)
+## 1.0.0 (2022/1/18 - 2022/1/25)
 
 
 _\<version description\>_
@@ -27,5 +27,10 @@ _\<version description\>_
 ### create
 
 + 🌱 **Support 'create' command.** - AntoineYANG(814602569@qq.com) 2022/1/23, on _main_
+
+
+### install
+
++ 🐞 **Link downloaded peerDependencies in node_modules** - AntoineYANG(814602569@qq.com) 2022/1/25, on _main_
 
 

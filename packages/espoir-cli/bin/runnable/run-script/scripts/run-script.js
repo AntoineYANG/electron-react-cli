@@ -38,7 +38,8 @@ const runScript = async (scope, command, cmd, cwd, args) => {
     resolve = res;
   });
   const paths = `${process.env['PATH'] ?? ''}${_env_1.default.resolvePath('.espoir', '.bin')};`;
-  const cp = (0, child_process_1.spawn)(`${cmd}${args.map(s => ` ${s}`).join('')}`, {
+  const cp = (0, child_process_1.spawn)(`${cmd}${args.map(s => ` ${s}`).join('')} --color`, {
+    stdio: 'pipe',
     cwd,
     shell: true,
     env: { ...process.env,

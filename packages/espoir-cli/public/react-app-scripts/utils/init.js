@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-const fs = require('fs');
 const path = require('path');
+
+const espoirEnv = require('espoir-cli/env').default;
+
 
 /**
  * Initialize Node env before webpack
@@ -19,7 +21,7 @@ const init = env => {
   }[env.toLocaleLowerCase()] ?? 'development';
   process.env.BABEL_ENV = ENV;
   process.env.NODE_ENV = ENV;
-  const appDirectory = fs.realpathSync(process.cwd());
+  const appDirectory = espoirEnv.resolvePathInPackage(espoirEnv.currentPackage);
   process.env.NODE_PATH = (process.env.NODE_PATH || '').
     split(path.delimiter).
     filter(folder => folder && !path.isAbsolute(folder)).

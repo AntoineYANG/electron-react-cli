@@ -158,20 +158,16 @@ code {
 import React from 'react';
 import {
   BrowserRouter as Router,
-  Switch,
+  Routes,
   Route
 } from 'react-router-dom';
-
-// import PageA from './page-a';
 
 
 const App${enableTS ? ': React.FC' : ''} = () => (
   <Router>
-    <Switch>
-      <Route path="/" >
-        {/* <PageA /> */}
-      </Route>
-    </Switch>
+    <Routes>
+      <Route path="/" element={ <></> } />
+    </Routes>
   </Router>
 );
 
@@ -220,72 +216,37 @@ export default App;
 
     const packageJSON = { ...require(path.join(dir, 'package.json')),
       dependencies: {
-        react: '>=17',
-        'react-dom': '>=17',
-        'react-router-dom': '>=5.3',
-        '@babel/core': '>=7.12.3',
-        '@pmmmwh/react-refresh-webpack-plugin': '0.4.3',
-        '@svgr/webpack': '5.5.0',
-        '@typescript-eslint/eslint-plugin': '^4.5.0',
-        '@typescript-eslint/parser': '^4.5.0',
-        'babel-eslint': '^10.1.0',
-        'babel-jest': '^26.6.0',
-        'babel-loader': '8.1.0',
-        'babel-plugin-named-asset-import': '^0.3.7',
-        'babel-preset-react-app': '^10.0.0',
-        bfj: '^7.0.2',
-        camelcase: '^6.1.0',
-        'case-sensitive-paths-webpack-plugin': '2.3.0',
-        'cra-template-typescript': '1.1.2',
-        'css-loader': '4.3.0',
-        dotenv: '8.2.0',
-        'dotenv-expand': '5.1.0',
-        eslint: '^7.11.0',
-        'eslint-config-react-app': '^6.0.0',
-        'eslint-plugin-flowtype': '^5.2.0',
-        'eslint-plugin-import': '^2.22.1',
-        'eslint-plugin-jest': '^24.1.0',
-        'eslint-plugin-jsx-a11y': '^6.3.1',
-        'eslint-plugin-react': '^7.21.5',
-        'eslint-plugin-react-hooks': '^4.2.0',
-        'eslint-plugin-testing-library': '^3.9.2',
-        'eslint-webpack-plugin': '^2.5.2',
-        'file-loader': '6.1.1',
-        'fs-extra': '^9.0.1',
-        'html-webpack-plugin': '4.5.0',
-        'identity-obj-proxy': '3.0.0',
-        jest: '26.6.0',
-        'jest-circus': '26.6.0',
-        'jest-resolve': '26.6.0',
-        'jest-watch-typeahead': '0.6.1',
-        'mini-css-extract-plugin': '0.11.3',
-        'optimize-css-assets-webpack-plugin': '5.0.4',
-        'pnp-webpack-plugin': '1.6.4',
-        'postcss-flexbugs-fixes': '4.2.1',
-        'postcss-loader': '3.0.0',
-        'postcss-normalize': '8.0.1',
-        'postcss-preset-env': '6.7.0',
-        'postcss-safe-parser': '5.0.2',
-        prompts: '2.4.0',
-        'react-app-polyfill': '^2.0.0',
-        'react-dev-utils': '^11.0.3',
-        'react-refresh': '^0.8.3',
-        resolve: '1.18.1',
-        'resolve-url-loader': '^3.1.2',
-        ...(useSass ? {
-          'sass': '^1.40.1',
-          'sass-loader': '^10.0.5'
-        } : {}),
-        semver: '7.3.2',
-        'style-loader': '1.3.0',
-        'terser-webpack-plugin': '4.2.3',
-        'tga-js': '^1.1.1',
-        'ts-pnp': '1.2.0',
-        'url-loader': '4.1.1',
-        webpack: '4.44.2',
-        'webpack-dev-server': '3.11.1',
-        'webpack-manifest-plugin': '2.2.0',
-        'workbox-webpack-plugin': '5.1.4'
+        '@babel/core': '^7.16.12',
+        '@pmmmwh/react-refresh-webpack-plugin': '^0.5.4',
+        'babel-loader': '^8.2.3',
+        'babel-plugin-named-asset-import': '^0.3.8',
+        'babel-preset-react-app': '10.0.0',
+        'case-sensitive-paths-webpack-plugin': '^2.4.0',
+        chalk: '^5.0.0',
+        'css-loader': '^6.5.1',
+        eslint: '^8.7.0',
+        'eslint-config-react-app': '^7.0.0',
+        'eslint-webpack-plugin': '^3.1.1',
+        'file-loader': '^6.2.0',
+        'fs-extra': '^9.1.0',
+        'html-webpack-plugin': '^5.5.0',
+        'mini-css-extract-plugin': '^0.11.3',
+        postcss: '^8.4.5',
+        'postcss-loader': '^6.2.1',
+        'postcss-normalize': '^10.0.1',
+        'postcss-preset-env': '^7.2.3',
+        'postcss-safe-parser': '^6.0.0',
+        react: '18.0.0-rc.0',
+        'react-dev-utils': '^12.0.0',
+        'react-dom': '18.0.0-rc.0',
+        'react-router-dom': '^6.2.1',
+        resolve: '^1.22.0',
+        'resolve-url-loader': '^5.0.0',
+        sass: '^1.49.0',
+        'sass-loader': '^12.4.0',
+        'url-loader': '^4.1.1',
+        webpack: '^5.67.0',
+        'webpack-manifest-plugin': '^4.1.1'
       },
       devDependencies: enableTS ? {
         typescript: '>=4',
@@ -299,29 +260,6 @@ export default App;
       browserslist: {
         production: ['>0.2%', 'not dead', 'not op_mini all'],
         development: ['last 1 chrome version', 'last 1 firefox version', 'last 1 safari version']
-      },
-      jest: {
-        roots: ['<rootDir>/src'],
-        collectCoverageFrom: ['src/**/*.{js,jsx,ts,tsx}', '!src/**/*.d.ts'],
-        setupFiles: ['react-app-polyfill/jsdom'],
-        setupFilesAfterEnv: [],
-        testMatch: ['<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}', '<rootDir>/src/**/*.{spec,test}.{js,jsx,ts,tsx}'],
-        testEnvironment: 'jsdom',
-        testRunner: 'D:\\project\\@github-KANATA\\haku\\node_modules\\jest-circus\\runner.js',
-        transform: {
-          '^.+\\.(js|jsx|mjs|cjs|ts|tsx)$': '<rootDir>/config/jest/babelTransform.js',
-          '^.+\\.css$': '<rootDir>/config/jest/cssTransform.js',
-          '^(?!.*\\.(js|jsx|mjs|cjs|ts|tsx|css|json)$)': '<rootDir>/config/jest/fileTransform.js'
-        },
-        transformIgnorePatterns: ['[/\\\\]node_modules[/\\\\].+\\.(js|jsx|mjs|cjs|ts|tsx)$', '^.+\\.module\\.(css|sass|scss)$'],
-        modulePaths: [],
-        moduleNameMapper: {
-          '^react-native$': 'react-native-web',
-          '^.+\\.module\\.(css|sass|scss)$': 'identity-obj-proxy'
-        },
-        moduleFileExtensions: ['web.js', 'js', 'web.ts', 'ts', 'web.tsx', 'tsx', 'json', 'web.jsx', 'jsx', 'node'],
-        watchPlugins: ['jest-watch-typeahead/filename', 'jest-watch-typeahead/testname'],
-        resetMocks: true
       },
       babel: {
         presets: ['react-app']
@@ -340,7 +278,6 @@ export default App;
 
     copy(path.join(__dirname, '..', '..', '..', '..', '..', 'public', 'react-app-scripts'), path.join(dir, 'scripts')); // configs
 
-    copy(path.join(__dirname, '..', '..', '..', '..', '..', 'public', 'react-app-configs'), path.join(dir, 'configs'));
     fs.writeFileSync(path.join(dir, 'configs', 'path.json'), JSON.stringify({
       rootDir: '.',
       template: 'public/index.html',
@@ -348,7 +285,10 @@ export default App;
       entry: `index.${enableTS ? 't' : 'j'}sx`,
       publicPath: '.',
       output: 'build'
-    }));
+    }, undefined, 2) + '\n');
+    fs.writeFileSync(path.join(dir, 'configs', 'env.json'), JSON.stringify({
+      APP_NAME: 'homepage'
+    }, undefined, 2) + '\n');
   }
 };
 exports.default = reactAppTemplate;

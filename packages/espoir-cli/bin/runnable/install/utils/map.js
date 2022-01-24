@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-16 20:00:09
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-23 17:15:24
+ * @Last Modified time: 2022-01-25 00:13:53
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -170,9 +170,21 @@ const map = async (explicit, lockData, installResults, logProgress) => {
       target
     } = lockInfo;
     const curPackage = path.join(target, 'package.json');
-    const curDeps = Object.entries(JSON.parse(fs.readFileSync(curPackage, {
+    const curPkgJSON = JSON.parse(fs.readFileSync(curPackage, {
       encoding: 'utf-8'
-    })).dependencies ?? {});
+    }));
+    const curDeps = Object.entries(curPkgJSON.dependencies ?? {});
+    Object.entries(curPkgJSON.peerDependencies ?? {}).forEach(([k, v]) => {
+      if (curDeps.find(e => e[0] === k)) {
+        return;
+      }
+
+      const required = curPkgJSON.peerDependenciesMeta?.[k]?.optional ?? true;
+
+      if (required) {
+        curDeps.push([k, v]);
+      }
+    });
 
     if (curDeps.length) {
       const curModulesDir = path.join(target, 'node_modules');

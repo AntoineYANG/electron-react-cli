@@ -1,5 +1,18 @@
 # espoir-cli v0.x
 
+## 0.3.1 (2022/1/25)
+
+_\<version description\>_
+
+**Contributors**
+
+- **AntoineYANG** (814602569@qq.com)
+
+### install
+
++ 🐞 **Link downloaded peerDependencies in node_modules** - AntoineYANG(814602569@qq.com) 2022/1/25, on _main_
+
+
 ## 0.3.0 (2022/1/23)
 
 _\<version description\>_
