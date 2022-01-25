@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-01-23 21:48:40 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-23 22:40:03
+ * @Last Modified time: 2022-01-26 01:30:50
  */
 
 import * as path from 'path';
@@ -32,7 +32,7 @@ const copy = (dir: string, dest: string): void => {
 };
 
 const reactAppTemplate: EspoirTemplate = {
-  name: 'React app',
+  name: 'React18(rc) app',
   create: async (name, enableTS) => {
     const dir = env.resolvePathInPackage(name);
 
@@ -100,15 +100,19 @@ const reactAppTemplate: EspoirTemplate = {
       
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from '${enableTS ? '@views' : './views'}';
+import App from '@views';
 
-import './index.${useSass ? 'scss' : 'css'}';
+import './index.scss';
 
-ReactDOM.render(
+
+const container = document.getElementById('root');
+// @ts-ignore
+const root = ReactDOM.createRoot(container);
+
+root.render(
   <React.StrictMode>
     <App />
-  </React.StrictMode>,
-  document.getElementById('root')
+  </React.StrictMode>
 );
 `, {
         encoding: 'utf-8'
@@ -242,10 +246,12 @@ export default App;
       ...require(path.join(dir, 'package.json')),
       dependencies: {
         '@babel/core': '^7.16.12',
+        '@babel/runtime': '7.12.1',
         '@pmmmwh/react-refresh-webpack-plugin': '^0.5.4',
         'babel-loader': '^8.2.3',
         'babel-plugin-named-asset-import': '^0.3.8',
-        'babel-preset-react-app': '10.0.0',
+        'babel-preset-react-app': '10.0.1',
+        browserslist: '^4.19.1',
         'case-sensitive-paths-webpack-plugin': '^2.4.0',
         chalk: '^5.0.0',
         'css-loader': '^6.5.1',
@@ -274,11 +280,20 @@ export default App;
         'webpack-manifest-plugin': '^4.1.1'
       },
       devDependencies: enableTS ? {
-        typescript: '>=4',
         '@types/react': '>=17',
         '@types/react-dom': '>=17',
-        '@types/react-router-dom': '>=5'
-      } : {},
+        '@types/react-router-dom': '>=5',
+        ajv: '^8.8.2',
+        'react-refresh': '^0.11.0',
+        'style-loader': '^3.3.1',
+        typescript: '>=4',
+        'webpack-dev-server': '^4.7.3'
+      } : {
+        ajv: '^8.8.2',
+        'react-refresh': '^0.11.0',
+        'style-loader': '^3.3.1',
+        'webpack-dev-server': '^4.7.3'
+      },
       eslintConfig: {
         extends: [
           'react-app',
@@ -338,7 +353,8 @@ export default App;
         template: 'public/index.html',
         src: 'src',
         entry: `index.${enableTS ? 't' : 'j'}sx`,
-        publicPath: '.',
+        referencePath: '.',
+        publicPath: 'public',
         output: 'build'
       }, undefined, 2) + '\n'
     );

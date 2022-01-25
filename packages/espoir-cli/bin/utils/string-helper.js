@@ -5,25 +5,18 @@
  * @Last Modified by: Kanata You
  * @Last Modified time: 2021-11-16 19:03:52
  */
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.sortedStrings = void 0;
-
-const sortedStrings = data => {
-  return data.sort((a, b) => {
-    for (let i = 0; i < a.length && i < b.length; i += 1) {
-      const ca = a.charCodeAt(i);
-      const cb = b.charCodeAt(i);
-
-      if (ca !== cb) {
-        return ca - cb;
-      }
-    }
-
-    return a.length - b.length;
-  });
+const sortedStrings = (data) => {
+    return data.sort((a, b) => {
+        for (let i = 0; i < a.length && i < b.length; i += 1) {
+            const ca = a.charCodeAt(i);
+            const cb = b.charCodeAt(i);
+            if (ca !== cb) {
+                return ca - cb;
+            }
+        }
+        return a.length - b.length;
+    });
 };
-
 exports.sortedStrings = sortedStrings;

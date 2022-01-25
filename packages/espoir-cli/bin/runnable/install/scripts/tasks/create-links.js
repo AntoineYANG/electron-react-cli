@@ -5,22 +5,16 @@
  * @Last Modified by: Kanata You
  * @Last Modified time: 2022-01-17 22:53:20
  */
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-const map_1 = require("../../utils/map");
-
+Object.defineProperty(exports, "__esModule", { value: true });
+const map_1 = require("@@install/utils/map");
 const createLinks = () => ({
-  title: 'Linking.',
-  task: async (ctx, task) => {
-    task.output = 'Linking /node_modules/';
-    await (0, map_1.default)(ctx.dependencies, ctx.lockData, ctx.installResults, log => {
-      task.output = log;
-    });
-    task.output = 'Linked successfully';
-  }
+    title: 'Linking.',
+    task: async (ctx, task) => {
+        task.output = 'Linking /node_modules/';
+        await (0, map_1.default)(ctx.dependencies, ctx.lockData, ctx.installResults, log => {
+            task.output = log;
+        });
+        task.output = 'Linked successfully';
+    }
 });
-
 exports.default = createLinks;

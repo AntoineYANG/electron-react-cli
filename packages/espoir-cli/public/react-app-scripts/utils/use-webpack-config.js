@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-01-24 16:09:18 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-24 23:05:09
+ * @Last Modified time: 2022-01-26 00:35:56
  */
 'use strict';
 
@@ -10,6 +10,9 @@ const fs = require('fs');
 const path = require('path');
 const env = require('espoir-cli/env').default;
 const getCSSModuleLocalIdent = require('react-dev-utils/getCSSModuleLocalIdent');
+/** @type {import('chalk') | null} */
+let chalk = null;
+import('chalk').then(mod => chalk = mod.default);
 
 const loadAliases = require('./load-aliases');
 const loadEnvVars = require('./load-env-vars');
@@ -79,11 +82,7 @@ const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin');
 const ModuleNotFoundPlugin = require('react-dev-utils/ModuleNotFoundPlugin');
-const {
-  DefinePlugin,
-  HotModuleReplacementPlugin
-} = require('webpack');
-const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
+const { DefinePlugin } = require('webpack');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const ForkTsCheckerWebpackPlugin = require('react-dev-utils/ForkTsCheckerWebpackPlugin');
@@ -91,12 +90,6 @@ const ESLintPlugin = require('eslint-webpack-plugin');
 const InlineChunkHtmlPlugin = require('react-dev-utils/InlineChunkHtmlPlugin');
 const { WebpackManifestPlugin: ManifestPlugin } = require('webpack-manifest-plugin');
 
-const reactRefreshOverlayEntry = require.resolve(
-  'react-dev-utils/refreshOverlayInterop'
-);
-const webpackDevClientEntry = require.resolve(
-  'react-dev-utils/webpackHotDevClient'
-);
 
 /**
  * @param {'development' | 'production'} mode
@@ -113,7 +106,6 @@ const useWebpackConfig = mode => {
   const isProd = mode === 'production';
 
   const enableSourceMap = true;
-  const enableReactFresh = true;
   
   return {
     // 'development' | 'production'
@@ -126,12 +118,7 @@ const useWebpackConfig = mode => {
       development: 'cheap-module-source-map'
     }[mode] ?? false,
     // app entry
-    entry: isDev && !enableReactFresh ? [
-      require.resolve(
-        'react-dev-utils/webpackHotDevClient'
-      ),
-      entry
-    ] : entry,
+    entry,
     // output
     output: {
       // output directory (absolute path)
@@ -166,6 +153,11 @@ const useWebpackConfig = mode => {
         env.resolvePath('node_modules')
       ],
       extensions: moduleFileExtensions,
+      fallback: {
+        // webpack < 5 used to include polyfills for node.js core modules by default.
+        // This is no longer the case.
+        url: false
+      },
       // module aliases
       alias: loadAliases(),
       plugins: [
@@ -174,8 +166,7 @@ const useWebpackConfig = mode => {
           dir,
           env.resolvePath('.espoir', '.modules')
         ], [
-          'package.json',
-          reactRefreshOverlayEntry
+          'package.json'
         ])
       ],
     },
@@ -247,10 +238,7 @@ const useWebpackConfig = mode => {
                         },
                       },
                     },
-                  ],
-                  isDev
-                    && enableReactFresh
-                    && require.resolve('react-refresh/babel'),
+                  ]
                 ].filter(Boolean),
                 // This is a feature of `babel-loader` for webpack (not Babel itself).
                 // It enables caching results in ./node_modules/.cache/babel-loader/
@@ -446,16 +434,6 @@ const useWebpackConfig = mode => {
       new ModuleNotFoundPlugin(dir),
       // Inject environment variables in JS code.
       new DefinePlugin(loadEnvVars()),
-      // Webpack HMR
-      isDev && new HotModuleReplacementPlugin(),
-      // React fresh
-      isDev && enableReactFresh && new ReactRefreshWebpackPlugin({
-        overlay: {
-          entry: webpackDevClientEntry,
-          module: reactRefreshOverlayEntry,
-          sockIntegration: false,
-        }
-      }),
       // Watcher doesn't work well if you mistype casing in a path so we use
       // a plugin that prints an error when you attempt to do this.
       // See https://github.com/facebook/create-react-app/issues/240
@@ -473,7 +451,7 @@ const useWebpackConfig = mode => {
       // - "entrypoints" key: Array of files which are included in `index.html`,
       //   can be used to reconstruct the HTML if necessary
       new ManifestPlugin({
-        fileName:   'asset-manifest.json',
+        fileName:   isDev ? 'manifest.json' : 'asset-manifest.json',
         publicPath: env.resolvePathInPackage(
           dir, paths.referencePath
         ),
@@ -527,7 +505,23 @@ const useWebpackConfig = mode => {
             },
           },
       }),
-    ].filter(Boolean)
+    ].filter(Boolean),
+    // dev server console config
+    infrastructureLogging: isDev ? {
+      console: {
+        ...console,
+        info: (...data) => {
+          const source = (
+            /^\[[^\]]+\]/.exec(data[0] || '[webpack]') || ['[webpack]']
+          )[0].replace(/^\[/, '').replace(/\]$/, ':');
+
+          console.info(
+            chalk ? chalk.yellow(source) : source,
+            ...data.map(n => n.replace(/^\[[^\]]+\]\s*/, ''))
+          );
+        }
+      }
+    } : {},
   };
 };
 

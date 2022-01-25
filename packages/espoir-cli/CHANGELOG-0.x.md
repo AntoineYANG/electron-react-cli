@@ -1,5 +1,18 @@
 # espoir-cli v0.x
 
+## 0.4.0 (2022/1/26)
+
+_\<version description\>_
+
+**Contributors**
+
+- **AntoineYANG** (814602569@qq.com)
+
+### create
+
++ 🌱 **Distince React 17 & 18, and append support for React dev server.** - AntoineYANG(814602569@qq.com) 2022/1/26, on _main_
+
+
 ## 0.3.1 (2022/1/25)
 
 _\<version description\>_

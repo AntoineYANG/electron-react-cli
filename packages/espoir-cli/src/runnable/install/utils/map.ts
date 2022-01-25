@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-16 20:00:09 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-25 00:13:53
+ * @Last Modified time: 2022-01-25 01:27:42
  */
 
 import * as path from 'path';
@@ -211,6 +211,7 @@ const map = async (
       curPkgJSON.dependencies ?? {}
     );
 
+    const curPeerDeps: [string, string][] = [];
     Object.entries(
       curPkgJSON.peerDependencies ?? {}
     ).forEach(([k, v]) => {
@@ -221,11 +222,11 @@ const map = async (
       const required = curPkgJSON.peerDependenciesMeta?.[k]?.optional ?? true;
 
       if (required) {
-        curDeps.push([k, v]);
+        curPeerDeps.push([k, v]);
       }
     });
   
-    if (curDeps.length) {
+    if (curDeps.length + curPeerDeps.length) {
       const curModulesDir = path.join(target, 'node_modules');
       mkdirp(curModulesDir);
 
@@ -234,7 +235,7 @@ const map = async (
 
         if (!what) {
           throw new Error(
-            `Cannot find "${dep[0]}@${dep[1]}" required by "${ir.name}@${ir.version}". `
+            `Cannot find "${dep[0]}" required by "${ir.name}@${ir.version}". `
           );
         }
 
@@ -244,6 +245,36 @@ const map = async (
           throw new Error(
             `Cannot find "${dep[0]}@${dep[1]}" required by "${ir.name}@${ir.version}". `
           );
+        }
+
+        const which = what[version] as LockInfo;
+        const depTarget = which.target;
+
+        if (!depTarget || !fs.existsSync(depTarget)) {
+          throw new Error(
+            `Files of "${dep[0]}@${version}" (path='${depTarget}') might be broken. `
+          );
+        }
+
+        const entry = path.join(curModulesDir, dep[0]);
+
+        // assign to LockInfo.entry
+        which.entry = entry;
+
+        await link(entry, depTarget);
+      }
+
+      for (const dep of curPeerDeps) {
+        const what = lockData[dep[0]];
+
+        if (!what) {
+          continue;
+        }
+
+        const version = Object.keys(what).find(v => semver.satisfies(v, dep[1]));
+
+        if (!version) {
+          continue;
         }
 
         const which = what[version] as LockInfo;

@@ -5,20 +5,13 @@
  * @Last Modified by: Kanata You
  * @Last Modified time: 2022-01-23 18:32:51
  */
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.useLockFileData = exports.writeLockFile = exports.createLockData = exports.LockCheckFailedReason = void 0;
-
 const fs = require("fs");
-
-const _env_1 = require("../../../utils/env");
-
+const _env_1 = require("@env");
 var LockCheckFailedReason;
-
 (function (LockCheckFailedReason) {
-  LockCheckFailedReason[LockCheckFailedReason["FILES_NOT_FOUND"] = 1] = "FILES_NOT_FOUND";
+    LockCheckFailedReason[LockCheckFailedReason["FILES_NOT_FOUND"] = 1] = "FILES_NOT_FOUND";
 })(LockCheckFailedReason = exports.LockCheckFailedReason || (exports.LockCheckFailedReason = {}));
 /**
  * Generates espoir lock data from version info.
@@ -27,55 +20,46 @@ var LockCheckFailedReason;
  * @param {VersionInfo[]} data
  * @returns {LockData}
  */
-
-
 const createLockData = (origin, data) => {
-  const result = origin;
-  data.forEach(d => {
-    if (!result[d.name]) {
-      result[d.name] = {};
-    }
-
-    const thisModule = result[d.name];
-
-    if (thisModule[d.version]) {
-      if (!d.lockInfo?.failed) {
-        throw new Error(`"${d.name}@${d.version}" is already recorded in lock file. `);
-      } // else: overwrite
-
-    }
-
-    thisModule[d.version] = {
-      resolved: d.dist.tarball,
-      integrity: d.dist.integrity,
-      target: '',
-      requires: {}
-    };
-    const requires = thisModule[d.version]?.requires;
-    Object.entries(d.dependencies ?? {}).forEach(([name, range]) => {
-      requires[name] = range;
+    const result = origin;
+    data.forEach(d => {
+        if (!result[d.name]) {
+            result[d.name] = {};
+        }
+        const thisModule = result[d.name];
+        if (thisModule[d.version]) {
+            if (!d.lockInfo?.failed) {
+                throw new Error(`"${d.name}@${d.version}" is already recorded in lock file. `);
+            }
+            // else: overwrite
+        }
+        thisModule[d.version] = {
+            resolved: d.dist.tarball,
+            integrity: d.dist.integrity,
+            target: '',
+            requires: {}
+        };
+        const requires = thisModule[d.version]?.requires;
+        Object.entries(d.dependencies ?? {}).forEach(([name, range]) => {
+            requires[name] = range;
+        });
     });
-  });
-  return result;
+    return result;
 };
-
 exports.createLockData = createLockData;
-
-const validateLockData = data => {
-  Object.entries(data).forEach(([name, item]) => {
-    Object.entries(item).forEach(([v, d]) => {
-      if (!d.target || !fs.existsSync(d.target)) {
-        throw new Error(`Files of "${name}@${v}" (path='${d.target}') might be broken. `);
-      }
-
-      if (d.entry && !fs.existsSync(d.entry)) {
-        throw new Error(`Module entry of "${name}@${v}" (path='${d.target}') might be broken. `);
-      }
+const validateLockData = (data) => {
+    Object.entries(data).forEach(([name, item]) => {
+        Object.entries(item).forEach(([v, d]) => {
+            if (!d.target || !fs.existsSync(d.target)) {
+                throw new Error(`Files of "${name}@${v}" (path='${d.target}') might be broken. `);
+            }
+            if (d.entry && !fs.existsSync(d.entry)) {
+                throw new Error(`Module entry of "${name}@${v}" (path='${d.target}') might be broken. `);
+            }
+        });
     });
-  });
-  return true;
+    return true;
 };
-
 const dir = _env_1.default.rootDir ? _env_1.default.resolvePath('.espoir') : '';
 const fn = _env_1.default.rootDir ? _env_1.default.resolvePath('.espoir', 'espoir-lock.json') : '';
 /**
@@ -83,53 +67,44 @@ const fn = _env_1.default.rootDir ? _env_1.default.resolvePath('.espoir', 'espoi
  *
  * @param {LockData} data
  */
-
-const writeLockFile = data => {
-  try {
-    if (!validateLockData(data)) {
-      return;
+const writeLockFile = (data) => {
+    try {
+        if (!validateLockData(data)) {
+            return;
+        }
     }
-  } catch (error) {
-    throw error;
-  }
-
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir);
-  }
-
-  const sorted = {};
-  Object.entries(data).sort((a, b) => {
-    const an = a[0];
-    const bn = b[0];
-
-    for (let i = 0; i < an.length && i < bn.length; i += 1) {
-      const ac = an.charCodeAt(i);
-      const bc = bn.charCodeAt(i);
-
-      if (ac !== bc) {
-        return ac - bc;
-      }
+    catch (error) {
+        throw error;
     }
-
-    return an.length - bn.length;
-  }).forEach(([k, v]) => {
-    sorted[k] = v;
-  });
-  fs.writeFileSync(fn, JSON.stringify(sorted, undefined, 2), {
-    encoding: 'utf-8'
-  });
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir);
+    }
+    const sorted = {};
+    Object.entries(data).sort((a, b) => {
+        const an = a[0];
+        const bn = b[0];
+        for (let i = 0; i < an.length && i < bn.length; i += 1) {
+            const ac = an.charCodeAt(i);
+            const bc = bn.charCodeAt(i);
+            if (ac !== bc) {
+                return ac - bc;
+            }
+        }
+        return an.length - bn.length;
+    }).forEach(([k, v]) => {
+        sorted[k] = v;
+    });
+    fs.writeFileSync(fn, JSON.stringify(sorted, undefined, 2), {
+        encoding: 'utf-8'
+    });
 };
-
 exports.writeLockFile = writeLockFile;
-
 const useLockFileData = () => {
-  if (fs.existsSync(fn)) {
-    return JSON.parse(fs.readFileSync(fn, {
-      encoding: 'utf-8'
-    }));
-  }
-
-  return {};
+    if (fs.existsSync(fn)) {
+        return JSON.parse(fs.readFileSync(fn, {
+            encoding: 'utf-8'
+        }));
+    }
+    return {};
 };
-
 exports.useLockFileData = useLockFileData;
