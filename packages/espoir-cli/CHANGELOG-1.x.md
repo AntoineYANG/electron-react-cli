@@ -1,5 +1,18 @@
 # espoir-cli v1.x
 
+## 1.0.1 (2022/1/26)
+
+_\<version description\>_
+
+**Contributors**
+
+- **AntoineYANG** (814602569@qq.com)
+
+### other
+
++ 🐞 **Removed recursive peerDependency.** - AntoineYANG(814602569@qq.com) 2022/1/26, on _main_
+
+
 ## 1.0.0 (2022/1/26)
 
 This is the first release version of `espoir-cli`.

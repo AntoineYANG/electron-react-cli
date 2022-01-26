@@ -1,6 +1,6 @@
 {
   "name": "espoir-cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "front-end scripts.",
   "espoirVersion": 0,
   "keywords": [
@@ -82,10 +82,6 @@
     "source-map-support": "^0.5.21",
     "typescript": "^4.5.4"
   },
-  "peerDependencies": {
-    "espoir-cli": "^5.0.1"
-  },
-  "peerDependenciesMeta": {},
   "scripts": {
     "build": "tsc",
     "test": "npx jest",
