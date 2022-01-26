@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2022-01-26 14:10:10
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-26 17:39:49
+ * @Last Modified time: 2022-01-26 18:52:37
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -66,9 +66,9 @@ const checkUpdate = async () => {
 
             if (changelog.length) {
               updateDetail = `${chalk.yellow('Forward changes:')}\n${(0, write_changelog_1.printChangelog)(changelog).split('\n').reduce((lines, line, i, list) => {
-                if (lines.length === 10) {
-                  return [...lines, `... (${list.length - i - 1} lines)`];
-                } else if (lines.length < 10 && line.trim().length) {
+                if (lines.length === 20) {
+                  return [...lines, `... (${list.length - i - 1} lines hidden)`];
+                } else if (lines.length < 20 && line.trim().length) {
                   return [...lines, line];
                 }
 
@@ -90,9 +90,9 @@ const checkUpdate = async () => {
 
               if (changelog.length) {
                 updateDetail = `${chalk.yellow('Bugfix messages:')}\n${(0, write_changelog_1.printChangelog)(changelog, ['bugfix']).split('\n').reduce((lines, line, i, list) => {
-                  if (lines.length === 10) {
-                    return [...lines, `... (${list.length - i - 1}lines)`];
-                  } else if (lines.length < 10 && line.trim().length) {
+                  if (lines.length === 20) {
+                    return [...lines, `... (${list.length - i - 1} lines hidden)`];
+                  } else if (lines.length < 20 && line.trim().length) {
                     return [...lines, line];
                   }
 

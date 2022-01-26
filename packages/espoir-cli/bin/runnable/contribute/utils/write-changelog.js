@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2022-01-11 15:21:52
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-26 17:36:26
+ * @Last Modified time: 2022-01-26 18:56:49
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -147,7 +147,14 @@ const parseChangelogFile = p => {
 const printChangelog = (data, filter = null) => {
   const versions = data.filter(d => d.type === ChangLogItemType.version);
   const raw = versions.sort((a, b) => semver.lt(a.version, b.version) ? 1 : -1).map(d => {
-    const body = d.body.includes('_\\<version description\\>_') ? '' : `  ${d.body}\n`;
+    const body = d.body.includes('_\\<version description\\>_') ? '' : `  ${d.body.split('\n').map(line => {
+      const tmp = line.replace( // unordered list item
+      /^[\+\-\*] /, ' \u25fd  ').replace( // inline codes
+      /`[^`]+`/g, code => chalk.bgGray.black.italic(`${code.slice(1, -1)}`)).replace( // links
+      /\[([^\]]+)\]\(([^)]+)\)/g, (_, text, url) => `${chalk.gray('[')}${chalk.blueBright.underline(text)}${chalk.gray(']( ')}${chalk.blue.underline( // remote url
+      url.replace(/^\./, _env_1.default.runtime.espoir.github.replace('/README.md', '')))} ${chalk.gray(')')}`);
+      return chalk(tmp);
+    }).join('\n')}\n`;
     return ` ${chalk.blueBright.bold(`v${d.version}`)}
 ${body}${Object.entries(d.details).reduce((lines, [scope, data]) => {
       const items = data.sort((a, b) => b.time - a.time).filter(d => filter === null || filter.includes(d.type));

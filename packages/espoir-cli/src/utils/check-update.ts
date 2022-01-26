@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-01-26 14:10:10 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-26 17:39:49
+ * @Last Modified time: 2022-01-26 18:52:37
  */
 
 import * as semver from 'semver';
@@ -80,9 +80,9 @@ const checkUpdate = async () => {
               }\n${
                 printChangelog(changelog).split('\n').reduce<string[]>(
                   (lines, line, i, list) => {
-                    if (lines.length === 10) {
-                      return [...lines, `... (${list.length - i - 1} lines)`]
-                    } else if (lines.length < 10 && line.trim().length) {
+                    if (lines.length === 20) {
+                      return [...lines, `... (${list.length - i - 1} lines hidden)`]
+                    } else if (lines.length < 20 && line.trim().length) {
                       return [...lines, line];
                     }
 
@@ -117,9 +117,9 @@ const checkUpdate = async () => {
                 }\n${
                   printChangelog(changelog, ['bugfix']).split('\n').reduce<string[]>(
                     (lines, line, i, list) => {
-                      if (lines.length === 10) {
-                        return [...lines, `... (${list.length - i - 1}lines)`]
-                      } else if (lines.length < 10 && line.trim().length) {
+                      if (lines.length === 20) {
+                        return [...lines, `... (${list.length - i - 1} lines hidden)`]
+                      } else if (lines.length < 20 && line.trim().length) {
                         return [...lines, line];
                       }
 
