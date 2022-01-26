@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2022-01-26 14:10:10
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-26 16:17:26
+ * @Last Modified time: 2022-01-26 17:39:49
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -115,6 +115,8 @@ const checkUpdate = async () => {
       logger_1.default.info(updateDetail);
     }
 
+    logger_1.default.info();
+    logger_1.default.info(`Run ${chalk.blueBright('espoir update')} to update espoir globally.`);
     logger_1.default.info(chalk.blue('-'.repeat(40)));
     logger_1.default.info();
   }

@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-01-11 15:21:52 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-26 16:18:35
+ * @Last Modified time: 2022-01-26 17:36:26
  */
 
 import * as fs from 'fs';
@@ -206,14 +206,20 @@ export const printChangelog = (data: ChangeLogData['data'], filter: string[] | n
 
     return (
 ` ${chalk.blueBright.bold(`v${d.version}`)}
-${body}${Object.entries(d.details).map(([scope, data]) => {
-  return (
+${body}${Object.entries(d.details).reduce<string[]>((lines, [scope, data]) => {
+  const items = data.sort(
+    (a, b) => b.time - a.time
+  ).filter(
+    d => filter === null || filter.includes(d.type)
+  );
+
+  if (items.length === 0) {
+    return lines;
+  }
+
+  const line = (
 `  ${`> ${chalk.italic.cyan(scope)}`}
-${data.sort(
-  (a, b) => b.time - a.time
-).filter(
-  d => filter === null || filter.includes(d.type)
-).map(d => {
+${items.map(d => {
   return (
 `     ${
   (filter?.length ?? 0) === 1 ? '' : chalk.greenBright(`[${d.type}] `)
@@ -224,7 +230,9 @@ ${data.sort(
 }).join('\n')}
 `
   );
-}).join('\n')}`
+
+  return [...lines, line];
+}, []).join('\n') || '(none)'}`
     );
   }).join('\n');
 

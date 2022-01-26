@@ -6,7 +6,7 @@ export declare type RepoPackageConfig = {
     template: string;
 };
 /**
- * Collect setup info of new monorepo.
+ * Collect setup info of new package.
  *
  * @returns {Promise<RepoPackageConfig>}
  */

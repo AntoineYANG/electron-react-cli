@@ -1,5 +1,18 @@
 # espoir-cli v0.x
 
+## 0.5.2 (2022/1/26)
+
+_\<version description\>_
+
+**Contributors**
+
+- **AntoineYANG** (814602569@qq.com)
+
+### create
+
++ 🐞 **Text error.** - AntoineYANG(814602569@qq.com) 2022/1/26, on _main_
+
+
 ## 0.5.1 (2022/1/26)
 
 _\<version description\>_
@@ -10,12 +23,12 @@ _\<version description\>_
 
 ### install
 
-+ 🌱 **Allow user to install for the package created just now** - AntoineYANG(814602569@qq.com) 2022/1/26, on _main_
++ 🌱 **Allow user to install for the package created just now.** - AntoineYANG(814602569@qq.com) 2022/1/26, on _main_
 
 
 ### update
 
-+ 🌱 **Allow user to install for the package created just now** - AntoineYANG(814602569@qq.com) 2022/1/26, on _main_
++ 🌱 **Automatically update espoir-cli by npm.** - AntoineYANG(814602569@qq.com) 2022/1/26, on _main_
 
 
 ## 0.5.0 (2022/1/26)
@@ -85,12 +98,9 @@ _\<version description\>_
 + 🐞 **Add renaming to git status checking.** - AntoineYANG(814602569@qq.com) 2022/1/18, on _main_
 
 
-## 0.2.1 (undefined)
-
-
+## 0.2.1 (2022/1/15)
 
 Some bugs still exist in script **contribute**.
-
 
 **Contributors**
 
@@ -127,7 +137,7 @@ _\<version description\>_
 + 🌱 **New supported command: espoir uninstall** - AntoineYANG(814602569@qq.com) 2022/1/12, on _feat-1112-espoir_install-yo_
 
 
-## 0.0.0 (2022/1/11)
+## 0.0.0 (2022/1/11 - 2022/1/16)
 
 _\<version description\>_
 
@@ -142,20 +152,8 @@ _\<version description\>_
 + 🌱 **New supported command: espoir contribute.** - AntoineYANG(814602569@qq.com) 2022/1/11, on _feat-1112-espoir_install-yo_
 
 
-
-
-**Contributors**
-
-- **AntoineYANG** (814602569@qq.com)
-
 ### document
 
 + 🧰 **Fixed errors in changelog** - AntoineYANG(814602569@qq.com) 2022/1/16, on _main_
-
-
-
-**Contributors**
-
-
 
 

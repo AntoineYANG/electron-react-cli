@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2022-01-11 15:21:52
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-26 16:18:35
+ * @Last Modified time: 2022-01-26 17:36:26
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -149,13 +149,20 @@ const printChangelog = (data, filter = null) => {
   const raw = versions.sort((a, b) => semver.lt(a.version, b.version) ? 1 : -1).map(d => {
     const body = d.body.includes('_\\<version description\\>_') ? '' : `  ${d.body}\n`;
     return ` ${chalk.blueBright.bold(`v${d.version}`)}
-${body}${Object.entries(d.details).map(([scope, data]) => {
-      return `  ${`> ${chalk.italic.cyan(scope)}`}
-${data.sort((a, b) => b.time - a.time).filter(d => filter === null || filter.includes(d.type)).map(d => {
+${body}${Object.entries(d.details).reduce((lines, [scope, data]) => {
+      const items = data.sort((a, b) => b.time - a.time).filter(d => filter === null || filter.includes(d.type));
+
+      if (items.length === 0) {
+        return lines;
+      }
+
+      const line = `  ${`> ${chalk.italic.cyan(scope)}`}
+${items.map(d => {
         return `     ${(filter?.length ?? 0) === 1 ? '' : chalk.greenBright(`[${d.type}] `)}${(filter?.length ?? 0) === 1 ? chalk.greenBright(`⚙ ${d.message}`) : d.message}`;
       }).join('\n')}
 `;
-    }).join('\n')}`;
+      return [...lines, line];
+    }, []).join('\n') || '(none)'}`;
   }).join('\n');
   return raw;
 };

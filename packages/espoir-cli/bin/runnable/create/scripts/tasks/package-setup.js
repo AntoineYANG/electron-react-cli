@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2022-01-23 20:17:05
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-23 21:45:10
+ * @Last Modified time: 2022-01-26 17:13:58
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -20,14 +20,14 @@ const _env_1 = require("../../../../utils/env");
 
 const load_template_1 = require("../../utils/load-template");
 /**
- * Collect setup info of new monorepo.
+ * Collect setup info of new package.
  *
  * @returns {Promise<RepoPackageConfig>}
  */
 
 
 const packageSetup = async () => {
-  logger_1.default.info('Monorepo setup ');
+  logger_1.default.info('Package setup ');
   const contributors = [];
 
   try {

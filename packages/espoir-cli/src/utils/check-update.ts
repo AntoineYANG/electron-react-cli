@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-01-26 14:10:10 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-26 16:17:26
+ * @Last Modified time: 2022-01-26 17:39:49
  */
 
 import * as semver from 'semver';
@@ -158,6 +158,13 @@ const checkUpdate = async () => {
     if (updateDetail) {
       logger.info(updateDetail);
     }
+    
+    logger.info();
+    logger.info(
+      `Run ${
+        chalk.blueBright('espoir update')
+      } to update espoir globally.`
+    );
 
     logger.info(chalk.blue('-'.repeat(40)));
 

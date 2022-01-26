@@ -1,9 +1,13 @@
 {
   "name": "espoir-cli",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "front-end scripts.",
+  "espoirVersion": 0,
   "keywords": [
-    "monorepo", "package manager", "install", "workspace"
+    "monorepo",
+    "package manager",
+    "install",
+    "workspace"
   ],
   "repository": {
     "type": "git",
@@ -78,7 +82,9 @@
     "source-map-support": "^0.5.21",
     "typescript": "^4.5.4"
   },
-  "peerDependencies": {},
+  "peerDependencies": {
+    "espoir-cli": "^5.0.1"
+  },
   "peerDependenciesMeta": {},
   "scripts": {
     "build": "tsc",

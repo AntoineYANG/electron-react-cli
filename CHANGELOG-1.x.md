@@ -26,6 +26,8 @@ _\<version description\>_
 
 ### create
 
++ 🐞 **Text error.** - AntoineYANG(814602569@qq.com) 2022/1/26, on _main_
+
 + 🌱 **Support 'create' command.** - AntoineYANG(814602569@qq.com) 2022/1/23, on _main_
 
 
