@@ -6,6 +6,22 @@
 ## 命令
 
 
+### espoir {create, new}
+
+* 若当前工作目录位于一个由 espoir 创建的 monorepo 中，则新建一个 package。
+
+在创建 package 时，可以选择预定义的模板，它们由 espoir-cli 内置。
+
+* 若当前工作目录不位于一个由 espoir 创建的 monorepo 中，则新建一个 monorepo。
+
+
+#### 用例
+
+* `espoir create`
+
+
+---
+
 ### espoir {install, i, ins}
 
 为指定（或所有）子仓库安装新增的依赖，或为指定（或所有）子仓库安装已定义的依赖。
@@ -223,4 +239,18 @@ _当根目录被指定时，`--save` 选项将产生一个错误。这是因为�
 
 运行这条命令将获取帮助信息。
 
+
+---
+
+### espoir update
+
+升级 espoir-cli。
+
+
+
+#### 用例
+
+* `espoir update`
+
+运行这条命令将自动更新 espoir-cli 到最新版本。
 

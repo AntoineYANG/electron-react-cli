@@ -10,6 +10,16 @@
 ## Commands
 
 
+### espoir {create, new}
+
+* If the current working directory is relative to a espoir monorepo, create a new package inside it.
+
+Some templates are available when you create a package. They are maintained by `espoir-cli`.
+
+* If the current working directory is **NOT** relative to a espoir monorepo, then create a new monorepo.
+
+---
+
 ### espoir {install, i, ins}
 
 Add new dependency (dependencies) to the given (or all) package, or install the defined dependencies.
@@ -191,13 +201,13 @@ While uninstalling, modules which is not depended on (by other packages or modul
 If one dependency depended on by other packages or modules is to be uninstalled from one package, it will be removed only from the configuration of the package, but not physically removed.
 
 
-#### 参数
+#### Arguments
 
 ##### module-names
 
 Names of the modules that is to uninstalled.
 
-#### 设置项
+#### Options
 
 ##### --here (default: `false`)
 
@@ -227,5 +237,21 @@ Uninstall dependency `axios` from package `foo`.
 * `espoir uni -h`
 
 Show help info.
+
+
+---
+
+### espoir update
+
+Update `espoir-cli` in npm global directory.
+
+
+
+#### Example
+
+* `espoir update`
+
+Execute `npm install -g espoir-cli@latest`.
+
 
 

@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-01-23 20:26:10 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-23 21:46:27
+ * @Last Modified time: 2022-01-26 16:55:15
  */
 
 import * as fs from 'fs';
@@ -10,11 +10,11 @@ import * as path from 'path';
 import { sync as mkdirp } from 'mkdirp';
 
 import type { RepoPackageConfig } from './package-setup';
-import env from '@env';
+import env, { PackageJSON } from '@env';
 import loadTemplate from '@@create/utils/load-template';
 
 
-const createPackage = async (config: RepoPackageConfig): Promise<void> => {
+const createPackage = async (config: RepoPackageConfig): Promise<PackageJSON> => {
   const dir = env.resolvePathInPackage(config.name);
 
   mkdirp(dir);
@@ -67,7 +67,13 @@ const createPackage = async (config: RepoPackageConfig): Promise<void> => {
   if (config.template !== 'none' && await loadTemplate(config.name, config.enableTS, config.template)) {
     // created successfully with template
 
-    return;
+    return JSON.parse(
+      fs.readFileSync(
+        path.join(dir, 'package.json'), {
+          encoding: 'utf-8'
+        }
+      )
+    );
   }
 
   // else: no template
@@ -130,6 +136,14 @@ const createPackage = async (config: RepoPackageConfig): Promise<void> => {
       }
     );
   }
+
+  return JSON.parse(
+    fs.readFileSync(
+      path.join(dir, 'package.json'), {
+        encoding: 'utf-8'
+      }
+    )
+  );
 };
 
 

@@ -4,7 +4,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-12 15:19:20 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-26 14:18:39
+ * @Last Modified time: 2022-01-26 16:46:10
  */
 
 import { Command } from 'commander';
@@ -19,6 +19,7 @@ const Uninstall = env.rootDir ? require('@@uninstall').default as RunnableScript
 const RunScript = env.rootDir ? require('@@run').default as RunnableScript : 0;
 const Contribute = env.rootDir ? require('@@contribute').default as RunnableScript : 0;
 const Create = require('@@create').default as RunnableScript;
+const SelfUpdate = require('@@su').default as RunnableScript;
 
 
 export enum ExitCode {
@@ -33,7 +34,8 @@ const supportedScripts = [
   Uninstall,
   RunScript,
   Contribute,
-  Create
+  Create,
+  SelfUpdate
 ].filter(Boolean) as Array<RunnableScript>;
 
 const program = new Command();

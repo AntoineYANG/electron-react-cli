@@ -4,7 +4,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-12 15:19:20
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-26 16:33:16
+ * @Last Modified time: 2022-01-26 16:46:10
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -27,6 +27,8 @@ const Contribute = _env_1.default.rootDir ? require("./runnable/contribute").def
 
 const Create = require("./runnable/create").default;
 
+const SelfUpdate = require("./runnable/self-update").default;
+
 var ExitCode;
 
 (function (ExitCode) {
@@ -37,7 +39,7 @@ var ExitCode;
 })(ExitCode = exports.ExitCode || (exports.ExitCode = {}));
 
 ;
-const supportedScripts = [Install, Uninstall, RunScript, Contribute, Create].filter(Boolean);
+const supportedScripts = [Install, Uninstall, RunScript, Contribute, Create, SelfUpdate].filter(Boolean);
 const program = new commander_1.Command();
 program.name(_env_1.default.runtime.espoir.name).version(_env_1.default.runtime.espoir.version, '-V, --version');
 

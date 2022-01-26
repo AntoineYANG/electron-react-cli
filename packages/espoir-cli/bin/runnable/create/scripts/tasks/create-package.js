@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2022-01-23 20:26:10
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-23 21:46:27
+ * @Last Modified time: 2022-01-26 16:55:15
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -57,7 +57,9 @@ const createPackage = async config => {
 
   if (config.template !== 'none' && (await (0, load_template_1.default)(config.name, config.enableTS, config.template))) {
     // created successfully with template
-    return;
+    return JSON.parse(fs.readFileSync(path.join(dir, 'package.json'), {
+      encoding: 'utf-8'
+    }));
   } // else: no template
 
 
@@ -110,6 +112,10 @@ const createPackage = async config => {
       encoding: 'utf-8'
     });
   }
+
+  return JSON.parse(fs.readFileSync(path.join(dir, 'package.json'), {
+    encoding: 'utf-8'
+  }));
 };
 
 exports.default = createPackage;

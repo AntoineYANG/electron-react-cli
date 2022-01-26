@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-01-23 20:17:05 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-23 21:45:10
+ * @Last Modified time: 2022-01-26 17:13:58
  */
 
 import { execSync } from 'child_process';
@@ -23,12 +23,12 @@ export type RepoPackageConfig = {
 
 
 /**
- * Collect setup info of new monorepo.
+ * Collect setup info of new package.
  *
  * @returns {Promise<RepoPackageConfig>}
  */
 const packageSetup = async (): Promise<RepoPackageConfig> => {
-  Logger.info('Monorepo setup ');
+  Logger.info('Package setup ');
 
   const contributors: string[] = [];
 

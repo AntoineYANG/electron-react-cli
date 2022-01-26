@@ -19,6 +19,8 @@
       "@@contribute/*": ["runnable/contribute/*"],
       "@@create": ["runnable/create"],
       "@@create/*": ["runnable/create/*"],
+      "@@su": ["runnable/self-update"],
+      "@@su/*": ["runnable/self-update/*"],
       "@request": ["utils/request"],
       "@request/*": ["utils/request/*"],
       "@ui/*": ["utils/ui/*"],

@@ -1,3 +1,4 @@
 import type { RepoPackageConfig } from './package-setup';
-declare const createPackage: (config: RepoPackageConfig) => Promise<void>;
+import { PackageJSON } from '@env';
+declare const createPackage: (config: RepoPackageConfig) => Promise<PackageJSON>;
 export default createPackage;

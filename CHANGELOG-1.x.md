@@ -31,11 +31,18 @@ _\<version description\>_
 
 ### install
 
++ 🌱 **Allow user to install for the package created just now** - AntoineYANG(814602569@qq.com) 2022/1/26, on _main_
+
 + 🐞 **Link downloaded peerDependencies in node_modules** - AntoineYANG(814602569@qq.com) 2022/1/25, on _main_
 
 
 ### other
 
 + 🌱 **Append update check for espoir-cli.** - AntoineYANG(814602569@qq.com) 2022/1/26, on _main_
+
+
+### update
+
++ 🌱 **Allow user to install for the package created just now** - AntoineYANG(814602569@qq.com) 2022/1/26, on _main_
 
 
