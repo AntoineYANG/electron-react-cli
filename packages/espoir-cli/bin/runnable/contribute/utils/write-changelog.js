@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2022-01-11 15:21:52
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-26 18:56:49
+ * @Last Modified time: 2022-01-26 18:56:58
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -152,7 +152,7 @@ const printChangelog = (data, filter = null) => {
       /^[\+\-\*] /, ' \u25fd  ').replace( // inline codes
       /`[^`]+`/g, code => chalk.bgGray.black.italic(`${code.slice(1, -1)}`)).replace( // links
       /\[([^\]]+)\]\(([^)]+)\)/g, (_, text, url) => `${chalk.gray('[')}${chalk.blueBright.underline(text)}${chalk.gray(']( ')}${chalk.blue.underline( // remote url
-      url.replace(/^\./, _env_1.default.runtime.espoir.github.replace('/README.md', '')))} ${chalk.gray(')')}`);
+      url.replace(/^\./, _env_1.default.runtime.espoir.github.replace('/README.md', '')))}${chalk.gray(' )')}`);
       return chalk(tmp);
     }).join('\n')}\n`;
     return ` ${chalk.blueBright.bold(`v${d.version}`)}

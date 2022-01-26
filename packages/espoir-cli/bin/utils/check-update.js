@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2022-01-26 14:10:10
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-26 18:52:37
+ * @Last Modified time: 2022-01-26 19:04:03
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -52,7 +52,27 @@ const checkUpdate = async () => {
 
     if (doMajorsDiffer) {
       infoHead = chalk.bgGreen.white('NEW MAJOR VERSION AVAILABLE');
-      updateDetail = chalk.blue(`Check for the latest document: ${github}`);
+      const [_err, data] = await _request_1.default.get(`https://unpkg.com/${name}@${latest}/CHANGELOG-${latestMajor}.x.md`);
+
+      if (data) {
+        try {
+          const changelog = (0, write_changelog_1.parseChangelog)(data).filter(item => item.type === write_changelog_1.ChangLogItemType.version && semver.gt(semver.valid(semver.coerce(item.version)), curSemver));
+
+          if (changelog.length) {
+            updateDetail = `${chalk.yellow('Bugfix messages:')}\n${(0, write_changelog_1.printChangelog)(changelog, ['feature', '']).split('\n').reduce((lines, line, i, list) => {
+              if (lines.length === 20) {
+                return [...lines, `... (${list.length - i - 1} lines hidden)`];
+              } else if (lines.length < 20 && line.trim().length) {
+                return [...lines, line];
+              }
+
+              return lines;
+            }, []).join('\n')}`;
+          }
+        } catch (error) {}
+      }
+
+      updateDetail += chalk.blue(`---\nCheck for the latest document: ${github}`);
     } else {
       const doMinorsDiffer = semver.minor(latestSemver) > semver.minor(curSemver);
 
