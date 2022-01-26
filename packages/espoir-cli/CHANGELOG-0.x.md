@@ -2,7 +2,25 @@
 
 ## 0.5.2 (2022/1/26)
 
-_\<version description\>_
+This is the first stable version of `espoir-cli`.
+
+Currently loaded features:
+
+* Create espoir monorepo - `espoir new`.
+
+* Create new package in espoir monorepo - `espoir new`.
+
+* Install npm packages - `espoir install`.
+
+* Uninstall npm packages - `espoir uninstall`.
+
+* Run package scripts - `espoir run-scripts`.
+
+* Generate change logs and commit changes to your repository - `espoir contribute`.
+
+* Update espoir-cli itself globally - `espoir update`.
+
+[Document](./README.md) of this CLI is available in [English](./README.md) and [Chinese](./README-zh.md).
 
 **Contributors**
 
@@ -11,6 +29,11 @@ _\<version description\>_
 ### create
 
 + 🐞 **Text error.** - AntoineYANG(814602569@qq.com) 2022/1/26, on _main_
+
+
+### document
+
++ 🧰 **Write version description** - AntoineYANG(814602569@qq.com) 2022/1/26, on _main_
 
 
 ## 0.5.1 (2022/1/26)
