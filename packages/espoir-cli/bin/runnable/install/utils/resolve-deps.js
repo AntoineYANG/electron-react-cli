@@ -3,13 +3,13 @@
  * @Author: Kanata You
  * @Date: 2021-11-14 17:53:51
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-30 18:20:04
+ * @Last Modified time: 2022-01-26 14:10:57
  */
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.resolvePackageDeps = void 0;
+exports.resolvePackageDeps = exports.getAvailableVersions = void 0;
 
 const semver = require("semver");
 
@@ -118,6 +118,8 @@ const getAvailableVersions = (name, version, lockData) => new Promise(resolve =>
     }
   });
 });
+
+exports.getAvailableVersions = getAvailableVersions;
 /**
  * Returns the minimum incompatible set of the dependency.
  *
@@ -126,14 +128,13 @@ const getAvailableVersions = (name, version, lockData) => new Promise(resolve =>
  * @returns {{ version: string; value?: VersionInfo; reason?: Error; }[]>}
  */
 
-
 const getMinIncompatibleSet = async (dependency, lockData) => {
   const coalesced = (0, extra_semver_1.coalesceVersions)(dependency.versions);
   const results = await Promise.all(coalesced.map(async v => {
     const resp = {
       version: v
     };
-    const [err, list] = await getAvailableVersions(dependency.name, v, lockData);
+    const [err, list] = await (0, exports.getAvailableVersions)(dependency.name, v, lockData);
 
     if (err || !list?.[0]) {
       resp.reason = err ?? new Error(`No version of "${dependency.name}" satisfies "${v}". `);
@@ -170,7 +171,7 @@ const resolveDependencies = async (dependencies, lockData, memoized = [], onProg
     }
 
     running += 1;
-    const [err, satisfied] = await getAvailableVersions(dep.name, dep.version, lockData);
+    const [err, satisfied] = await (0, exports.getAvailableVersions)(dep.name, dep.version, lockData);
     running -= 1;
     onProgress?.(data.length + entering.length + 1, running + entering.length);
 

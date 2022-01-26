@@ -56,7 +56,7 @@ export declare type EspoirConfigs = {
     /** Configuration of espoir contribute feature */
     commit: EspoirCommitConfigs;
 };
-declare const env: {
+declare const _default: Readonly<{
     version: number;
     rootDir: string | null;
     rootPkg: Partial<{
@@ -68,7 +68,7 @@ declare const env: {
         author: PackageAuthor;
         contributors: PackageAuthor[];
         repository: {
-            type: 'git';
+            type: "git";
             url: string;
             directory: string;
         };
@@ -98,7 +98,7 @@ declare const env: {
             author: PackageAuthor;
             contributors: PackageAuthor[];
             repository: {
-                type: 'git';
+                type: "git";
                 url: string;
                 directory: string;
             };
@@ -119,6 +119,7 @@ declare const env: {
         } & Record<DependencyTag, DependencySet>>;
     } | null;
     currentPackage: string | undefined;
+    refresh: () => void;
     resolvePath: (...pathSegments: string[]) => string;
     resolvePathInPackage: (packageName: string, ...pathSegments: string[]) => string;
     runtime: {
@@ -126,6 +127,7 @@ declare const env: {
         espoir: {
             name: string;
             version: string;
+            github: string;
         };
         npm: {
             registry: string;
@@ -135,5 +137,5 @@ declare const env: {
         };
     };
     configs: Readonly<EspoirConfigs>;
-};
-export default env;
+}>;
+export default _default;

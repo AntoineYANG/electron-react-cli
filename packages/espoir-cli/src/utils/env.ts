@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-12 15:31:24 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-23 20:33:55
+ * @Last Modified time: 2022-01-26 14:57:56
  */
 
 import * as path from 'path';
@@ -53,6 +53,7 @@ export type PackageJSON = Partial<{
 const thisPkg = require('../../package.json') as {
   name: string;
   version: string;
+  homepage: string;
 };
 
 // ************************************ //
@@ -226,6 +227,8 @@ const configs: EspoirConfigs = {
   }
 };
 
+let refresh = () => {};
+
 
 const env = {
   version: parseInt(thisPkg.version.split('.')[0] as string),
@@ -234,13 +237,15 @@ const env = {
   packages,
   packageMap,
   currentPackage,
+  refresh,
   resolvePath,
   resolvePathInPackage,
   runtime: {
     shell:   process.platform === 'win32' ? (process.env['ComSpec'] || 'cmd') : (process.env['SHELL'] || 'sh'),
     espoir: {
       name: thisPkg.name,
-      version: thisPkg.version
+      version: thisPkg.version,
+      github: thisPkg.homepage
     },
     npm: {
       registry: (() => {
@@ -258,5 +263,20 @@ const env = {
   configs: configs as Readonly<EspoirConfigs>
 };
 
+refresh = () => {
+  /** Names of all packages. */
+  const packages = rootDir ? fs.readdirSync(path.resolve(rootDir, 'packages')) : null;
 
-export default env;
+  /** Package.json mappings for each package. */
+  const packageMap = rootDir && packages ? Object.fromEntries(
+    packages.map(p => [
+      p, require(path.resolve(rootDir, 'packages', p, 'package.json')) as PackageJSON
+    ])
+  ) : null;
+
+  env.packages = packages;
+  env.packageMap = packageMap;
+};
+
+
+export default env as Readonly<typeof env>;

@@ -1,8 +1,10 @@
+#! /usr/bin/env node
+
 /*
  * @Author: Kanata You 
  * @Date: 2021-11-12 15:19:20 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-23 19:42:06
+ * @Last Modified time: 2022-01-26 14:18:39
  */
 
 import { Command } from 'commander';
@@ -10,6 +12,7 @@ import { Command } from 'commander';
 import RunnableScript from '@runnable';
 import env from '@env';
 import Logger, { StopWatch } from '@ui/logger';
+import checkUpdate from './utils/check-update';
 
 const Install = env.rootDir ? require('@@install').default as RunnableScript : 0;
 const Uninstall = env.rootDir ? require('@@uninstall').default as RunnableScript : 0;
@@ -121,6 +124,8 @@ const cli = async (argv?: string[]) => {
   program.showHelpAfterError('(add --help for additional information)');
 
   program.showSuggestionAfterError(true);
+
+  await checkUpdate();
 
   program.parse(argv); // implicitly use process.argv and auto-detect node vs electron conventions
 

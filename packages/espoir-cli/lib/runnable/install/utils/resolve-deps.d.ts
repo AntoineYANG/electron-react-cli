@@ -2,6 +2,16 @@ import { VersionInfo } from '@request/request-npm';
 import { SingleDependency } from './load-dependencies';
 import { LockData } from './lock';
 /**
+ * Returns available versions of a module.
+ * Results is sorted by version in descending order.
+ *
+ * @param {string} name
+ * @param {string} version
+ * @param {LockData} lockData
+ * @returns {(Promise<[null, VersionInfo[]] | [Error, null]>)}
+ */
+export declare const getAvailableVersions: (name: string, version: string, lockData: LockData) => Promise<[null, VersionInfo[]] | [Error, null]>;
+/**
  * Resolves all the dependencies given in package.json.
  *
  * @param {SingleDependency[]} dependencies

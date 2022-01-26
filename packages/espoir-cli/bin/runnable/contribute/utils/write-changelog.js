@@ -3,13 +3,13 @@
  * @Author: Kanata You
  * @Date: 2022-01-11 15:21:52
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-23 18:15:10
+ * @Last Modified time: 2022-01-26 16:18:35
  */
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.ChangLogItemType = void 0;
+exports.printChangelog = exports.parseChangelog = exports.ChangLogItemType = void 0;
 
 const fs = require("fs");
 
@@ -18,6 +18,8 @@ const path = require("path");
 const child_process_1 = require("child_process");
 
 const semver = require("semver");
+
+const chalk = require("chalk");
 
 const _env_1 = require("../../../utils/env");
 
@@ -65,76 +67,100 @@ const requirePackageVersion = _package => {
   return version;
 };
 
-const parseChangelog = p => {
+const parseChangelog = raw => {
+  return raw.split('\n').reduce((context, line) => {
+    if (line === '**Contributors**') {
+      if (context.curVersion) {
+        context.curVersion.body = context.curVersion.body.replace(/^\n+/, '').replace(/\n+$/, '');
+      }
+
+      context.isVersionBody = false;
+      return context;
+    } else if (context.isVersionBody && context.curVersion) {
+      context.curVersion.body += line + '\n';
+      return context;
+    } else if (line.trim() === '' || line.startsWith('- ')) {
+      return context;
+    } else if (line.startsWith('+ ')) {
+      const info = /^\+ (?<mark>.+) \*\*(?<msg>.+)\*\* \- (?<author>.*)\((?<email>.+@.+\.com)\) (?<date>[0-9/]+), on _(?<branch>.+)_$/.exec(line)?.groups;
+
+      if (context.curVersion && context.curScope) {
+        context.curVersion.details[context.curScope]?.push({
+          curBranch: info.branch,
+          author: {
+            name: info.author,
+            email: info.email
+          },
+          message: info.msg,
+          type: {
+            '🌱': 'feature',
+            '🐞': 'bugfix',
+            '🧬': 'refactor',
+            '⏱': 'performance',
+            '🧰': 'chore'
+          }[info.mark] ?? 'other',
+          time: new Date(info.date).getTime()
+        });
+      }
+    } else if (line.startsWith('## ')) {
+      const {
+        v: version
+      } = /^## (?<v>[0-9.]+) /.exec(line)?.groups;
+      context.curVersion = {
+        type: ChangLogItemType.version,
+        version,
+        body: '',
+        details: {}
+      };
+      context.data.push(context.curVersion);
+      context.isVersionBody = true;
+    } else if (line.startsWith('### ')) {
+      const {
+        scope
+      } = /^### (?<scope>.*)$/.exec(line)?.groups;
+      context.curScope = scope;
+
+      if (context.curVersion) {
+        context.curVersion.details[scope] = [];
+      }
+    }
+
+    return context;
+  }, {
+    data: []
+  }).data;
+};
+
+exports.parseChangelog = parseChangelog;
+
+const parseChangelogFile = p => {
   if (fs.existsSync(p)) {
     const raw = fs.readFileSync(p, {
       encoding: 'utf-8'
     }).split('\n').slice(2);
-    return raw.reduce((context, line) => {
-      if (line === '**Contributors**') {
-        if (context.curVersion) {
-          context.curVersion.body = context.curVersion.body.replace(/^\n+/, '').replace(/\n+$/, '');
-        }
-
-        context.isVersionBody = false;
-        return context;
-      } else if (context.isVersionBody && context.curVersion) {
-        context.curVersion.body += line + '\n';
-        return context;
-      } else if (line.trim() === '' || line.startsWith('- ')) {
-        return context;
-      } else if (line.startsWith('+ ')) {
-        const info = /^\+ (?<mark>.+) \*\*(?<msg>.+)\*\* \- (?<author>.*)\((?<email>.+@.+\.com)\) (?<date>[0-9/]+), on _(?<branch>.+)_$/.exec(line)?.groups;
-
-        if (context.curVersion && context.curScope) {
-          context.curVersion.details[context.curScope]?.push({
-            curBranch: info.branch,
-            author: {
-              name: info.author,
-              email: info.email
-            },
-            message: info.msg,
-            type: {
-              '🌱': 'feature',
-              '🐞': 'bugfix',
-              '🧬': 'refactor',
-              '⏱': 'performance',
-              '🧰': 'chore'
-            }[info.mark] ?? 'other',
-            time: new Date(info.date).getTime()
-          });
-        }
-      } else if (line.startsWith('## ')) {
-        const {
-          v: version
-        } = /^## (?<v>[0-9.]+) /.exec(line)?.groups;
-        context.curVersion = {
-          type: ChangLogItemType.version,
-          version,
-          body: '',
-          details: {}
-        };
-        context.data.push(context.curVersion);
-        context.isVersionBody = true;
-      } else if (line.startsWith('### ')) {
-        const {
-          scope
-        } = /^### (?<scope>.*)$/.exec(line)?.groups;
-        context.curScope = scope;
-
-        if (context.curVersion) {
-          context.curVersion.details[scope] = [];
-        }
-      }
-
-      return context;
-    }, {
-      data: []
-    }).data;
+    return (0, exports.parseChangelog)(raw.join('\n'));
   }
 
   return [];
 };
+
+const printChangelog = (data, filter = null) => {
+  const versions = data.filter(d => d.type === ChangLogItemType.version);
+  const raw = versions.sort((a, b) => semver.lt(a.version, b.version) ? 1 : -1).map(d => {
+    const body = d.body.includes('_\\<version description\\>_') ? '' : `  ${d.body}\n`;
+    return ` ${chalk.blueBright.bold(`v${d.version}`)}
+${body}${Object.entries(d.details).map(([scope, data]) => {
+      return `  ${`> ${chalk.italic.cyan(scope)}`}
+${data.sort((a, b) => b.time - a.time).filter(d => filter === null || filter.includes(d.type)).map(d => {
+        return `     ${(filter?.length ?? 0) === 1 ? '' : chalk.greenBright(`[${d.type}] `)}${(filter?.length ?? 0) === 1 ? chalk.greenBright(`⚙ ${d.message}`) : d.message}`;
+      }).join('\n')}
+`;
+    }).join('\n')}`;
+  }).join('\n');
+  return raw;
+};
+
+exports.printChangelog = printChangelog;
 
 const dumpChangelog = (name, data) => {
   const versions = data.filter(d => d.type === ChangLogItemType.version);
@@ -227,7 +253,7 @@ const writeChangelog = (state, scopes, msg, type) => {
     const version = semver.valid(semver.coerce(scope.version)) ?? '1.0.0';
     const major = semver.major(version);
     const output = path.join(dir, `CHANGELOG-${major}.x.md`);
-    const data = parseChangelog(output);
+    const data = parseChangelogFile(output);
     let curVersion = data.find(v => v.type === ChangLogItemType.version && v.version === version);
 
     if (!curVersion) {

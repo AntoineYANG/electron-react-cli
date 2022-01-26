@@ -1,3 +1,4 @@
+#! /usr/bin/env node
 export declare enum ExitCode {
     OK = 0,
     OPERATION_FAILED = 1,

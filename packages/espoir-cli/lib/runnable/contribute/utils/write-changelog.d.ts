@@ -33,6 +33,8 @@ export declare type ChangeLogData = {
     path: string;
     data: Array<ChangeLogMigration | ChangeLogVersionComment>;
 };
+export declare const parseChangelog: (raw: string) => ChangeLogData['data'];
+export declare const printChangelog: (data: ChangeLogData['data'], filter?: string[] | null) => string;
 /**
  * Generates change log.
  *

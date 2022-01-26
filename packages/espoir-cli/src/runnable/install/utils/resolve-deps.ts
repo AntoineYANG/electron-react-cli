@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 17:53:51 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-30 18:20:04
+ * @Last Modified time: 2022-01-26 14:10:57
  */
 
 import * as semver from 'semver';
@@ -23,7 +23,7 @@ import { LockData } from './lock';
  * @param {LockData} lockData
  * @returns {(Promise<[null, VersionInfo[]] | [Error, null]>)}
  */
-const getAvailableVersions = (
+export const getAvailableVersions = (
   name: string,
   version: string,
   lockData: LockData

@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-12 15:31:24
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-23 20:33:55
+ * @Last Modified time: 2022-01-26 14:57:56
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -131,6 +131,9 @@ const configs = {
     }
   }
 };
+
+let refresh = () => {};
+
 const env = {
   version: parseInt(thisPkg.version.split('.')[0]),
   rootDir,
@@ -138,13 +141,15 @@ const env = {
   packages,
   packageMap,
   currentPackage,
+  refresh,
   resolvePath,
   resolvePathInPackage,
   runtime: {
     shell: process.platform === 'win32' ? process.env['ComSpec'] || 'cmd' : process.env['SHELL'] || 'sh',
     espoir: {
       name: thisPkg.name,
-      version: thisPkg.version
+      version: thisPkg.version,
+      github: thisPkg.homepage
     },
     npm: {
       registry: (() => {
@@ -163,4 +168,15 @@ const env = {
   },
   configs: configs
 };
+
+refresh = () => {
+  /** Names of all packages. */
+  const packages = rootDir ? fs.readdirSync(path.resolve(rootDir, 'packages')) : null;
+  /** Package.json mappings for each package. */
+
+  const packageMap = rootDir && packages ? Object.fromEntries(packages.map(p => [p, require(path.resolve(rootDir, 'packages', p, 'package.json'))])) : null;
+  env.packages = packages;
+  env.packageMap = packageMap;
+};
+
 exports.default = env;

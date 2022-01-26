@@ -1,6 +1,6 @@
 # root v1.x
 
-## 1.0.0 (2022/1/18 - 2022/1/25)
+## 1.0.0 (2022/1/18 - 2022/1/26)
 
 
 _\<version description\>_
@@ -32,5 +32,10 @@ _\<version description\>_
 ### install
 
 + 🐞 **Link downloaded peerDependencies in node_modules** - AntoineYANG(814602569@qq.com) 2022/1/25, on _main_
+
+
+### other
+
++ 🌱 **Append update check for espoir-cli.** - AntoineYANG(814602569@qq.com) 2022/1/26, on _main_
 
 

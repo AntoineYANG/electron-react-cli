@@ -1,9 +1,10 @@
+#! /usr/bin/env node
 "use strict";
 /*
  * @Author: Kanata You
  * @Date: 2021-11-12 15:19:20
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-23 19:42:06
+ * @Last Modified time: 2022-01-26 16:33:16
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -16,6 +17,8 @@ const commander_1 = require("commander");
 const _env_1 = require("./utils/env");
 
 const logger_1 = require("./utils/ui/logger");
+
+const check_update_1 = require("./utils/check-update");
 
 const Install = _env_1.default.rootDir ? require("./runnable/install").default : 0;
 const Uninstall = _env_1.default.rootDir ? require("./runnable/uninstall").default : 0;
@@ -92,6 +95,7 @@ const cli = async argv => {
   });
   program.showHelpAfterError('(add --help for additional information)');
   program.showSuggestionAfterError(true);
+  await (0, check_update_1.default)();
   program.parse(argv); // implicitly use process.argv and auto-detect node vs electron conventions
 
   const rCode = await run;
