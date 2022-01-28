@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-01-26 14:10:10 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-26 19:03:32
+ * @Last Modified time: 2022-01-28 13:45:50
  */
 
 import * as semver from 'semver';
@@ -16,6 +16,10 @@ import { ChangLogItemType, parseChangelog, printChangelog } from '@@contribute/u
 
 
 const checkUpdate = async () => {
+  if (process.argv.includes('update')) {
+    return;
+  }
+  
   const {
     name,
     version: curVersion,

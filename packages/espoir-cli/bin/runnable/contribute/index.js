@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-12-02 18:09:51
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-12 21:03:55
+ * @Last Modified time: 2022-01-28 13:38:30
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -11,6 +11,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 const commit_1 = require("./scripts/commit");
+/**
+ * @since 1.0.0
+ */
+
 
 const Contribute = {
   fullName: 'contribute',

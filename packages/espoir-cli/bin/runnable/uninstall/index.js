@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2022-01-12 21:02:24
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-23 18:20:01
+ * @Last Modified time: 2022-01-28 13:40:07
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -22,6 +22,10 @@ const uninstall_1 = require("./scripts/uninstall");
 
 const installTarget = _env_1.default.packages ? [..._env_1.default.packages, 'root'] : [];
 const defaultPackage = _env_1.default.currentPackage ?? 'root';
+/**
+ * @since 1.0.0
+ */
+
 const Uninstall = {
   fullName: 'uninstall',
   displayName: 'uninstall',

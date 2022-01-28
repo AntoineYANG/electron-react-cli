@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-14 02:00:17
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-23 18:24:51
+ * @Last Modified time: 2022-01-28 13:39:09
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -21,6 +21,10 @@ const install_all_1 = require("./scripts/install-all");
 const install_and_save_1 = require("./scripts/install-and-save");
 
 const installTarget = _env_1.default.packages ? [..._env_1.default.packages, 'root'] : [];
+/**
+ * @since 1.0.0
+ */
+
 const Install = {
   fullName: 'install',
   displayName: 'install',

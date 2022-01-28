@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 02:00:17 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-23 18:24:51
+ * @Last Modified time: 2022-01-28 13:39:09
  */
 
 import { Argument, Option } from 'commander';
@@ -19,6 +19,9 @@ const installTarget = env.packages ? [
   'root'
 ] : [];
 
+/**
+ * @since 1.0.0
+ */
 const Install: RunnableScript = {
   fullName: 'install',
   displayName: 'install',

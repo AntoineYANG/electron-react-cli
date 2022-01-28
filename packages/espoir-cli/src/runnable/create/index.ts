@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-01-23 19:04:52 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-23 20:47:40
+ * @Last Modified time: 2022-01-28 13:38:50
  */
 
 import RunnableScript from '@runnable';
@@ -12,6 +12,9 @@ import newPackage from '@@create/scripts/new-package';
 import env from '@env';
 
 
+/**
+ * @since 1.0.0
+ */
 const Create: RunnableScript = {
   fullName: 'create',
   displayName: env.rootDir ? 'new package' : 'new monorepo',

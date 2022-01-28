@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-30 18:27:09
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-23 18:59:06
+ * @Last Modified time: 2022-01-28 13:39:37
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -25,6 +25,10 @@ const index_1 = require("../../..");
 const logger_1 = require("../../utils/ui/logger");
 
 const workspaces = _env_1.default.packages ? [..._env_1.default.packages, 'root'] : [];
+/**
+ * @since 1.0.0
+ */
+
 const RunScript = {
   fullName: 'run-script',
   displayName: 'run-script',

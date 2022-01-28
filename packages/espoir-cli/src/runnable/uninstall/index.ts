@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-01-12 21:02:24 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-23 18:20:01
+ * @Last Modified time: 2022-01-28 13:40:07
  */
 
 import { Argument, Option } from 'commander';
@@ -22,6 +22,9 @@ const installTarget = env.packages ? [
 
 const defaultPackage = env.currentPackage ?? 'root';
 
+/**
+ * @since 1.0.0
+ */
 const Uninstall: RunnableScript = {
   fullName: 'uninstall',
   displayName: 'uninstall',

@@ -4,7 +4,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-12 15:19:20 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-26 16:46:10
+ * @Last Modified time: 2022-01-28 13:40:52
  */
 
 import { Command } from 'commander';
@@ -14,11 +14,17 @@ import env from '@env';
 import Logger, { StopWatch } from '@ui/logger';
 import checkUpdate from './utils/check-update';
 
+/** @since 1.0.0 */
 const Install = env.rootDir ? require('@@install').default as RunnableScript : 0;
+/** @since 1.0.0 */
 const Uninstall = env.rootDir ? require('@@uninstall').default as RunnableScript : 0;
+/** @since 1.0.0 */
 const RunScript = env.rootDir ? require('@@run').default as RunnableScript : 0;
+/** @since 1.0.0 */
 const Contribute = env.rootDir ? require('@@contribute').default as RunnableScript : 0;
+/** @since 1.0.0 */
 const Create = require('@@create').default as RunnableScript;
+/** @since 1.0.0 */
 const SelfUpdate = require('@@su').default as RunnableScript;
 
 

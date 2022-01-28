@@ -4,7 +4,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-12 15:19:20
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-26 16:46:10
+ * @Last Modified time: 2022-01-28 13:40:52
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -19,13 +19,24 @@ const _env_1 = require("./utils/env");
 const logger_1 = require("./utils/ui/logger");
 
 const check_update_1 = require("./utils/check-update");
+/** @since 1.0.0 */
+
 
 const Install = _env_1.default.rootDir ? require("./runnable/install").default : 0;
+/** @since 1.0.0 */
+
 const Uninstall = _env_1.default.rootDir ? require("./runnable/uninstall").default : 0;
+/** @since 1.0.0 */
+
 const RunScript = _env_1.default.rootDir ? require("./runnable/run-script").default : 0;
+/** @since 1.0.0 */
+
 const Contribute = _env_1.default.rootDir ? require("./runnable/contribute").default : 0;
+/** @since 1.0.0 */
 
 const Create = require("./runnable/create").default;
+/** @since 1.0.0 */
+
 
 const SelfUpdate = require("./runnable/self-update").default;
 
