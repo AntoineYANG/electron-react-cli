@@ -238,6 +238,30 @@ Uninstall dependency `axios` from package `foo`.
 
 Show help info.
 
+---
+
+### espoir {use-static, use, static, export}
+
+Mark the local package(s) as exportable, to be installed and imported from other packages.
+
+
+#### Arguments
+
+##### packages
+
+Names of the packages you want to export.
+
+
+#### Examples
+
+* `espoir use-static foo`
+
+Mark package `foo` as exportable.
+
+* `espoir use-static -h`
+
+Show help info.
+
 
 ---
 

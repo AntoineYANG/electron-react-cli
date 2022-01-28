@@ -4,7 +4,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-12 15:19:20
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-28 13:40:52
+ * @Last Modified time: 2022-01-28 18:06:29
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -26,6 +26,9 @@ const Install = _env_1.default.rootDir ? require("./runnable/install").default :
 /** @since 1.0.0 */
 
 const Uninstall = _env_1.default.rootDir ? require("./runnable/uninstall").default : 0;
+/** @since 1.1.0 */
+
+const UseStatic = _env_1.default.rootDir ? require("./runnable/use-static").default : 0;
 /** @since 1.0.0 */
 
 const RunScript = _env_1.default.rootDir ? require("./runnable/run-script").default : 0;
@@ -50,7 +53,7 @@ var ExitCode;
 })(ExitCode = exports.ExitCode || (exports.ExitCode = {}));
 
 ;
-const supportedScripts = [Install, Uninstall, RunScript, Contribute, Create, SelfUpdate].filter(Boolean);
+const supportedScripts = [Install, Uninstall, UseStatic, RunScript, Contribute, Create, SelfUpdate].filter(Boolean);
 const program = new commander_1.Command();
 program.name(_env_1.default.runtime.espoir.name).version(_env_1.default.runtime.espoir.version, '-V, --version');
 

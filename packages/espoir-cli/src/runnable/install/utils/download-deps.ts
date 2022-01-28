@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-16 00:03:04 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-17 23:02:24
+ * @Last Modified time: 2022-01-28 18:01:45
  */
 
 import { ListrRenderer, ListrTask, ListrTaskWrapper as TaskWrapper } from 'listr2';
@@ -84,12 +84,35 @@ const batchDownload = (
   };
 
   const tasks = modules.map((mod, i): ListrTask => {
-    const { name, version } = mod;
+    const { name, version, espoirPackage } = mod;
     const dir = path.join(
       env.resolvePath('.espoir', '.modules'),
       name,
       (semver.valid(semver.coerce(version)) as string).replace(/\./g, '_')
     );
+
+    if (espoirPackage === 'module') {
+      return {
+        task: async () => {
+          onEnd?.({
+            name,
+            version,
+            err: null,
+            data: {
+              size: 0,
+              unpackedSize: 0,
+              dir: env.resolvePathInPackage(name)
+            },
+            _request: {
+              url: env.resolvePathInPackage(name)
+            }
+          });
+
+          return;
+        }
+      };
+    }
+
     const url = mod.dist.tarball;
     const fn = url.split(/\/+/).reverse()[0] as string;
     const p = path.join(dir, fn);

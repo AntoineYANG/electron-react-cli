@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-30 19:14:41 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-17 22:59:16
+ * @Last Modified time: 2022-01-28 16:31:54
  */
 
 import * as chalk from 'chalk';
@@ -49,7 +49,7 @@ const runScript = async (
   const cp = spawn(
     `${cmd}${
       args.map(s => ` ${s}`).join('')
-    } --color`,
+    }`,
     {
       stdio: 'pipe',
       cwd,

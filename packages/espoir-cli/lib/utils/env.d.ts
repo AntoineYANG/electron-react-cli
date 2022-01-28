@@ -9,6 +9,8 @@ export declare type PackageJSON = Partial<{
     name: string;
     version: string;
     private: boolean;
+    espoirVersion: number;
+    espoirPackage: 'module' | 'package';
     workspaces: string[];
     author: PackageAuthor;
     contributors: PackageAuthor[];

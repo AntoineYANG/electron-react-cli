@@ -1,12 +1,14 @@
 {
   "name": "espoir-cli",
   "version": "1.1.0",
-  "description": "front-end scripts.",
+  "description": "NodeJS dependency management, and useful tools for monorepo.",
   "espoirVersion": 0,
   "keywords": [
+    "nodejs",
+    "package-manager",
+    "javascript",
+    "frontend",
     "monorepo",
-    "package manager",
-    "install",
     "workspace"
   ],
   "repository": {

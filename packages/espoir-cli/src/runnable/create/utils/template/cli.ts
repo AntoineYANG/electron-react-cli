@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-01-23 21:06:27 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-23 22:06:29
+ * @Last Modified time: 2022-01-28 16:33:04
  */
 
 import * as path from 'path';
@@ -23,6 +23,10 @@ const cliTemplate: EspoirTemplate = {
     mkdirp(path.join(dir, 'scripts'));
     mkdirp(path.join(dir, 'tasks'));
     mkdirp(path.join(dir, 'src'));
+    
+    if (enableTS) {
+      mkdirp(path.join(dir, 'bin'));
+    }
 
     const { useNpm } = await inquirer.prompt([{
       type: 'confirm',
@@ -42,51 +46,54 @@ const cliTemplate: EspoirTemplate = {
           encoding: 'utf-8'
         }
       );
-
-      const main = enableTS ? './bin/index.js' : './src/index.js';
-      const files = [
-        'LICENSE',
-        'README.md',
-        'README-*.md',
-        'CHANGELOG-*.md',
-        enableTS ? '/bin/' : '/src/',
-        enableTS ? '/lib/' : false
-      ].filter(Boolean) as string[];
-      const bin = {
-        [name]: main
-      };
-      const types = enableTS ? './lib/index.d.ts' : undefined;
-      const exports = {
-        '.': [
-          {
-            default: main
-          },
-          main
-        ],
-        './package.json': './package.json'
-      };
-
-      const packageJSON = {
-        ...require(path.join(dir, 'package.json')),
-        main,
-        files,
-        preferGlobal: true,
-        bin,
-        types,
-        exports
-      };
-
-      fs.writeFileSync(
-        path.join(dir, 'package.json'),
-        JSON.stringify(
-          packageJSON,
-          undefined,
-          2
-        ) + '\n', {
-          encoding: 'utf-8'
-        }
-      );
     }
+
+    const main = enableTS ? './bin/index.js' : './src/index.js';
+    const files = [
+      'LICENSE',
+      'README.md',
+      'README-*.md',
+      'CHANGELOG-*.md',
+      enableTS ? '/bin/' : '/src/',
+      enableTS ? '/lib/' : false
+    ].filter(Boolean) as string[];
+    const bin = {
+      [name]: main
+    };
+    const types = enableTS ? './lib/index.d.ts' : undefined;
+    const exports = {
+      '.': [
+        {
+          default: main
+        },
+        main
+      ],
+      './package.json': './package.json'
+    };
+
+    const packageJSON = {
+      ...require(path.join(dir, 'package.json')),
+      scripts: {
+        build: `cd ${env.resolvePathInPackage(name)} && tsc`
+      },
+      main,
+      files,
+      preferGlobal: true,
+      bin,
+      types,
+      exports
+    };
+
+    fs.writeFileSync(
+      path.join(dir, 'package.json'),
+      JSON.stringify(
+        packageJSON,
+        undefined,
+        2
+      ) + '\n', {
+        encoding: 'utf-8'
+      }
+    );
 
     fs.writeFileSync(
       path.join(dir, enableTS ? 'bin' : 'src', 'index.js'),
@@ -110,8 +117,6 @@ module.exports = main;
     );
 
     if (enableTS) {
-      mkdirp(path.join(dir, 'bin'));
-
       fs.writeFileSync(
         path.join(dir, 'src', 'index.ts'),
         `/** ESPOIR TEMPLATE */
@@ -128,49 +133,6 @@ if (require.main === module) {
 
 export default main;
 
-`, {
-          encoding: 'utf-8'
-        }
-      );
-
-      fs.writeFileSync(
-        path.join(dir, 'scripts', 'build.js'),
-        `/** ESPOIR TEMPLATE */
-        
-const { exec } = require('child_process');
-
-
-const tscBuild = () => new Promise(resolve => {
-  exec('npx tsc', (err, stdout, stderr) => {
-    if (err) {
-      console.error(err);
-      process.exit(1);
-    }
-
-    if (stderr) {
-      console.error(stderr);
-      process.exit(2);
-    }
-
-    console.log(stdout);
-    resolve();
-  });
-});
-
-const main = async () => {
-  try {
-    await tscBuild();
-  } catch (error) {
-    console.error(error);
-
-    return 1;
-  }
-
-  return 0;
-};
-
-
-main().then(process.exit);
 `, {
           encoding: 'utf-8'
         }
@@ -226,6 +188,7 @@ main().then(process.exit);
               'src/', '../../node_modules/'
             ],
             typeRoots: ['../../node_modules/@types/'],
+            outDir: 'bin',
             declarationDir: 'lib'
           }
         },

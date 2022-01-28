@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-14 17:53:51
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-26 14:10:57
+ * @Last Modified time: 2022-01-28 17:47:03
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -12,6 +12,8 @@ Object.defineProperty(exports, "__esModule", {
 exports.resolvePackageDeps = exports.getAvailableVersions = void 0;
 
 const semver = require("semver");
+
+const _env_1 = require("../../../utils/env");
 
 const _request_1 = require("../../../utils/request");
 
@@ -28,14 +30,34 @@ const extra_semver_1 = require("./extra-semver");
 
 
 const getAvailableVersions = (name, version, lockData) => new Promise(resolve => {
-  // check lock file first
+  // check exported local packages first
+  for (const data of _env_1.default.packages?.map(name => _env_1.default.packageMap?.[name]) ?? []) {
+    if (data?.espoirPackage === 'module' && data.version) {
+      if (data.name === name && semver.satisfies(data.version, version)) {
+        return resolve([null, [{
+          espoirPackage: 'module',
+          name,
+          version: data.version,
+          _id: `${name}@${data.version}`,
+          dist: {
+            integrity: '<local>',
+            shasum: '<local>',
+            tarball: '<local>'
+          },
+          dependencies: data.dependencies ?? {}
+        }]]);
+      }
+    }
+  } // search in lock data
+
+
   const what = Object.entries(lockData[name] ?? {});
   const which = what.find(([v]) => semver.satisfies(v, version));
 
   if (which) {
     // use locked version
     return resolve([null, [{
-      name: name,
+      name,
       version: which[0],
       _id: `${name}@${which[0]}`,
       dist: {

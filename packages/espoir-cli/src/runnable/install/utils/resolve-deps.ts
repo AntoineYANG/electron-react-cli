@@ -2,16 +2,17 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 17:53:51 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-26 14:10:57
+ * @Last Modified time: 2022-01-28 17:47:03
  */
 
 import * as semver from 'semver';
 
-import { VersionInfo } from '@request/request-npm';
+import env from '@env';
+import type { VersionInfo } from '@request/request-npm';
 import request from '@request';
-import { Dependency, DependencySet, SingleDependency } from './load-dependencies';
+import type { Dependency, DependencySet, SingleDependency } from './load-dependencies';
 import { coalesceVersions } from './extra-semver';
-import { LockData } from './lock';
+import type { LockData } from './lock';
 
 
 /**
@@ -28,7 +29,29 @@ export const getAvailableVersions = (
   version: string,
   lockData: LockData
 ): Promise<[null, VersionInfo[]] | [Error, null]> => new Promise(resolve => {
-  // check lock file first
+  // check exported local packages first
+  for (const data of env.packages?.map(name => env.packageMap?.[name]) ?? []) {
+    if (data?.espoirPackage === 'module' && data.version) {
+      if (data.name === name && semver.satisfies(data.version, version)) {
+        return resolve([
+          null, [{
+            espoirPackage: 'module',
+            name,
+            version: data.version,
+            _id: `${name}@${data.version}`,
+            dist: {
+              integrity: '<local>',
+              shasum: '<local>',
+              tarball: '<local>'
+            },
+            dependencies: data.dependencies ?? {}
+          } as VersionInfo]
+        ]);
+      }
+    }
+  }
+
+  // search in lock data
 
   const what = Object.entries(lockData[name] ?? {});
   const which = what.find(([v]) => semver.satisfies(v, version));
@@ -37,7 +60,7 @@ export const getAvailableVersions = (
     // use locked version
     return resolve([
       null, [{
-        name: name,
+        name,
         version: which[0],
         _id: `${name}@${which[0]}`,
         dist: {

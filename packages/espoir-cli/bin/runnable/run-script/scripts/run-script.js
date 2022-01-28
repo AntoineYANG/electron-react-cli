@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-30 19:14:41
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-17 22:59:16
+ * @Last Modified time: 2022-01-28 16:31:54
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -38,7 +38,7 @@ const runScript = async (scope, command, cmd, cwd, args) => {
     resolve = res;
   });
   const paths = `${process.env['PATH'] ?? ''}${_env_1.default.resolvePath('.espoir', '.bin')};`;
-  const cp = (0, child_process_1.spawn)(`${cmd}${args.map(s => ` ${s}`).join('')} --color`, {
+  const cp = (0, child_process_1.spawn)(`${cmd}${args.map(s => ` ${s}`).join('')}`, {
     stdio: 'pipe',
     cwd,
     shell: true,

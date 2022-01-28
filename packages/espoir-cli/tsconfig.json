@@ -21,6 +21,8 @@
       "@@create/*": ["runnable/create/*"],
       "@@su": ["runnable/self-update"],
       "@@su/*": ["runnable/self-update/*"],
+      "@@use": ["runnable/use-static"],
+      "@@use/*": ["runnable/use-static/*"],
       "@request": ["utils/request"],
       "@request/*": ["utils/request/*"],
       "@ui/*": ["utils/ui/*"],

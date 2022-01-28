@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-12 15:31:24 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-28 15:24:05
+ * @Last Modified time: 2022-01-28 16:44:26
  */
 
 import * as path from 'path';
@@ -23,6 +23,8 @@ export type PackageJSON = Partial<{
   name: string;
   version: string;
   private: boolean;
+  espoirVersion: number;
+  espoirPackage: 'module' | 'package';
   workspaces: string[];
   author: PackageAuthor;
   contributors: PackageAuthor[];

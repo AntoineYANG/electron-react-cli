@@ -4,7 +4,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-12 15:19:20 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-28 13:40:52
+ * @Last Modified time: 2022-01-28 18:06:29
  */
 
 import { Command } from 'commander';
@@ -18,6 +18,8 @@ import checkUpdate from './utils/check-update';
 const Install = env.rootDir ? require('@@install').default as RunnableScript : 0;
 /** @since 1.0.0 */
 const Uninstall = env.rootDir ? require('@@uninstall').default as RunnableScript : 0;
+/** @since 1.1.0 */
+const UseStatic = env.rootDir ? require('@@use').default as RunnableScript : 0;
 /** @since 1.0.0 */
 const RunScript = env.rootDir ? require('@@run').default as RunnableScript : 0;
 /** @since 1.0.0 */
@@ -26,7 +28,6 @@ const Contribute = env.rootDir ? require('@@contribute').default as RunnableScri
 const Create = require('@@create').default as RunnableScript;
 /** @since 1.0.0 */
 const SelfUpdate = require('@@su').default as RunnableScript;
-
 
 export enum ExitCode {
   OK = 0,
@@ -38,6 +39,7 @@ export enum ExitCode {
 const supportedScripts = [
   Install,
   Uninstall,
+  UseStatic,
   RunScript,
   Contribute,
   Create,
@@ -143,6 +145,7 @@ const cli = async (argv?: string[]) => {
 
   return rCode;
 };
+
 
 if (require.main === module) {
   cli().then(

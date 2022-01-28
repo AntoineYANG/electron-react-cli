@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2022-01-28 15:41:58
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-28 15:56:24
+ * @Last Modified time: 2022-01-28 16:01:49
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -25,7 +25,7 @@ const logger_1 = require("../../../utils/ui/logger");
 const printUpdateDetail = async version => {
   const curSemver = semver.valid(semver.coerce(_env_1.default.runtime.espoir.version));
   const major = parseInt(version.split('.')[0], 10);
-  const [_err, data] = await _request_1.default.get(`https://unpkg.com/${name}@${version}/CHANGELOG-${major}.x.md`);
+  const [_err, data] = await _request_1.default.get(`https://unpkg.com/${_env_1.default.runtime.espoir.name}@${version}/CHANGELOG-${major}.x.md`);
 
   if (data) {
     try {

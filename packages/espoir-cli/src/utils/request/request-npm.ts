@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 18:34:47 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-24 01:42:54
+ * @Last Modified time: 2022-01-28 17:44:46
  */
 
 import env, { PackageAuthor, PackageJSON } from '@env';
@@ -18,7 +18,7 @@ export type VersionInfo = PackageJSON & {
   _nodeVersion: string;
   _npmVersion: string;
   dist: {
-    integrity: `${'sha256'|'sha384'|'sha512'}-${string}`;
+    integrity: '<local>' | `${'sha256'|'sha384'|'sha512'}-${string}`;
     shasum: string;
     tarball: string; // 'https://registry.npmjs.org/{name}/-/{name}-{version}.tgz'
     fileCount?: number;

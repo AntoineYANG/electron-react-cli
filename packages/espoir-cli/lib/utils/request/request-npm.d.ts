@@ -9,7 +9,7 @@ export declare type VersionInfo = PackageJSON & {
     _nodeVersion: string;
     _npmVersion: string;
     dist: {
-        integrity: `${'sha256' | 'sha384' | 'sha512'}-${string}`;
+        integrity: '<local>' | `${'sha256' | 'sha384' | 'sha512'}-${string}`;
         shasum: string;
         tarball: string;
         fileCount?: number;

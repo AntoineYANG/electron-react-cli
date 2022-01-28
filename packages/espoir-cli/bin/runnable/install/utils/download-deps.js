@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2021-11-16 00:03:04
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-17 23:02:24
+ * @Last Modified time: 2022-01-28 18:01:45
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -75,9 +75,32 @@ const batchDownload = (modules, onProgress, onEnd) => {
   const tasks = modules.map((mod, i) => {
     const {
       name,
-      version
+      version,
+      espoirPackage
     } = mod;
     const dir = path.join(_env_1.default.resolvePath('.espoir', '.modules'), name, semver.valid(semver.coerce(version)).replace(/\./g, '_'));
+
+    if (espoirPackage === 'module') {
+      return {
+        task: async () => {
+          onEnd?.({
+            name,
+            version,
+            err: null,
+            data: {
+              size: 0,
+              unpackedSize: 0,
+              dir: _env_1.default.resolvePathInPackage(name)
+            },
+            _request: {
+              url: _env_1.default.resolvePathInPackage(name)
+            }
+          });
+          return;
+        }
+      };
+    }
+
     const url = mod.dist.tarball;
     const fn = url.split(/\/+/).reverse()[0];
     const p = path.join(dir, fn);

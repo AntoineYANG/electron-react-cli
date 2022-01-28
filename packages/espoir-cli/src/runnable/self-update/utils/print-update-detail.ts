@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-01-28 15:41:58 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-28 15:56:24
+ * @Last Modified time: 2022-01-28 16:01:49
  */
 
 import * as semver from 'semver';
@@ -18,7 +18,7 @@ const printUpdateDetail = async (version: string) => {
   const curSemver = semver.valid(semver.coerce(env.runtime.espoir.version)) as string;
   const major = parseInt(version.split('.')[0] as string, 10);
   const [_err, data] = await request.get<string>(
-    `https://unpkg.com/${name}@${version}/CHANGELOG-${major}.x.md`
+    `https://unpkg.com/${env.runtime.espoir.name}@${version}/CHANGELOG-${major}.x.md`
   );
 
   if (data) {

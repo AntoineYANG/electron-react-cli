@@ -1,6 +1,6 @@
-import { VersionInfo } from '@request/request-npm';
-import { SingleDependency } from './load-dependencies';
-import { LockData } from './lock';
+import type { VersionInfo } from '@request/request-npm';
+import type { SingleDependency } from './load-dependencies';
+import type { LockData } from './lock';
 /**
  * Returns available versions of a module.
  * Results is sorted by version in descending order.
