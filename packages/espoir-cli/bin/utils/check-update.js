@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2022-01-26 14:10:10
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-28 13:43:57
+ * @Last Modified time: 2022-01-28 13:45:50
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -25,7 +25,10 @@ const logger_1 = require("./ui/logger");
 const write_changelog_1 = require("../runnable/contribute/utils/write-changelog");
 
 const checkUpdate = async () => {
-  console.log(process.argv);
+  if (process.argv.includes('update')) {
+    return;
+  }
+
   const {
     name,
     version: curVersion,

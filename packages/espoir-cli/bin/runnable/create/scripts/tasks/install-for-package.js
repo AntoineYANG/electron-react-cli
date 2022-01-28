@@ -7,7 +7,7 @@ Object.defineProperty(exports, "__esModule", {
  * @Author: Kanata You
  * @Date: 2022-01-26 13:58:40
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-26 14:09:10
+ * @Last Modified time: 2022-01-28 15:04:56
  */
 
 const inquirer = require("inquirer");
@@ -15,6 +15,8 @@ const inquirer = require("inquirer");
 const install_all_1 = require("../../../install/scripts/install-all");
 
 const _env_1 = require("../../../../utils/env");
+
+const _lazy_1 = require("../../../../utils/lazy-readonly");
 
 const installForPackage = async name => {
   const {
@@ -27,7 +29,7 @@ const installForPackage = async name => {
   }]);
 
   if (doInstall) {
-    _env_1.default.refresh();
+    _env_1.default[_lazy_1.lazyUpdate](['packages', 'packageMap']);
 
     await (0, install_all_1.default)(false, [name]);
   }

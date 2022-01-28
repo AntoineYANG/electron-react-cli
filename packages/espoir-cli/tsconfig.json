@@ -24,7 +24,8 @@
       "@request": ["utils/request"],
       "@request/*": ["utils/request/*"],
       "@ui/*": ["utils/ui/*"],
-      "@env": ["utils/env"]
+      "@env": ["utils/env"],
+      "@lazy": ["utils/lazy-readonly"]
     },
     "declaration": true,
     "preserveConstEnums": true,

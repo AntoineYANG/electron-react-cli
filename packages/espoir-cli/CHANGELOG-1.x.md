@@ -13,6 +13,11 @@ _\<version description\>_
 + ⏱ **Skip update check when running espoir update.** - AntoineYANG(814602569@qq.com) 2022/1/28, on _main_
 
 
+### env
+
++ 🧬 **Make espoir env params lazy-initialized.** - AntoineYANG(814602569@qq.com) 2022/1/28, on _main_
+
+
 ## 1.0.1 (2022/1/26)
 
 _\<version description\>_
