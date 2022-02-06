@@ -73,16 +73,6 @@ const requirePackageVersion = (_package: string): string => {
     );
   }
 
-  if (_package === 'root') {
-    const version = env.rootPkg.version;
-
-    if (!version) {
-      return '1.0.0';
-    }
-
-    return version;
-  }
-
   const version = env.packageMap[_package]?.version;
 
   if (!version) {
@@ -379,15 +369,6 @@ const writeChangelog = (state: GitStatus, scopes: string[], msg: string, type: s
         }
       }
 
-    } else {
-      if (!list.find(e => e.package === 'root')) {
-        const version = requirePackageVersion('root');
-
-        list.push({
-          package: 'root',
-          version
-        });
-      }
     }
 
     return list;

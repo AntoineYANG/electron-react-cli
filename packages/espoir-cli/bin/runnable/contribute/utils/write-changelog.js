@@ -44,16 +44,6 @@ const requirePackageVersion = _package => {
     throw new Error(`You're outside a espoir workspace.`);
   }
 
-  if (_package === 'root') {
-    const version = _env_1.default.rootPkg.version;
-
-    if (!version) {
-      return '1.0.0';
-    }
-
-    return version;
-  }
-
   const version = _env_1.default.packageMap[_package]?.version;
 
   if (!version) {
@@ -249,14 +239,6 @@ const writeChangelog = (state, scopes, msg, type) => {
             version
           });
         }
-      }
-    } else {
-      if (!list.find(e => e.package === 'root')) {
-        const version = requirePackageVersion('root');
-        list.push({
-          package: 'root',
-          version
-        });
       }
     }
 

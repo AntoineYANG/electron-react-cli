@@ -1,5 +1,18 @@
 # espoir-cli v1.x
 
+## 1.2.0 (2022/2/6)
+
+_\<version description\>_
+
+**Contributors**
+
+- **AntoineYANG** (814602569@qq.com)
+
+### commit
+
++ 🐞 **Stop updating changelog in the root dir.** - AntoineYANG(814602569@qq.com) 2022/2/6, on _main_
+
+
 ## 1.1.0 (2022/1/28)
 
 🌱  Installing local packages as dependencies is now supported.

@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-23 21:50:19 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2021-11-30 18:22:23
+ * @Last Modified time: 2022-02-06 12:55:11
  */
 
 const fs = require('fs');
@@ -49,15 +49,20 @@ const resolveTSAliases = async () => {
 };
 
 const main = async () => {
-  try {
-    await resolveTSAliases();
-  } catch (error) {
-    console.error(error);
+  let code = 1;
 
-    return 1;
-  }
+  [false, true].forEach(throws => {
+    try {
+      await resolveTSAliases();
+      code = 0;
+    } catch (error) {
+      if (throws) {
+        console.error(error);
+      }
+    }
+  });
 
-  return 0;
+  return code;
 };
 
 
