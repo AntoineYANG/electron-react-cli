@@ -1,5 +1,18 @@
 # espoir-cli v1.x
 
+## 1.2.1 (2022/2/11)
+
+_\<version description\>_
+
+**Contributors**
+
+- **AntoineYANG** (814602569@qq.com)
+
+### update check
+
++ 🐞 **Create log dir when not exist, in `logError()`.** - AntoineYANG(814602569@qq.com) 2022/2/11, on _fix-0211-log_outside_no_file-ks_
+
+
 ## 1.2.0 (2022/2/6)
 
 _\<version description\>_

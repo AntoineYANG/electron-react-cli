@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-14 02:35:46 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-23 18:29:58
+ * @Last Modified time: 2022-02-11 19:50:48
  */
 
 import * as fs from 'fs';
@@ -144,11 +144,15 @@ abstract class Logger {
   }
 
   static logError(err: Error): boolean {
-    const line = fs.readFileSync(
+    if (!env.rootDir) {
+      return false;
+    }
+
+    const line = fs.existsSync(this.path) ? fs.readFileSync(
       this.path, {
         encoding: 'utf-8'
       }
-    ).split('\n').length + 1;
+    ).split('\n').length + 1 : 1;
     
     this.saveLog('error', err.message + '\n' + err.stack ?? '');
     

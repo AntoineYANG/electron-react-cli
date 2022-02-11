@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2021-11-23 21:50:19 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-02-06 12:55:11
+ * @Last Modified time: 2022-02-11 19:49:04
  */
 
 const fs = require('fs');
@@ -30,7 +30,7 @@ const getAllOutputFiles = (dir = output) => {
   return files;
 };
 
-const resolveTSAliases = async () => {
+const resolveTSAliases = async (silent = false) => {
   const files = getAllOutputFiles();
   
   for (const file of files) {
@@ -51,16 +51,14 @@ const resolveTSAliases = async () => {
 const main = async () => {
   let code = 1;
 
-  [false, true].forEach(throws => {
+  for (const throws of [false, true]) {
     try {
-      await resolveTSAliases();
+      await resolveTSAliases(throws);
       code = 0;
     } catch (error) {
-      if (throws) {
-        console.error(error);
-      }
+      console.error(error);
     }
-  });
+  }
 
   return code;
 };
