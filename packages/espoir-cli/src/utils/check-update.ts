@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-01-26 14:10:10 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-28 13:45:50
+ * @Last Modified time: 2022-03-22 14:23:36
  */
 
 import * as semver from 'semver';
@@ -15,10 +15,16 @@ import logger from '@ui/logger';
 import { ChangLogItemType, parseChangelog, printChangelog } from '@@contribute/utils/write-changelog';
 
 
-const checkUpdate = async () => {
+const checkUpdate = async (
+  timeout: number = 1000
+) => new Promise<void>(async resolve => {
   if (process.argv.includes('update')) {
-    return;
+    return resolve();
   }
+
+  setTimeout(() => {
+    resolve();
+  }, timeout);
   
   const {
     name,
@@ -36,12 +42,12 @@ const checkUpdate = async () => {
 
   if (err) {
     if ((err.message ?? '').startsWith('No version of "')) {
-      return;
+      return resolve();
     }
 
     logger.logError(err);
     
-    return;
+    return resolve();
   }
 
   if (list?.length) {
@@ -167,7 +173,7 @@ const checkUpdate = async () => {
             } catch (error) {}
           }
         } else {
-          return;
+          return resolve();
         }
       }
     }
@@ -205,8 +211,10 @@ const checkUpdate = async () => {
     logger.info(chalk.blue('-'.repeat(40)));
 
     logger.info();
+
+    return resolve();
   }
-};
+});
 
 
 export default checkUpdate;

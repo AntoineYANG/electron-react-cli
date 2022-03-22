@@ -1,2 +1,2 @@
-declare const checkUpdate: () => Promise<void>;
+declare const checkUpdate: (timeout?: number) => Promise<void>;
 export default checkUpdate;

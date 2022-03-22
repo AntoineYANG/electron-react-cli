@@ -217,26 +217,28 @@ export default App;
     const packageJSON = { ...require(path.join(dir, 'package.json')),
       dependencies: {
         '@babel/core': '^7.16.12',
+        '@babel/plugin-proposal-private-property-in-object': '^7.16.7',
         '@babel/runtime': '7.12.1',
         '@pmmmwh/react-refresh-webpack-plugin': '^0.5.4',
         'babel-loader': '^8.2.3',
         'babel-plugin-named-asset-import': '^0.3.8',
-        'babel-preset-react-app': '10.0.1',
-        browserslist: '^4.19.1',
+        'babel-plugin-react-anonymous-display-name': '^0.1.0',
+        'babel-preset-react-app': '^10.0.1',
+        browserslist: '^4.20.0',
         'case-sensitive-paths-webpack-plugin': '^2.4.0',
         chalk: '^5.0.0',
-        'css-loader': '^6.5.1',
-        eslint: '^8.7.0',
+        'css-loader': '^6.7.1',
         'eslint-config-react-app': '^7.0.0',
         'eslint-webpack-plugin': '^3.1.1',
         'file-loader': '^6.2.0',
-        'fs-extra': '^9.1.0',
+        'fs-extra': '^10.0.1',
         'html-webpack-plugin': '^5.5.0',
-        'mini-css-extract-plugin': '^0.11.3',
-        postcss: '^8.4.5',
+        'mini-css-extract-plugin': '^2.6.0',
+        nanoid: '^3.3.1',
+        postcss: '^8.4.8',
         'postcss-loader': '^6.2.1',
         'postcss-normalize': '^10.0.1',
-        'postcss-preset-env': '^7.2.3',
+        'postcss-preset-env': '^7.4.2',
         'postcss-safe-parser': '^6.0.0',
         react: '^17',
         'react-dev-utils': '^12.0.0',
@@ -245,22 +247,28 @@ export default App;
         resolve: '^1.22.0',
         'resolve-url-loader': '^5.0.0',
         sass: '^1.49.0',
-        'sass-loader': '^12.4.0',
+        'sass-loader': '^12.6.0',
         'url-loader': '^4.1.1',
-        webpack: '^5.67.0',
-        'webpack-manifest-plugin': '^4.1.1'
+        webpack: '^5.70.0',
+        'webpack-manifest-plugin': '^5.0.0'
       },
       devDependencies: enableTS ? {
         '@types/react': '>=17',
         '@types/react-dom': '>=17',
         '@types/react-router-dom': '>=5',
         ajv: '^8.8.2',
+        eslint: '^7.32.0',
+        'eslint-plugin-no-memo-displayname': '^0.0.1',
+        'eslint-plugin-react': '^7.29.4',
         'react-refresh': '^0.11.0',
         'style-loader': '^3.3.1',
         typescript: '>=4',
         'webpack-dev-server': '^4.7.3'
       } : {
         ajv: '^8.8.2',
+        eslint: '^7.32.0',
+        'eslint-plugin-no-memo-displayname': '^0.0.1',
+        'eslint-plugin-react': '^7.29.4',
         'react-refresh': '^0.11.0',
         'style-loader': '^3.3.1',
         'webpack-dev-server': '^4.7.3'
@@ -289,6 +297,49 @@ export default App;
 
     copy(path.join(__dirname, '..', '..', '..', '..', '..', 'public', 'react-app-scripts'), path.join(dir, 'scripts')); // configs
 
+    fs.writeFileSync(path.join(dir, 'configs', '.eslintrc.json'), `{
+  // Prevent eslint from looking for configuration files
+  // in all parent folders up to the root directory.
+  "root": true,
+  "plugins": [
+    "react",
+    "eslint-plugin-no-memo-displayname"
+  ],
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended"
+  ],
+  "rules": {
+    "react/jsx-pascal-case": ["error", {
+      "allowLeadingUnderscore": true
+    }]${enableTS ? `,
+    // Since TS is enabled,
+    // we don't and don't ever need to trust the react/prop-types rule.
+    "react/prop-types": "off"` : ''}
+  },
+  "parserOptions": {
+    // Use ES6
+    "ecmaVersion": 6
+  },
+  "env": {
+    "node": true,
+    "browser": true,
+    "commonjs": true,
+    "amd": true
+  }
+}
+`, {
+      encoding: 'utf-8'
+    });
+    fs.writeFileSync(path.join(dir, 'configs', 'dev-proxy.js'), `/**
+ * @type {import('webpack-dev-server').Configuration['proxy']}
+ */
+const proxyConfig = {};
+
+module.exports = proxyConfig;
+`, {
+      encoding: 'utf-8'
+    });
     fs.writeFileSync(path.join(dir, 'configs', 'path.json'), JSON.stringify({
       rootDir: '.',
       template: 'public/index.html',
@@ -299,7 +350,7 @@ export default App;
       output: 'build'
     }, undefined, 2) + '\n');
     fs.writeFileSync(path.join(dir, 'configs', 'env.json'), JSON.stringify({
-      APP_NAME: 'homepage'
+      APP_NAME: name
     }, undefined, 2) + '\n');
   }
 };

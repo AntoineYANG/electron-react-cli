@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2022-01-26 14:10:10
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-28 13:45:50
+ * @Last Modified time: 2022-03-22 14:23:36
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -24,11 +24,14 @@ const logger_1 = require("./ui/logger");
 
 const write_changelog_1 = require("../runnable/contribute/utils/write-changelog");
 
-const checkUpdate = async () => {
+const checkUpdate = async (timeout = 1000) => new Promise(async resolve => {
   if (process.argv.includes('update')) {
-    return;
+    return resolve();
   }
 
+  setTimeout(() => {
+    resolve();
+  }, timeout);
   const {
     name,
     version: curVersion,
@@ -39,11 +42,11 @@ const checkUpdate = async () => {
 
   if (err) {
     if ((err.message ?? '').startsWith('No version of "')) {
-      return;
+      return resolve();
     }
 
     logger_1.default.logError(err);
-    return;
+    return resolve();
   }
 
   if (list?.length) {
@@ -126,7 +129,7 @@ const checkUpdate = async () => {
             } catch (error) {}
           }
         } else {
-          return;
+          return resolve();
         }
       }
     }
@@ -143,7 +146,8 @@ const checkUpdate = async () => {
     logger_1.default.info(`Run ${chalk.blueBright('espoir update')} to update espoir globally.`);
     logger_1.default.info(chalk.blue('-'.repeat(40)));
     logger_1.default.info();
+    return resolve();
   }
-};
+});
 
 exports.default = checkUpdate;
