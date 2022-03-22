@@ -2,13 +2,11 @@
  * @Author: Kanata You 
  * @Date: 2022-01-24 21:18:41 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-24 22:51:00
+ * @Last Modified time: 2022-03-22 14:12:59
  */
 'use strict';
 
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const postcssNormalize = require('postcss-normalize');
-
 
 
 const useStyleLoaders = (

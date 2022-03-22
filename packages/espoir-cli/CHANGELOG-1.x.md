@@ -1,6 +1,20 @@
 # espoir-cli v1.x
 
-## 1.2.1 (2022/2/11)
+## 1.2.2 (2022/3/22)
+
+_\<version description\>_
+
+**Contributors**
+
+- **AntoineYANG** (814602569@qq.com)
+
+### template:react
+
++ 🐞 **Upgrade react templates.** - AntoineYANG(814602569@qq.com) 2022/3/22, on _main_
+
+
+## 1.2.1 (undefined)
+
 
 _\<version description\>_
 
@@ -136,5 +150,13 @@ Loaded features include:
 + 🧰 **Write version description (v1).** - AntoineYANG(814602569@qq.com) 2022/1/26, on _main_
 
 + 🧰 **Ready to release espoir-cli v1.** - AntoineYANG(814602569@qq.com) 2022/1/26, on _main_
+
+
+
+
+
+**Contributors**
+
+
 
 
