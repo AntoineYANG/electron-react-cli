@@ -1,22 +1,28 @@
+"use strict";
 /*
- * @Author: Kanata You 
- * @Date: 2022-01-23 21:48:40 
+ * @Author: Kanata You
+ * @Date: 2022-01-23 21:48:40
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-04-20 17:46:43
+ * @Last Modified time: 2022-04-20 17:54:15
  */
 
-import * as path from 'path';
-import * as fs from 'fs';
-import { sync as mkdirp } from 'mkdirp';
-import * as inquirer from 'inquirer';
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
-import env from '@env';
-import type { EspoirTemplate } from '@@create/utils/load-template';
+const path = require("path");
 
+const fs = require("fs");
 
-const copy = (dir: string, dest: string): void => {
+const mkdirp_1 = require("mkdirp");
+
+const inquirer = require("inquirer");
+
+const _env_1 = require("../../../../utils/env");
+
+const copy = (dir, dest) => {
   if (!fs.existsSync(dest)) {
-    mkdirp(dest);
+    (0, mkdirp_1.sync)(dest);
   }
 
   fs.readdirSync(dir).forEach(n => {
@@ -30,30 +36,27 @@ const copy = (dir: string, dest: string): void => {
     }
   });
 };
+/**
+ * @since 1.3.0
+ */
 
-const reactAppTemplate: EspoirTemplate = {
-  name: 'React18 app',
+
+const reactElectronAppTemplate = {
+  name: 'React18 Electron app',
   create: async (name, enableTS) => {
-    const dir = env.resolvePathInPackage(name);
+    const dir = _env_1.default.resolvePathInPackage(name);
 
-    mkdirp(path.join(dir, 'configs'));
-    mkdirp(path.join(dir, 'scripts'));
-    mkdirp(path.join(dir, 'tasks'));
-    mkdirp(path.join(dir, 'src'));
-
-    mkdirp(path.join(dir, 'public', 'images'));
-
-    // public dir
+    (0, mkdirp_1.sync)(path.join(dir, 'configs'));
+    (0, mkdirp_1.sync)(path.join(dir, 'scripts'));
+    (0, mkdirp_1.sync)(path.join(dir, 'tasks'));
+    (0, mkdirp_1.sync)(path.join(dir, 'src'));
+    (0, mkdirp_1.sync)(path.join(dir, 'public', 'images')); // public dir
 
     ['favicon.ico', 'logo192.png', 'logo512.png', 'manifest.json', 'robots.txt'].forEach(n => {
       const source = path.join(__dirname, '..', '..', '..', '..', '..', 'public', n);
-
       fs.copyFileSync(source, path.join(dir, 'public', n));
     });
-
-    fs.writeFileSync(
-      path.join(dir, 'public', 'index.html'),
-      `<!DOCTYPE html>
+    fs.writeFileSync(path.join(dir, 'public', 'index.html'), `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -78,25 +81,26 @@ const reactAppTemplate: EspoirTemplate = {
   </body>
 </html>
 `, {
-        encoding: 'utf-8'
-      }
-    );
-
-    const { useSass } = await inquirer.prompt([{
+      encoding: 'utf-8'
+    });
+    const {
+      useSass,
+      useStyledComponents
+    } = await inquirer.prompt([{
       type: 'confirm',
       name: 'useSass',
       message: 'Use sass?'
+    }, {
+      type: 'confirm',
+      name: 'useStyledComponents',
+      message: 'Use styled-components?'
     }]);
-
-    mkdirp(path.join(dir, 'src', 'components'));
-    mkdirp(path.join(dir, 'src', 'context'));
-    mkdirp(path.join(dir, 'src', 'typings'));
-    mkdirp(path.join(dir, 'src', 'utils'));
-    mkdirp(path.join(dir, 'src', 'views'));
-
-    fs.writeFileSync(
-      path.join(dir, 'src', enableTS ? 'index.tsx' : 'index.jsx'),
-      `/** ESPOIR TEMPLATE */
+    (0, mkdirp_1.sync)(path.join(dir, 'src', 'components'));
+    (0, mkdirp_1.sync)(path.join(dir, 'src', 'context'));
+    (0, mkdirp_1.sync)(path.join(dir, 'src', 'typings'));
+    (0, mkdirp_1.sync)(path.join(dir, 'src', 'utils'));
+    (0, mkdirp_1.sync)(path.join(dir, 'src', 'views'));
+    fs.writeFileSync(path.join(dir, 'src', enableTS ? 'index.tsx' : 'index.jsx'), `/** ESPOIR TEMPLATE */
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
@@ -119,13 +123,9 @@ root.render(
   </React.StrictMode>
 );
 `, {
-        encoding: 'utf-8'
-      }
-    );
-
-    fs.writeFileSync(
-      path.join(dir, 'src', useSass ? 'index.scss' : 'index.css'),
-      `/** ESPOIR TEMPLATE */
+      encoding: 'utf-8'
+    });
+    fs.writeFileSync(path.join(dir, 'src', useSass ? 'index.scss' : 'index.css'), `/** ESPOIR TEMPLATE */
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -142,13 +142,9 @@ code {
     monospace;
 }
 `, {
-        encoding: 'utf-8'
-      }
-    );
-
-    fs.writeFileSync(
-      path.join(dir, 'src', 'views', enableTS ? 'index.tsx' : 'index.jsx'),
-      `/** ESPOIR TEMPLATE */
+      encoding: 'utf-8'
+    });
+    fs.writeFileSync(path.join(dir, 'src', 'views', enableTS ? 'index.tsx' : 'index.jsx'), `/** ESPOIR TEMPLATE */
 import React from 'react';
 import {
   BrowserRouter as Router,
@@ -167,60 +163,53 @@ const App${enableTS ? ': React.FC' : ''} = () => (
 
 export default App;
 `, {
-        encoding: 'utf-8'
-      }
-    );
+      encoding: 'utf-8'
+    });
 
     if (enableTS) {
-      fs.writeFileSync(
-        path.join(dir, 'tsconfig.json'),
-        JSON.stringify({
-          extends: '../../tsconfig.base.json',
-          include: ['./src/**/*'],
-          exclude: ['node_modules', '.modules'],
-          compilerOptions: {
-            target: 'es5',
-            lib: [
-              'dom',
-              'dom.iterable',
-              'esnext'
-            ],
-            allowJs: true,
-            skipLibCheck: true,
-            esModuleInterop: true,
-            allowSyntheticDefaultImports: true,
-            strict: true,
-            forceConsistentCasingInFileNames: true,
-            noFallthroughCasesInSwitch: true,
-            module: 'esnext',
-            moduleResolution: 'node',
-            resolveJsonModule: true,
-            isolatedModules: true,
-            noEmit: true,
-            jsx: 'react-jsx',
-            baseUrl: '.',
-            paths: {
-              '@components/*': ['./src/components/*'],
-              '@context/*': ['./src/context/*'],
-              '@views': ['./src/views/'],
-              '@views/*': ['./src/views/*'],
-              '@objects': ['./src/objects'],
-              '@objects/*': ['./src/objects/*'],
-              '@utils/*': ['./src/utils/*'],
-              '@public/*': ['./public/*']
-            }
-          },
-        },
-          undefined,
-          2
-        ) + '\n', {
-          encoding: 'utf-8'
+      fs.writeFileSync(path.join(dir, 'tsconfig.json'), JSON.stringify({
+        extends: '../../tsconfig.base.json',
+        include: ['./src/**/*'],
+        exclude: ['node_modules', '.modules'],
+        compilerOptions: {
+          target: 'es5',
+          lib: ['dom', 'dom.iterable', 'esnext'],
+          allowJs: true,
+          skipLibCheck: true,
+          esModuleInterop: true,
+          allowSyntheticDefaultImports: true,
+          strict: true,
+          forceConsistentCasingInFileNames: true,
+          noFallthroughCasesInSwitch: true,
+          module: 'esnext',
+          moduleResolution: 'node',
+          resolveJsonModule: true,
+          isolatedModules: true,
+          noEmit: true,
+          jsx: 'react-jsx',
+          baseUrl: '.',
+          paths: {
+            '@components/*': ['./src/components/*'],
+            '@context/*': ['./src/context/*'],
+            '@views': ['./src/views/'],
+            '@views/*': ['./src/views/*'],
+            '@objects': ['./src/objects'],
+            '@objects/*': ['./src/objects/*'],
+            '@utils/*': ['./src/utils/*'],
+            '@public/*': ['./public/*']
+          }
         }
-      );
+      }, undefined, 2) + '\n', {
+        encoding: 'utf-8'
+      });
     }
 
-    const packageJSON = {
-      ...require(path.join(dir, 'package.json')),
+    const packageJSON = { ...require(path.join(dir, 'package.json')),
+      scripts: {
+        lint: 'eslint src -c configs/.eslintrc.json',
+        preview: 'serve build',
+        electron: 'electron ./tasks/electron/main.js'
+      },
       dependencies: {
         '@babel/core': '^7.16.12',
         '@babel/plugin-proposal-private-property-in-object': '^7.16.7',
@@ -234,6 +223,8 @@ export default App;
         'case-sensitive-paths-webpack-plugin': '^2.4.0',
         chalk: '^5.0.0',
         'css-loader': '^6.7.1',
+        electron: '^18.0.4',
+        'electron-packager': '^15.4.0',
         eslint: '^7.32.0',
         'eslint-config-react-app': '^7.0.0',
         'eslint-webpack-plugin': '^3.1.1',
@@ -253,20 +244,28 @@ export default App;
         'react-router-dom': '^6.2.1',
         resolve: '^1.22.0',
         'resolve-url-loader': '^5.0.0',
-        sass: '^1.49.0',
+        sass: '^1.49.9',
         'sass-loader': '^12.6.0',
+        ...(useStyledComponents ? {
+          'styled-components': '^5.3.3'
+        } : {}),
         'url-loader': '^4.1.1',
         webpack: '^5.70.0',
         'webpack-manifest-plugin': '^5.0.0'
       },
       devDependencies: enableTS ? {
+        '@types/electron': '^1.6.10',
         '@types/react': '^18.0.0',
         '@types/react-dom': '^18.0.0',
         '@types/react-router-dom': '>=5',
+        ...(useStyledComponents ? {
+          '@types/styled-components': '^5.1.24'
+        } : {}),
         ajv: '^8.8.2',
         eslint: '^7.32.0',
         'eslint-plugin-no-memo-displayname': '^0.0.1',
         'eslint-plugin-react': '^7.29.4',
+        'espoir-cli': '^1.3.0',
         'react-refresh': '^0.11.0',
         'style-loader': '^3.3.1',
         typescript: '>=4',
@@ -281,27 +280,14 @@ export default App;
         'webpack-dev-server': '^4.7.3'
       },
       eslintConfig: {
-        extends: [
-          'react-app',
-          'react-app/jest'
-        ]
+        extends: ['react-app', 'react-app/jest']
       },
       browserslist: {
-        production: [
-          '>0.2%',
-          'not dead',
-          'not op_mini all'
-        ],
-        development: [
-          'last 1 chrome version',
-          'last 1 firefox version',
-          'last 1 safari version'
-        ]
+        production: ['>0.2%', 'not dead', 'not op_mini all'],
+        development: ['last 1 chrome version', 'last 1 firefox version', 'last 1 safari version']
       },
       babel: {
-        presets: [
-          'react-app'
-        ]
+        presets: ['react-app']
       },
       alias: {
         '@components': './src/components/',
@@ -311,30 +297,15 @@ export default App;
         '@public': './public/'
       }
     };
+    fs.writeFileSync(path.join(dir, 'package.json'), JSON.stringify(packageJSON, undefined, 2) + '\n', {
+      encoding: 'utf-8'
+    }); // scripts
 
-    fs.writeFileSync(
-      path.join(dir, 'package.json'),
-      JSON.stringify(
-        packageJSON,
-        undefined,
-        2
-      ) + '\n', {
-        encoding: 'utf-8'
-      }
-    );
+    copy(path.join(__dirname, '..', '..', '..', '..', '..', 'public', 'react-app-scripts'), path.join(dir, 'scripts')); // tasks
 
-    // scripts
+    copy(path.join(__dirname, '..', '..', '..', '..', '..', 'public', 'react-app-tasks'), path.join(dir, 'tasks')); // configs
 
-    copy(
-      path.join(__dirname, '..', '..', '..', '..', '..', 'public', 'react-app-scripts'),
-      path.join(dir, 'scripts')
-    );
-
-    // configs
-
-    fs.writeFileSync(
-      path.join(dir, 'configs', '.eslintrc.json'),
-      `{
+    fs.writeFileSync(path.join(dir, 'configs', '.eslintrc.json'), `{
   // Prevent eslint from looking for configuration files
   // in all parent folders up to the root directory.
   "root": true,
@@ -349,12 +320,10 @@ export default App;
   "rules": {
     "react/jsx-pascal-case": ["error", {
       "allowLeadingUnderscore": true
-    }]${
-      enableTS ? `,
+    }]${enableTS ? `,
     // Since TS is enabled,
     // we don't and don't ever need to trust the react/prop-types rule.
-    "react/prop-types": "off"` : ''
-    }
+    "react/prop-types": "off"` : ''}
   },
   "parserOptions": {
     // Use ES6
@@ -370,10 +339,7 @@ export default App;
 `, {
       encoding: 'utf-8'
     });
-
-    fs.writeFileSync(
-      path.join(dir, 'configs', 'dev-proxy.js'),
-      `/**
+    fs.writeFileSync(path.join(dir, 'configs', 'dev-proxy.js'), `/**
  * @type {import('webpack-dev-server').Configuration['proxy']}
  */
 const proxyConfig = {};
@@ -382,28 +348,18 @@ module.exports = proxyConfig;
 `, {
       encoding: 'utf-8'
     });
-
-    fs.writeFileSync(
-      path.join(dir, 'configs', 'path.json'),
-      JSON.stringify({
-        rootDir: '.',
-        template: 'public/index.html',
-        src: 'src',
-        entry: `index.${enableTS ? 't' : 'j'}sx`,
-        referencePath: '.',
-        publicPath: 'public',
-        output: 'build'
-      }, undefined, 2) + '\n'
-    );
-
-    fs.writeFileSync(
-      path.join(dir, 'configs', 'env.json'),
-      JSON.stringify({
-        APP_NAME: name
-      }, undefined, 2) + '\n'
-    );
+    fs.writeFileSync(path.join(dir, 'configs', 'path.json'), JSON.stringify({
+      rootDir: '.',
+      template: 'public/index.html',
+      src: 'src',
+      entry: `index.${enableTS ? 't' : 'j'}sx`,
+      referencePath: '.',
+      publicPath: 'public',
+      output: 'build'
+    }, undefined, 2) + '\n');
+    fs.writeFileSync(path.join(dir, 'configs', 'env.json'), JSON.stringify({
+      APP_NAME: name
+    }, undefined, 2) + '\n');
   }
 };
-
-
-export default reactAppTemplate;
+exports.default = reactElectronAppTemplate;

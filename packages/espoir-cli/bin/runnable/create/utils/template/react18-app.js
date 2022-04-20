@@ -3,7 +3,7 @@
  * @Author: Kanata You
  * @Date: 2022-01-23 21:48:40
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-01-26 01:30:50
+ * @Last Modified time: 2022-04-20 17:46:43
  */
 
 Object.defineProperty(exports, "__esModule", {
@@ -38,7 +38,7 @@ const copy = (dir, dest) => {
 };
 
 const reactAppTemplate = {
-  name: 'React18(rc) app',
+  name: 'React18 app',
   create: async (name, enableTS) => {
     const dir = _env_1.default.resolvePathInPackage(name);
 
@@ -92,16 +92,20 @@ const reactAppTemplate = {
     (0, mkdirp_1.sync)(path.join(dir, 'src', 'utils'));
     (0, mkdirp_1.sync)(path.join(dir, 'src', 'views'));
     fs.writeFileSync(path.join(dir, 'src', enableTS ? 'index.tsx' : 'index.jsx'), `/** ESPOIR TEMPLATE */
-      
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom/client';
+
 import App from '@views';
 
 import './index.scss';
 
 
 const container = document.getElementById('root');
-// @ts-ignore
+
+if (!container) {
+  throw new Error(\`container Node "#root" not found\`);
+}
+
 const root = ReactDOM.createRoot(container);
 
 root.render(
@@ -113,7 +117,6 @@ root.render(
       encoding: 'utf-8'
     });
     fs.writeFileSync(path.join(dir, 'src', useSass ? 'index.scss' : 'index.css'), `/** ESPOIR TEMPLATE */
-      
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -129,36 +132,10 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
-
-.App {
-  text-align: center;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
 `, {
       encoding: 'utf-8'
     });
     fs.writeFileSync(path.join(dir, 'src', 'views', enableTS ? 'index.tsx' : 'index.jsx'), `/** ESPOIR TEMPLATE */
-      
 import React from 'react';
 import {
   BrowserRouter as Router,
@@ -232,6 +209,7 @@ export default App;
         'case-sensitive-paths-webpack-plugin': '^2.4.0',
         chalk: '^5.0.0',
         'css-loader': '^6.7.1',
+        eslint: '^7.32.0',
         'eslint-config-react-app': '^7.0.0',
         'eslint-webpack-plugin': '^3.1.1',
         'file-loader': '^6.2.0',
@@ -244,9 +222,9 @@ export default App;
         'postcss-normalize': '^10.0.1',
         'postcss-preset-env': '^7.4.2',
         'postcss-safe-parser': '^6.0.0',
-        react: '18.0.0-rc.0',
+        react: '^18.0.0',
         'react-dev-utils': '^12.0.0',
-        'react-dom': '18.0.0-rc.0',
+        'react-dom': '^18.0.0',
         'react-router-dom': '^6.2.1',
         resolve: '^1.22.0',
         'resolve-url-loader': '^5.0.0',
@@ -257,8 +235,8 @@ export default App;
         'webpack-manifest-plugin': '^5.0.0'
       },
       devDependencies: enableTS ? {
-        '@types/react': '>=17',
-        '@types/react-dom': '>=17',
+        '@types/react': '^18.0.0',
+        '@types/react-dom': '^18.0.0',
         '@types/react-router-dom': '>=5',
         ajv: '^8.8.2',
         eslint: '^7.32.0',

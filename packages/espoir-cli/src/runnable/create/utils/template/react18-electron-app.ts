@@ -2,7 +2,7 @@
  * @Author: Kanata You 
  * @Date: 2022-01-23 21:48:40 
  * @Last Modified by: Kanata You
- * @Last Modified time: 2022-04-20 17:46:43
+ * @Last Modified time: 2022-04-20 17:54:15
  */
 
 import * as path from 'path';
@@ -31,8 +31,11 @@ const copy = (dir: string, dest: string): void => {
   });
 };
 
-const reactAppTemplate: EspoirTemplate = {
-  name: 'React18 app',
+/**
+ * @since 1.3.0
+ */
+const reactElectronAppTemplate: EspoirTemplate = {
+  name: 'React18 Electron app',
   create: async (name, enableTS) => {
     const dir = env.resolvePathInPackage(name);
 
@@ -82,10 +85,14 @@ const reactAppTemplate: EspoirTemplate = {
       }
     );
 
-    const { useSass } = await inquirer.prompt([{
+    const { useSass, useStyledComponents } = await inquirer.prompt([{
       type: 'confirm',
       name: 'useSass',
       message: 'Use sass?'
+    }, {
+      type: 'confirm',
+      name: 'useStyledComponents',
+      message: 'Use styled-components?'
     }]);
 
     mkdirp(path.join(dir, 'src', 'components'));
@@ -221,6 +228,11 @@ export default App;
 
     const packageJSON = {
       ...require(path.join(dir, 'package.json')),
+      scripts: {
+        lint: 'eslint src -c configs/.eslintrc.json',
+        preview: 'serve build',
+        electron: 'electron ./tasks/electron/main.js'
+      },
       dependencies: {
         '@babel/core': '^7.16.12',
         '@babel/plugin-proposal-private-property-in-object': '^7.16.7',
@@ -234,6 +246,8 @@ export default App;
         'case-sensitive-paths-webpack-plugin': '^2.4.0',
         chalk: '^5.0.0',
         'css-loader': '^6.7.1',
+        electron: '^18.0.4',
+        'electron-packager': '^15.4.0',
         eslint: '^7.32.0',
         'eslint-config-react-app': '^7.0.0',
         'eslint-webpack-plugin': '^3.1.1',
@@ -253,20 +267,28 @@ export default App;
         'react-router-dom': '^6.2.1',
         resolve: '^1.22.0',
         'resolve-url-loader': '^5.0.0',
-        sass: '^1.49.0',
+        sass: '^1.49.9',
         'sass-loader': '^12.6.0',
+        ...(useStyledComponents ? {
+          'styled-components': '^5.3.3'
+        } : {}),
         'url-loader': '^4.1.1',
         webpack: '^5.70.0',
         'webpack-manifest-plugin': '^5.0.0'
       },
       devDependencies: enableTS ? {
+        '@types/electron': '^1.6.10',
         '@types/react': '^18.0.0',
         '@types/react-dom': '^18.0.0',
         '@types/react-router-dom': '>=5',
+        ...(useStyledComponents ? {
+          '@types/styled-components': '^5.1.24'
+        } : {}),
         ajv: '^8.8.2',
         eslint: '^7.32.0',
         'eslint-plugin-no-memo-displayname': '^0.0.1',
         'eslint-plugin-react': '^7.29.4',
+        'espoir-cli': '^1.3.0',
         'react-refresh': '^0.11.0',
         'style-loader': '^3.3.1',
         typescript: '>=4',
@@ -328,6 +350,13 @@ export default App;
     copy(
       path.join(__dirname, '..', '..', '..', '..', '..', 'public', 'react-app-scripts'),
       path.join(dir, 'scripts')
+    );
+
+    // tasks
+
+    copy(
+      path.join(__dirname, '..', '..', '..', '..', '..', 'public', 'react-app-tasks'),
+      path.join(dir, 'tasks')
     );
 
     // configs
@@ -406,4 +435,4 @@ module.exports = proxyConfig;
 };
 
 
-export default reactAppTemplate;
+export default reactElectronAppTemplate;
