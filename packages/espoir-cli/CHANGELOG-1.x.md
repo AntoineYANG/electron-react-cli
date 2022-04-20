@@ -1,5 +1,18 @@
 # espoir-cli v1.x
 
+## 1.3.1 (2022/4/20)
+
+_\<version description\>_
+
+**Contributors**
+
+- **AntoineYANG** (814602569@qq.com)
+
+### other
+
++ 🐞 **Fix changelog.** - AntoineYANG(814602569@qq.com) 2022/4/20, on _main_
+
+
 ## 1.3.0 (2022/4/20)
 
 _\<version description\>_

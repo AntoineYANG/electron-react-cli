@@ -1,6 +1,6 @@
 {
   "name": "espoir-cli",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "NodeJS dependency management, and useful tools for monorepo.",
   "espoirVersion": 0,
   "keywords": [
